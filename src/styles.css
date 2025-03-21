@@ -1,2 +1,108 @@
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+:root[data-theme="light"] {
+  --text: #08080f;
+  --background: #f7f7fc;
+  --primary: #4a4ec1;
+  --secondary: #8c8ee0;
+  --accent: #676adf;
+  
+  --text-rgb: 8, 8, 15;
+  --background-rgb: 247, 247, 252;
+  --primary-rgb: 74, 78, 193;
+  --secondary-rgb: 140, 142, 224;
+  --accent-rgb: 103, 106, 223;
+}
+
+:root[data-theme="dark"] {
+  --text: #eeeef6;
+  --background: #030307;
+  --primary: #3e42b6;
+  --secondary: #1f2075;
+  --accent: #202297;
+  
+  --text-rgb: 238, 238, 246;
+  --background-rgb: 3, 3, 7;
+  --primary-rgb: 62, 66, 182;
+  --secondary-rgb: 31, 32, 117;
+  --accent-rgb: 32, 34, 151;
+}
+
+:root {
+  --text: #08080f;
+  --background: #f7f7fc;
+  --primary: #4a4ec1;
+  --secondary: #8c8ee0;
+  --accent: #676adf;
+}
+
+body { 
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.app-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-area {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--background);
+}
+
+.mat-mdc-raised-button.mat-primary {
+  background-color: var(--primary) !important;
+  color: white !important;
+}
+
+.mat-mdc-raised-button.mat-accent {
+  background-color: var(--accent) !important;
+  color: white !important;
+}
+
+.mat-mdc-stroked-button.mat-primary {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+.mat-mdc-stroked-button.mat-accent {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+.mat-mdc-button.mat-primary {
+  color: var(--primary) !important;
+}
+
+.mat-mdc-button.mat-accent {
+  color: var(--accent) !important;
+}
+
+.mat-mdc-raised-button:hover {
+  opacity: 0.9;
+}
+
+.mat-mdc-stroked-button:hover {
+  background-color: rgba(var(--primary-rgb), 0.05) !important;
+}
+
+.mat-mdc-raised-button.mat-primary[disabled],
+.mat-mdc-raised-button.mat-accent[disabled] {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  color: rgba(0, 0, 0, 0.38) !important;
+}
+
+.mat-mdc-stroked-button.mat-primary[disabled],
+.mat-mdc-stroked-button.mat-accent[disabled] {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: rgba(0, 0, 0, 0.38) !important;
+}
