@@ -1,0 +1,77 @@
+<div class="profile-container">
+  <section class="profile-header">
+    <div class="avatar-container">
+      <div class="avatar">
+        <img [src]="profileImage" alt="User avatar" onError="this.src='https://placehold.co/200x200/455a64/ffffff?text=User'">
+        <div class="avatar-edit" *ngIf="isEditing" (click)="triggerFileInput()">
+          <mat-icon>photo_camera</mat-icon>
+        </div>
+        <input type="file" #fileInput hidden (change)="onFileSelected($event)" accept="image/*">
+      </div>
+    </div>
+    <div class="user-info">
+      <div class="name-section">
+        <h2>{{ userName }}</h2>
+        <button mat-icon-button color="primary" (click)="toggleEdit()" class="edit-button">
+          <mat-icon>{{ isEditing ? 'done' : 'edit' }}</mat-icon>
+        </button>
+      </div>
+      <div class="contact-info">
+        <div class="info-item" *ngIf="!isEditing">
+          <mat-icon>email</mat-icon>
+          <span>{{ email }}</span>
+        </div>
+        <div class="info-item" *ngIf="!isEditing">
+          <mat-icon>phone</mat-icon>
+          <span>{{ phoneNumber }}</span>
+        </div>
+        
+        <!-- Edit fields -->
+        <div class="edit-fields" *ngIf="isEditing">
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput [(ngModel)]="editEmail" type="email">
+            <mat-icon matPrefix>email</mat-icon>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Phone Number</mat-label>
+            <input matInput [(ngModel)]="editPhoneNumber" type="tel">
+            <mat-icon matPrefix>phone</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="cars-section">
+    <h3>My Vehicles</h3>
+    <div class="car-list">
+      <div *ngFor="let car of cars" class="car-item">
+        <div class="car-info">
+          <mat-icon>directions_car</mat-icon>
+          <div class="car-details">
+            <div class="car-plate">{{ car.plate }}</div>
+            <div class="car-type">{{ car.type }} • {{ car.color }}</div>
+          </div>
+        </div>
+        <button mat-icon-button color="warn" (click)="removeCar(car.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <div class="add-car-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Add new vehicle (license plate)</mat-label>
+        <input matInput [(ngModel)]="newCarPlate" placeholder="e.g. ABC-123">
+        <button *ngIf="newCarPlate" matSuffix mat-icon-button aria-label="Clear" (click)="newCarPlate=''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="addCar()" [disabled]="!newCarPlate.trim()">
+        Add Vehicle
+      </button>
+    </div>
+  </section>
+</div>

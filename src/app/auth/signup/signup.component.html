@@ -1,0 +1,45 @@
+<div class="signup-container">
+  <div class="signup-box">
+    <div class="parking-logo">
+      <div class="p-logo">P</div>
+      <h1>PARKING</h1>
+    </div>
+    
+    <form (ngSubmit)="onSignup()" class="signup-form">
+      <div class="form-field">
+        <mat-icon>person</mat-icon>
+        <input type="text" placeholder="User Name" [(ngModel)]="username" name="username" required>
+      </div>
+      
+      <div class="form-field">
+        <mat-icon>email</mat-icon>
+        <input type="email" placeholder="Email" [(ngModel)]="email" name="email" required>
+      </div>
+      
+      <div class="form-field">
+        <mat-icon>phone</mat-icon>
+        <input type="tel" placeholder="Phone Number" [(ngModel)]="phoneNumber" name="phoneNumber" required>
+      </div>
+      
+      <div class="form-field">
+        <mat-icon>vpn_key</mat-icon>
+        <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required>
+      </div>
+      
+      <div class="form-field">
+        <mat-icon>vpn_key</mat-icon>
+        <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+      </div>
+      
+      <button type="submit" class="signup-button" [disabled]="!isFormValid() || isLoading">
+        <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
+        <span *ngIf="!isLoading">Sign Up</span>
+      </button>
+      
+      <div class="login-link">
+        <span>Already have an account?</span>
+        <a (click)="onLogin()">Log In</a>
+      </div>
+    </form>
+  </div>
+</div>

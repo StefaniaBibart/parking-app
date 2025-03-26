@@ -1,0 +1,16 @@
+<div class="app-container">
+  <app-loader></app-loader>
+  
+  <ng-container *ngIf="isLoggedIn; else loginTemplate">
+    <div class="main-layout">
+      <app-sidebar class="sidebar"></app-sidebar>
+      <div class="content-area">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </ng-container>
+  
+  <ng-template #loginTemplate>
+    <router-outlet></router-outlet>
+  </ng-template>
+</div>

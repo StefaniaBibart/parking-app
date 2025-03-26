@@ -1,0 +1,26 @@
+<div class="sidebar-container">
+  <div class="logo-container">
+    <div class="p-logo" (click)="navigateToHome()">P</div>
+  </div>
+  
+  <div class="menu-items">
+    <div class="menu-item" (click)="navigateTo('/new-reservation')">
+      <mat-icon>calendar_today</mat-icon>
+    </div>
+    <div class="menu-item" (click)="navigateTo('/reservations')">
+      <mat-icon>list</mat-icon>
+    </div>
+  </div>
+  
+  <div class="bottom-controls">
+    <div class="menu-item theme-toggle" (click)="toggleTheme()">
+      <mat-icon>{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </div>
+    
+    <div class="user-profile" (click)="navigateTo('/profile')">
+      <div class="avatar">
+        <img src="assets/avatar.png" alt="User avatar" onError="this.src='https://placehold.co/200x200/455a64/ffffff?text=User'">
+      </div>
+    </div>
+  </div>
+</div>
