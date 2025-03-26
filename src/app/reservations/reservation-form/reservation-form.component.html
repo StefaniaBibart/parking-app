@@ -1,0 +1,63 @@
+<div class="reservation-form-container">
+  <h1>Create New Reservation</h1>
+  
+  <div class="step-indicator">
+    <div class="step active">
+      <div class="step-number">1</div>
+      <div class="step-label">Select Date</div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-label">Choose Spot</div>
+    </div>
+  </div>
+  
+  <section class="date-selection">
+    <h2>Select a date for your reservation</h2>
+    <div class="calendar-container">
+      <mat-calendar 
+        [selected]="selectedDate"
+        [minDate]="minDate"
+        [maxDate]="maxDate"
+        (selectedChange)="onDateSelected($event)">
+      </mat-calendar>
+    </div>
+    
+    <div class="selected-date-display" *ngIf="selectedDate">
+      <mat-icon>event</mat-icon>
+      <span>Selected date: <strong>{{ selectedDate | date:'fullDate' }}</strong></span>
+    </div>
+  </section>
+  
+  <section class="vehicle-selection" *ngIf="selectedDate">
+    <h2>Select your vehicle</h2>
+    
+    <div class="vehicles-list">
+      <div *ngFor="let vehicle of userVehicles" 
+           class="vehicle-card"
+           [class.selected]="selectedVehicleId === vehicle.id"
+           (click)="selectVehicle(vehicle.id)">
+        <mat-icon>directions_car</mat-icon>
+        <div class="vehicle-info">
+          <div class="vehicle-plate">{{ vehicle.plate }}</div>
+          <div class="vehicle-details">{{ vehicle.type }} • {{ vehicle.color }}</div>
+        </div>
+        <mat-icon *ngIf="selectedVehicleId === vehicle.id" class="check-icon">check_circle</mat-icon>
+      </div>
+      
+      <div class="add-vehicle-card" (click)="addNewVehicle()">
+        <mat-icon>add_circle_outline</mat-icon>
+        <div class="add-vehicle-text">Add New Vehicle</div>
+      </div>
+    </div>
+  </section>
+  
+  <div class="form-actions">
+    <button mat-raised-button color="primary" 
+            [disabled]="!selectedDate || !selectedVehicleId"
+            (click)="proceedToSpotSelection()">
+      Continue to Spot Selection
+    </button>
+  </div>
+</div>

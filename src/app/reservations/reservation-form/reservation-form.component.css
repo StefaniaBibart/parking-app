@@ -1,0 +1,168 @@
+.reservation-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  overflow: visible;
+}
+
+h1 {
+  color: var(--text);
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--secondary);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.step.active .step-number {
+  background-color: var(--accent);
+  color: white;
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background-color: var(--secondary);
+  margin: 0 15px;
+}
+
+.step-label {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.step.active .step-label {
+  color: var(--primary);
+}
+
+section {
+  margin-bottom: 25px;
+  background-color: var(--background);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid var(--secondary);
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.calendar-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.vehicles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vehicle-card, .add-vehicle-card {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--secondary);
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.vehicle-card:hover, .add-vehicle-card:hover {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.vehicle-card.selected {
+  background-color: var(--primary);
+  border-color: var(--accent);
+  color: white;
+}
+
+.vehicle-card mat-icon, .add-vehicle-card mat-icon {
+  font-size: 24px;
+  margin-right: 15px;
+  color: inherit;
+}
+
+.vehicle-info {
+  flex: 1;
+}
+
+.vehicle-plate {
+  font-weight: 500;
+  color: inherit;
+}
+
+.vehicle-details {
+  font-size: 14px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.check-icon {
+  color: white !important;
+}
+
+.add-vehicle-card {
+  border-style: dashed;
+  justify-content: center;
+}
+
+.add-vehicle-card mat-icon {
+  margin-right: 10px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 0 30px;
+  background-color: var(--primary) !important;
+  color: white !important;
+}
+
+.selected-date-display {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: var(--secondary);
+  color: var(--text);
+  border-radius: 8px;
+  border: 1px solid var(--primary);
+}
+
+.selected-date-display mat-icon {
+  margin-right: 10px;
+  color: var(--primary);
+}
