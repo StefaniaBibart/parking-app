@@ -5,33 +5,95 @@
       <h1>PARKING</h1>
     </div>
     
-    <form (ngSubmit)="onSignup()" class="signup-form">
-      <div class="form-field">
-        <mat-icon>person</mat-icon>
-        <input type="text" placeholder="User Name" [(ngModel)]="username" name="username" required>
-      </div>
+    <form [formGroup]="signupForm" (ngSubmit)="onSignup()" class="signup-form">
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          type="text" 
+          placeholder="User Name"
+          formControlName="username" 
+          required>
+        <mat-icon matPrefix>person</mat-icon>
+        <mat-error *ngIf="username?.touched && getUsernameError()">
+          {{ getUsernameError() }}
+        </mat-error>
+      </mat-form-field>
       
-      <div class="form-field">
-        <mat-icon>email</mat-icon>
-        <input type="email" placeholder="Email" [(ngModel)]="email" name="email" required>
-      </div>
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          type="email" 
+          placeholder="Email"
+          formControlName="email" 
+          required>
+        <mat-icon matPrefix>email</mat-icon>
+        <mat-error *ngIf="email?.touched && getEmailError()">
+          {{ getEmailError() }}
+        </mat-error>
+      </mat-form-field>
       
-      <div class="form-field">
-        <mat-icon>phone</mat-icon>
-        <input type="tel" placeholder="Phone Number" [(ngModel)]="phoneNumber" name="phoneNumber" required>
-      </div>
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          type="tel" 
+          placeholder="Phone Number"
+          formControlName="phoneNumber" 
+          required
+          (keypress)="onPhoneNumberKeyPress($event)"
+          (blur)="validatePhoneNumber()">
+        <mat-icon matPrefix>phone</mat-icon>
+        <mat-hint>Format: +40 7xx xxx xxx or 07xx xxx xxx</mat-hint>
+        <mat-error *ngIf="phoneNumber?.touched && getPhoneNumberError()">
+          {{ getPhoneNumberError() }}
+        </mat-error>
+      </mat-form-field>
       
-      <div class="form-field">
-        <mat-icon>vpn_key</mat-icon>
-        <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required>
-      </div>
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          [type]="hidePassword ? 'password' : 'text'" 
+          placeholder="Password"
+          formControlName="password" 
+          required>
+        <mat-icon matPrefix>vpn_key</mat-icon>
+        <button 
+          mat-icon-button 
+          matSuffix 
+          type="button"
+          (click)="togglePasswordVisibility('password')" 
+          [attr.aria-label]="'Toggle password visibility'" 
+          [attr.aria-pressed]="!hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="password?.touched && getPasswordError()">
+          {{ getPasswordError() }}
+        </mat-error>
+      </mat-form-field>
       
-      <div class="form-field">
-        <mat-icon>vpn_key</mat-icon>
-        <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
-      </div>
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          [type]="hideConfirmPassword ? 'password' : 'text'" 
+          placeholder="Confirm Password"
+          formControlName="confirmPassword" 
+          required
+          (blur)="validatePasswordMatch()">
+        <mat-icon matPrefix>vpn_key</mat-icon>
+        <button 
+          mat-icon-button 
+          matSuffix 
+          type="button"
+          (click)="togglePasswordVisibility('confirm')" 
+          [attr.aria-label]="'Toggle password visibility'" 
+          [attr.aria-pressed]="!hideConfirmPassword">
+          <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="confirmPassword?.touched && getConfirmPasswordError()">
+          {{ getConfirmPasswordError() }}
+        </mat-error>
+      </mat-form-field>
       
-      <button type="submit" class="signup-button" [disabled]="!isFormValid() || isLoading">
+      <button type="submit" mat-raised-button color="primary" class="signup-button" [disabled]="signupForm.invalid || isLoading">
         <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
         <span *ngIf="!isLoading">Sign Up</span>
       </button>
