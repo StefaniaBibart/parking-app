@@ -9,18 +9,46 @@
       <h1>PARKING</h1>
     </div>
     
-    <form (ngSubmit)="onLogin()" class="login-form">
-      <div class="form-field">
-        <mat-icon>person</mat-icon>
-        <input type="text" placeholder="User Name" [(ngModel)]="username" name="username" required>
-      </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          type="text" 
+          placeholder="User Name"
+          formControlName="username" 
+          required>
+        <mat-icon matPrefix>person</mat-icon>
+        <mat-error *ngIf="username?.touched && username?.errors?.['required']">
+          Username is required
+        </mat-error>
+      </mat-form-field>
       
-      <div class="form-field">
-        <mat-icon>vpn_key</mat-icon>
-        <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required>
-      </div>
+      <mat-form-field appearance="fill">
+        <input 
+          matInput
+          [type]="hidePassword ? 'password' : 'text'" 
+          placeholder="Password"
+          formControlName="password" 
+          required>
+        <mat-icon matPrefix>vpn_key</mat-icon>
+        <button 
+          mat-icon-button 
+          matSuffix 
+          type="button"
+          (click)="togglePasswordVisibility()" 
+          [attr.aria-label]="'Toggle password visibility'" 
+          [attr.aria-pressed]="!hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="password?.touched && password?.errors?.['required']">
+          Password is required
+        </mat-error>
+      </mat-form-field>
       
-      <button type="submit" class="login-button">Log In</button>
+      <button type="submit" class="login-button" [disabled]="loginForm.invalid || isLoading">
+        <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
+        <span *ngIf="!isLoading">Log In</span>
+      </button>
       
       <div class="signup-link">
         <span>Don't have an account?</span>

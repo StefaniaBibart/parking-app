@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {merge} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import { ValidationService } from '../../shared/services/validation.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -35,7 +36,7 @@ export class UserProfileComponent {
     { id: 2, plate: 'CJ 34 XYZ', type: 'SUV', color: 'Black' }
   ];
 
-  constructor() {
+  constructor(private validationService: ValidationService) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateEmailError());
@@ -85,26 +86,8 @@ export class UserProfileComponent {
   validatePhoneNumber(): boolean {
     const phoneNumber = this.phoneNumber.value || '';
     
-    if (!phoneNumber.trim()) {
-      this.phoneNumberError.set('You must enter a phone number');
-      this.phoneNumber.setErrors({ 'required': true });
-      return false;
-    }
-    
-    const containsInvalidChars = /[^0-9+\s\-()]/.test(phoneNumber);
-    if (containsInvalidChars) {
-      this.phoneNumberError.set('Phone number can only contain digits, +, spaces, hyphens and parentheses');
-      this.phoneNumber.setErrors({ 'invalidChars': true });
-      return false;
-    }
-    
-    const cleanedNumber = phoneNumber.replace(/[\s\-()]/g, '');
-    
-    const mobileRegex = /^(\+407|07)\d{8}$/;
-    const landlineRegex = /^(\+402|02)\d{8}$/;
-    
-    if (!(mobileRegex.test(cleanedNumber) || landlineRegex.test(cleanedNumber))) {
-      this.phoneNumberError.set('Please enter a valid Romanian phone number');
+    if (!this.validationService.validatePhoneNumber(phoneNumber)) {
+      this.phoneNumberError.set(this.validationService.getPhoneNumberErrorMessage(phoneNumber));
       this.phoneNumber.setErrors({ 'invalidFormat': true });
       return false;
     }
@@ -123,7 +106,7 @@ export class UserProfileComponent {
       return true;
     }
     
-    if (!this.validateRomanianLicensePlate(licensePlate)) {
+    if (!this.validationService.validateRomanianLicensePlate(licensePlate)) {
       this.licensePlateError.set('Not a valid Romanian license plate');
       this.newCarPlate.setErrors({ 'invalidFormat': true });
       return false;
@@ -132,12 +115,6 @@ export class UserProfileComponent {
     this.licensePlateError.set('');
     this.newCarPlate.setErrors(null);
     return true;
-  }
-  
-  validateRomanianLicensePlate(licensePlate: string): boolean {
-    const plateRegex = /^[A-Z]{1,2}\s?[0-9]{2,3}\s?[A-Z]{3}$/;
-    
-    return plateRegex.test(licensePlate);
   }
   
   triggerFileInput() {
@@ -187,14 +164,11 @@ export class UserProfileComponent {
     const start = input.selectionStart;
     const end = input.selectionEnd;
     
-    // Convert to uppercase
     const upperCaseValue = input.value.toUpperCase();
-    
-    // Only update if the value actually changed
+
     if (input.value !== upperCaseValue) {
       this.newCarPlate.setValue(upperCaseValue, {emitEvent: false});
       
-      // Restore cursor position
       setTimeout(() => {
         input.setSelectionRange(start, end);
       }, 0);
