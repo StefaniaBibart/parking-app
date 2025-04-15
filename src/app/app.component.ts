@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { MaterialModule } from './material.module';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,7 @@ import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { HomeComponent } from './home/home.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { LoaderService } from './shared/services/loader.service';
+import { AuthService } from './shared/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -21,12 +22,22 @@ import { LoaderService } from './shared/services/loader.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'parking-app';
-  isLoggedIn = true; // Set to true to show the main layout with sidebar
+  isLoggedIn = false;
 
-  constructor(private router: Router, private loaderService: LoaderService) {
+  constructor(
+    private router: Router, 
+    private loaderService: LoaderService,
+    private authService: AuthService
+  ) {
     this.setupRouterEvents();
+  }
+
+  ngOnInit() {
+    this.authService.user.subscribe(user => {
+      this.isLoggedIn = !!user;
+    });
   }
 
   setupRouterEvents() {

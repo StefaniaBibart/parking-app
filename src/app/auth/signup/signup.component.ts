@@ -4,6 +4,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ValidationService } from '../../shared/services/validation.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-signup',
@@ -17,11 +20,13 @@ export class SignupComponent {
   isLoading: boolean = false;
   hidePassword = true;
   hideConfirmPassword = true;
+  errorMessage = '';
   
   constructor(
     private router: Router,
     private validationService: ValidationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {
     this.signupForm = this.fb.group({
       username: ['', [Validators.required]],
@@ -119,11 +124,28 @@ export class SignupComponent {
     
     if (this.signupForm.valid) {
       this.isLoading = true;
+      this.errorMessage = '';
       
-      setTimeout(() => {
-        this.isLoading = false;
-        this.router.navigate(['/login']);
-      }, 1500);
+      const email = this.email?.value;
+      const password = this.password?.value;
+      const username = this.username?.value;
+      const phoneNumber = this.phoneNumber?.value;
+      
+      this.authService.signup(email, password, username, phoneNumber)
+        .pipe(
+          catchError(error => {
+            this.errorMessage = this.getSignupErrorMessage(error);
+            return of(null);
+          }),
+          finalize(() => {
+            this.isLoading = false;
+          })
+        )
+        .subscribe(result => {
+          if (result) {
+            this.router.navigate(['/home']);
+          }
+        });
     } else {
       Object.keys(this.signupForm.controls).forEach(key => {
         this.signupForm.get(key)?.markAsTouched();
@@ -140,6 +162,21 @@ export class SignupComponent {
       this.hidePassword = !this.hidePassword;
     } else {
       this.hideConfirmPassword = !this.hideConfirmPassword;
+    }
+  }
+
+  private getSignupErrorMessage(error: any): string {
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        return 'This email is already in use. Please use a different email or try logging in.';
+      case 'auth/invalid-email':
+        return 'Invalid email address format.';
+      case 'auth/weak-password':
+        return 'Password is too weak. Please use a stronger password.';
+      case 'auth/operation-not-allowed':
+        return 'Email/password accounts are not enabled. Please contact support.';
+      default:
+        return 'An error occurred during signup. Please try again.';
     }
   }
 }

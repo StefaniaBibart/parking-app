@@ -93,6 +93,10 @@
         </mat-error>
       </mat-form-field>
       
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      
       <button type="submit" mat-raised-button color="primary" class="signup-button" [disabled]="signupForm.invalid || isLoading">
         <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
         <span *ngIf="!isLoading">Sign Up</span>
