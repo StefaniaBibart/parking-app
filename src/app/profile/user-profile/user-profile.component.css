@@ -167,3 +167,12 @@
 .full-width {
   width: 100%;
 }
+
+mat-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-bottom: 10px;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}

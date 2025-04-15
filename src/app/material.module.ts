@@ -15,8 +15,28 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSidenavModule,
+    MatListModule,
+    MatToolbarModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatChipsModule,
+    MatBadgeModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    ReactiveFormsModule
+  ],
   exports: [
     MatButtonModule,
     MatCardModule,
