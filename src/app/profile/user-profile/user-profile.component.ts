@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
-import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {merge} from 'rxjs';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { merge } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
+import { AuthService, User } from '../../shared/services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -14,12 +15,12 @@ import { ValidationService } from '../../shared/services/validation.service';
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css']
 })
-export class UserProfileComponent {
+export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
   
-  userName: string = 'John Doe';
-  email = new FormControl('john.doe@example.com', [Validators.required, Validators.email]);
-  phoneNumber = new FormControl('+40 712 345 678', [Validators.required]);
+  userName: string = '';
+  email = new FormControl('', [Validators.required, Validators.email]);
+  phoneNumber = new FormControl('', [Validators.required]);
   profileImage: string = 'assets/avatar.png';
   
   isEditing: boolean = false;
@@ -36,7 +37,10 @@ export class UserProfileComponent {
     { id: 2, plate: 'CJ 34 XYZ', type: 'SUV', color: 'Black' }
   ];
 
-  constructor(private validationService: ValidationService) {
+  constructor(
+    private validationService: ValidationService,
+    private authService: AuthService
+  ) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateEmailError());
@@ -50,6 +54,36 @@ export class UserProfileComponent {
       .subscribe(() => this.validateLicensePlate());
   }
 
+  ngOnInit() {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.loadUserData(currentUser);
+    }
+    
+    this.authService.user.subscribe(user => {
+      if (user) {
+        this.loadUserData(user);
+      }
+    });
+  }
+  
+  loadUserData(user: User) {
+    this.userName = user.username;
+    this.email.setValue(user.email);
+    
+    if (user.phoneNumber) {
+      this.phoneNumber.setValue(user.phoneNumber);
+    }
+    
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      if (parsedData.cars && Array.isArray(parsedData.cars)) {
+        this.cars = parsedData.cars;
+      }
+    }
+  }
+
   updateEmailError() {
     if (this.email.hasError('required')) {
       this.emailError.set('You must enter a value');
@@ -60,9 +94,52 @@ export class UserProfileComponent {
     }
   }
   
+  validatePhoneNumber(): boolean {
+    const phoneValue = this.phoneNumber.value || '';
+    if (!phoneValue) {
+      this.phoneNumberError.set('Phone number is required');
+      return false;
+    }
+    
+    if (!this.validationService.validatePhoneNumber(phoneValue)) {
+      this.phoneNumberError.set(this.validationService.getPhoneNumberErrorMessage(phoneValue));
+      return false;
+    }
+    
+    this.phoneNumberError.set('');
+    return true;
+  }
+  
+  validateLicensePlate() {
+    const plateValue = this.newCarPlate.value || '';
+    if (plateValue && !this.validationService.validateRomanianLicensePlate(plateValue)) {
+      this.licensePlateError.set('Invalid license plate format');
+    } else {
+      this.licensePlateError.set('');
+    }
+  }
+  
   toggleEdit() {
     if (this.isEditing) {
       if (this.validatePhoneNumber()) {
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser) {
+          const updatedUser: User = {
+            ...currentUser,
+            email: this.email.value || currentUser.email,
+            phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
+          };
+          
+          // Save cars along with other user data
+          const userData = {
+            ...updatedUser,
+            cars: this.cars
+          };
+          
+          localStorage.setItem('userData', JSON.stringify(userData));
+          this.authService['userSubject'].next(updatedUser);
+        }
+        
         this.isEditing = false;
       }
     } else {
@@ -73,48 +150,7 @@ export class UserProfileComponent {
   }
   
   onPhoneNumberKeyPress(event: KeyboardEvent): boolean {
-    const allowedChars = /[0-9\+\s\-\(\)]/;
-    const inputChar = event.key;
-    
-    if (inputChar.length === 1 && !allowedChars.test(inputChar)) {
-      event.preventDefault();
-      return false;
-    }
-    return true;
-  }
-  
-  validatePhoneNumber(): boolean {
-    const phoneNumber = this.phoneNumber.value || '';
-    
-    if (!this.validationService.validatePhoneNumber(phoneNumber)) {
-      this.phoneNumberError.set(this.validationService.getPhoneNumberErrorMessage(phoneNumber));
-      this.phoneNumber.setErrors({ 'invalidFormat': true });
-      return false;
-    }
-    
-    this.phoneNumberError.set('');
-    this.phoneNumber.setErrors(null);
-    return true;
-  }
-  
-  validateLicensePlate(): boolean {
-    const licensePlate = this.newCarPlate.value || '';
-    
-    if (!licensePlate.trim()) {
-      this.licensePlateError.set('');
-      this.newCarPlate.setErrors(null);
-      return true;
-    }
-    
-    if (!this.validationService.validateRomanianLicensePlate(licensePlate)) {
-      this.licensePlateError.set('Not a valid Romanian license plate');
-      this.newCarPlate.setErrors({ 'invalidFormat': true });
-      return false;
-    }
-    
-    this.licensePlateError.set('');
-    this.newCarPlate.setErrors(null);
-    return true;
+    return this.validationService.onPhoneNumberKeyPress(event);
   }
   
   triggerFileInput() {
@@ -125,33 +161,27 @@ export class UserProfileComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      
-      if (file.type.match(/image\/*/) == null) {
-        alert('Only images are supported');
-        return;
-      }
-      
       const reader = new FileReader();
-      reader.readAsDataURL(file);
-      
       reader.onload = () => {
         this.profileImage = reader.result as string;
       };
+      reader.readAsDataURL(file);
     }
   }
   
   addCar() {
-    if (this.newCarPlate.value && this.newCarPlate.valid) {
-      if (this.validateLicensePlate()) {
-        const newId = Math.max(0, ...this.cars.map(car => car.id)) + 1;
-        this.cars.push({
-          id: newId,
-          plate: this.newCarPlate.value,
-          type: 'Unknown',
-          color: 'Unknown'
-        });
-        this.newCarPlate.setValue('');
-      }
+    const plateValue = this.newCarPlate.value || '';
+    if (plateValue && this.validationService.validateRomanianLicensePlate(plateValue)) {
+      const newCar = {
+        id: this.cars.length + 1,
+        plate: plateValue,
+        type: 'Unknown',
+        color: 'Unknown'
+      };
+      this.cars = [...this.cars, newCar];
+      this.newCarPlate.setValue('');
+    } else {
+      this.licensePlateError.set('Invalid license plate format');
     }
   }
   
@@ -161,19 +191,19 @@ export class UserProfileComponent {
   
   onLicensePlateInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
+    let value = input.value.toUpperCase();
     
-    const upperCaseValue = input.value.toUpperCase();
-
-    if (input.value !== upperCaseValue) {
-      this.newCarPlate.setValue(upperCaseValue, {emitEvent: false});
-      
-      setTimeout(() => {
-        input.setSelectionRange(start, end);
-      }, 0);
+    if (value.length === 2 && !value.includes(' ')) {
+      value += ' ';
+    } else if (value.length === 5 && value[2] === ' ' && !value.includes(' ', 3)) {
+      value += ' ';
     }
     
+    this.newCarPlate.setValue(value);
     this.validateLicensePlate();
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

@@ -176,3 +176,13 @@ mat-error {
   opacity: 1 !important;
   visibility: visible !important;
 }
+
+.logout-section {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.logout-button {
+  padding: 0.5rem 2rem;
+}
