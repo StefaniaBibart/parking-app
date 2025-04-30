@@ -7,6 +7,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService, User } from '../../shared/services/auth.service';
 
+interface Car {
+  id: number;
+  plate: string;
+}
+
 @Component({
   selector: 'app-user-profile',
   standalone: true,
@@ -32,10 +37,7 @@ export class UserProfileComponent implements OnInit {
   licensePlateError = signal('');
   emailError = signal('');
   
-  cars = [
-    { id: 1, plate: 'B 12 ABC', type: 'Sedan', color: 'Blue' },
-    { id: 2, plate: 'CJ 34 XYZ', type: 'SUV', color: 'Black' }
-  ];
+  cars: Car[] = [];
 
   constructor(
     private validationService: ValidationService,
@@ -130,7 +132,6 @@ export class UserProfileComponent implements OnInit {
             phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
           };
           
-          // Save cars along with other user data
           const userData = {
             ...updatedUser,
             cars: this.cars
@@ -172,14 +173,24 @@ export class UserProfileComponent implements OnInit {
   addCar() {
     const plateValue = this.newCarPlate.value || '';
     if (plateValue && this.validationService.validateRomanianLicensePlate(plateValue)) {
+      const newId = this.cars.length > 0 
+        ? Math.max(...this.cars.map(car => car.id)) + 1 
+        : 1;
+      
       const newCar = {
-        id: this.cars.length + 1,
-        plate: plateValue,
-        type: 'Unknown',
-        color: 'Unknown'
+        id: newId,
+        plate: plateValue
       };
+      
       this.cars = [...this.cars, newCar];
       this.newCarPlate.setValue('');
+      
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const parsedData = JSON.parse(userData);
+        parsedData.cars = this.cars;
+        localStorage.setItem('userData', JSON.stringify(parsedData));
+      }
     } else {
       this.licensePlateError.set('Invalid license plate format');
     }
@@ -187,6 +198,13 @@ export class UserProfileComponent implements OnInit {
   
   removeCar(id: number) {
     this.cars = this.cars.filter(car => car.id !== id);
+    
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      parsedData.cars = this.cars;
+      localStorage.setItem('userData', JSON.stringify(parsedData));
+    }
   }
   
   onLicensePlateInput(event: Event) {

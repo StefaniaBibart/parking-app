@@ -166,3 +166,34 @@ h2 {
   margin-right: 10px;
   color: var(--primary);
 }
+
+.no-vehicles-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-light);
+  border-radius: 12px;
+  padding: 30px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.no-vehicles-message mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: var(--warning);
+  margin-bottom: 16px;
+}
+
+.no-vehicles-message h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.no-vehicles-message p {
+  margin: 0 0 20px 0;
+  color: var(--text-secondary);
+}
