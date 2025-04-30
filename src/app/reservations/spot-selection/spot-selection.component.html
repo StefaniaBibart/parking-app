@@ -10,67 +10,69 @@
       <div class="step-label">Choose Spot</div>
     </div>
   </div>
-  
+
   <div class="reservation-date">
     <mat-icon>calendar_today</mat-icon>
-    <span>{{ selectedDate | date:'EEEE, MMMM d, y' }}</span>
+    <span>{{ selectedDate | date : "EEEE, MMMM d, y" }}</span>
   </div>
-  
+
   <section class="vehicle-selection">
     <h2>Your selected vehicle</h2>
     <div class="selected-vehicle">
       <mat-icon>directions_car</mat-icon>
       <div class="vehicle-info">
         <div class="vehicle-plate">{{ selectedVehicle }}</div>
-        <div class="vehicle-details" *ngIf="selectedVehicleDetails">
-          {{ selectedVehicleDetails.type }} • {{ selectedVehicleDetails.color }}
-        </div>
       </div>
     </div>
   </section>
-  
+
   <section class="spot-selection">
     <h2>Choose a parking spot <mat-icon>info</mat-icon></h2>
     <div class="parking-layout">
       <div class="parking-row">
-        <div *ngFor="let spot of parkingSpots.slice(0, 5)" 
-             [class.selected]="selectedSpot === spot.id"
-             [class.occupied]="!spot.available"
-             class="parking-spot"
-             (click)="selectSpot(spot.id)">
+        <div
+          *ngFor="let spot of parkingSpots.slice(0, 5)"
+          [class.selected]="selectedSpot === spot.id"
+          [class.occupied]="!spot.available"
+          class="parking-spot"
+          (click)="selectSpot(spot.id)"
+        >
           <span *ngIf="spot.available">{{ spot.id }}</span>
           <mat-icon *ngIf="!spot.available">directions_car</mat-icon>
         </div>
       </div>
-      
+
       <div class="floor-selector">
         <mat-icon>arrow_back</mat-icon>
         <span>A-B Floor</span>
         <mat-icon>arrow_forward</mat-icon>
       </div>
-      
+
       <div class="parking-row">
-        <div *ngFor="let spot of parkingSpots.slice(5)" 
-             [class.selected]="selectedSpot === spot.id"
-             [class.occupied]="!spot.available"
-             class="parking-spot"
-             (click)="selectSpot(spot.id)">
+        <div
+          *ngFor="let spot of parkingSpots.slice(5)"
+          [class.selected]="selectedSpot === spot.id"
+          [class.occupied]="!spot.available"
+          class="parking-spot"
+          (click)="selectSpot(spot.id)"
+        >
           <span *ngIf="spot.available">{{ spot.id }}</span>
           <mat-icon *ngIf="!spot.available">directions_car</mat-icon>
         </div>
       </div>
     </div>
   </section>
-  
+
   <section class="booking-summary">
     <div class="action-buttons">
-      <button mat-stroked-button (click)="goBack()">
-        Back
-      </button>
-      <button mat-raised-button class="book-button" 
-              [disabled]="!selectedSpot"
-              (click)="bookPlace()">
-        Book Place
+      <button mat-stroked-button (click)="goBack()">Back</button>
+      <button
+        mat-raised-button
+        class="book-button"
+        [disabled]="!selectedSpot"
+        (click)="bookPlace()"
+      >
+        {{ isEditing ? "Update Reservation" : "Book Place" }}
       </button>
     </div>
   </section>

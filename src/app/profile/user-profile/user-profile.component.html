@@ -45,12 +45,12 @@
         <div class="edit-fields" *ngIf="isEditing">
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
-            <input
-              matInput
-              [formControl]="email"
-            />
+            <input matInput [formControl]="email" />
             <mat-icon matPrefix>email</mat-icon>
-            <mat-error *ngIf="email.invalid && (email.dirty || email.touched)">{{ emailError() }}</mat-error>
+            <mat-error
+              *ngIf="email.invalid && (email.dirty || email.touched)"
+              >{{ emailError() }}</mat-error
+            >
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -73,13 +73,19 @@
 
   <section class="cars-section">
     <h3>My Vehicles</h3>
-    <div class="car-list">
+
+    <div *ngIf="cars.length === 0" class="no-vehicles-message">
+      <mat-icon>warning</mat-icon>
+      <h3>No vehicles found</h3>
+      <p>You need to add a vehicle to make parking reservations.</p>
+    </div>
+
+    <div class="car-list" *ngIf="cars.length > 0">
       <div *ngFor="let car of cars" class="car-item">
         <div class="car-info">
           <mat-icon>directions_car</mat-icon>
           <div class="car-details">
             <div class="car-plate">{{ car.plate }}</div>
-            <div class="car-type">{{ car.type }} • {{ car.color }}</div>
           </div>
         </div>
         <button mat-icon-button color="warn" (click)="removeCar(car.id)">
@@ -120,7 +126,12 @@
   </section>
 
   <section class="logout-section">
-    <button mat-raised-button color="warn" (click)="logout()" class="logout-button">
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="logout()"
+      class="logout-button"
+    >
       <mat-icon>exit_to_app</mat-icon>
       Logout
     </button>
