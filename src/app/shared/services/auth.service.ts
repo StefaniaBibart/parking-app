@@ -70,21 +70,17 @@ export class AuthService {
     return from(signInWithEmailAndPassword(auth, email, password)).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
-          // Get the token
           const token = await userCredential.user.getIdToken();
           
-          // Try to get user data from localStorage to retrieve phone number
           let phoneNumber = '';
           const storedUserData = localStorage.getItem('userData');
           if (storedUserData) {
             const parsedData = JSON.parse(storedUserData);
-            // If the stored user has the same email, use their phone number
             if (parsedData.email === userCredential.user.email) {
               phoneNumber = parsedData.phoneNumber || '';
             }
           }
           
-          // Create user object
           const user: User = {
             email: userCredential.user.email || '',
             id: userCredential.user.uid,
@@ -93,7 +89,6 @@ export class AuthService {
             phoneNumber: phoneNumber
           };
           
-          // Store user data
           this.userSubject.next(user);
           localStorage.setItem('userData', JSON.stringify(user));
         }
@@ -124,5 +119,17 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.userSubject.value;
+  }
+
+  async updateUserProfile(user: User): Promise<void> {
+    try {
+      localStorage.setItem('userData', JSON.stringify(user));
+      
+      this.userSubject.next(user);
+      
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
   }
 }

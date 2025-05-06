@@ -6,6 +6,9 @@ import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService, User } from '../../shared/services/auth.service';
+import { DataService } from '../../shared/services/data.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 
 interface Car {
   id: number;
@@ -41,7 +44,10 @@ export class UserProfileComponent implements OnInit {
 
   constructor(
     private validationService: ValidationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private dataService: DataService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
@@ -56,20 +62,20 @@ export class UserProfileComponent implements OnInit {
       .subscribe(() => this.validateLicensePlate());
   }
 
-  ngOnInit() {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.loadUserData(currentUser);
-    }
-    
-    this.authService.user.subscribe(user => {
+  async ngOnInit() {
+    try {
+      const user = this.authService.getCurrentUser();
       if (user) {
         this.loadUserData(user);
+      } else {
+        this.router.navigate(['/login']);
       }
-    });
+    } catch (error) {
+      console.error('Error initializing user profile:', error);
+    }
   }
   
-  loadUserData(user: User) {
+  async loadUserData(user: User) {
     this.userName = user.username;
     this.email.setValue(user.email);
     
@@ -77,12 +83,11 @@ export class UserProfileComponent implements OnInit {
       this.phoneNumber.setValue(user.phoneNumber);
     }
     
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      if (parsedData.cars && Array.isArray(parsedData.cars)) {
-        this.cars = parsedData.cars;
-      }
+    try {
+      this.cars = await this.dataService.getUserVehicles();
+      this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading vehicles:', error);
     }
   }
 
@@ -121,27 +126,26 @@ export class UserProfileComponent implements OnInit {
     }
   }
   
-  toggleEdit() {
+  async toggleEdit() {
     if (this.isEditing) {
       if (this.validatePhoneNumber()) {
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser) {
-          const updatedUser: User = {
-            ...currentUser,
-            email: this.email.value || currentUser.email,
-            phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
-          };
+        try {
+          const currentUser = this.authService.getCurrentUser();
+          if (currentUser) {
+            const updatedUser: User = {
+              ...currentUser,
+              email: this.email.value || currentUser.email,
+              phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
+            };
+            
+            await this.authService.updateUserProfile(updatedUser);
+            
+          }
           
-          const userData = {
-            ...updatedUser,
-            cars: this.cars
-          };
-          
-          localStorage.setItem('userData', JSON.stringify(userData));
-          this.authService['userSubject'].next(updatedUser);
+          this.isEditing = false;
+        } catch (error) {
+          console.error('Error updating user profile:', error);
         }
-        
-        this.isEditing = false;
       }
     } else {
       this.editEmail = this.email.value || '';
@@ -170,40 +174,36 @@ export class UserProfileComponent implements OnInit {
     }
   }
   
-  addCar() {
+  async addCar() {
     const plateValue = this.newCarPlate.value || '';
     if (plateValue && this.validationService.validateRomanianLicensePlate(plateValue)) {
-      const newId = this.cars.length > 0 
-        ? Math.max(...this.cars.map(car => car.id)) + 1 
-        : 1;
-      
-      const newCar = {
-        id: newId,
-        plate: plateValue
-      };
-      
-      this.cars = [...this.cars, newCar];
-      this.newCarPlate.setValue('');
-      
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        const parsedData = JSON.parse(userData);
-        parsedData.cars = this.cars;
-        localStorage.setItem('userData', JSON.stringify(parsedData));
+      try {
+        const newVehicle = {
+          id: Date.now(),
+          plate: plateValue
+        };
+        
+        await this.dataService.addVehicle(newVehicle);
+        
+        this.cars = await this.dataService.getUserVehicles();
+        this.newCarPlate.setValue('');
+        this.cdr.markForCheck();
+      } catch (error) {
+        console.error('Error adding vehicle:', error);
       }
     } else {
       this.licensePlateError.set('Invalid license plate format');
     }
   }
   
-  removeCar(id: number) {
-    this.cars = this.cars.filter(car => car.id !== id);
-    
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      parsedData.cars = this.cars;
-      localStorage.setItem('userData', JSON.stringify(parsedData));
+  async removeCar(id: number) {
+    try {
+      await this.dataService.deleteVehicle(id);
+      
+      this.cars = await this.dataService.getUserVehicles();
+      this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error removing vehicle:', error);
     }
   }
   

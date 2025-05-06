@@ -3,14 +3,7 @@ import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-interface Reservation {
-  id: number;
-  date: Date;
-  spot: string;
-  vehicle: string;
-  vehicleType: string;
-}
+import { DataService, Reservation, Vehicle } from '../../shared/services/data.service';
 
 @Component({
   selector: 'app-spot-selection',
@@ -21,13 +14,13 @@ interface Reservation {
 })
 export class SpotSelectionComponent implements OnInit {
   selectedVehicle: string = '';
-  selectedVehicleDetails: any = null;
+  selectedVehicleDetails: Vehicle | null = null;
   selectedSpot: string = '';
   selectedDate: Date | null = null;
   isEditing = false;
   editingReservationId: number | null = null;
   
-  userVehicles: any[] = [];
+  userVehicles: Vehicle[] = [];
   
   parkingSpots = [
     { id: 'A1', available: true },
@@ -42,84 +35,89 @@ export class SpotSelectionComponent implements OnInit {
     { id: 'B11', available: true }
   ];
   
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private dataService: DataService
+  ) {}
   
-  ngOnInit() {
-    const dateStr = localStorage.getItem('reservationDate');
-    const vehicleId = localStorage.getItem('reservationVehicleId');
-    const editingId = localStorage.getItem('editingReservationId');
-    
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      if (parsedData.cars && Array.isArray(parsedData.cars)) {
-        this.userVehicles = parsedData.cars;
-      }
-    }
-    
-    if (editingId) {
-      this.isEditing = true;
-      this.editingReservationId = parseInt(editingId);
+  async ngOnInit() {
+    try {
+      this.userVehicles = await this.dataService.getUserVehicles();
       
-      const storedReservations = localStorage.getItem('userReservations');
-      if (storedReservations) {
-        const reservations: Reservation[] = JSON.parse(storedReservations);
+      const tempData = await this.dataService.getTemporaryReservationData();
+      
+      if (tempData.editingReservationId) {
+        this.isEditing = true;
+        this.editingReservationId = tempData.editingReservationId;
+        await this.loadEditingReservation();
+      }
+      
+      if (tempData.reservationDate) {
+        this.selectedDate = new Date(tempData.reservationDate);
+      }
+      
+      if (tempData.reservationVehicleId) {
+        const vehicle = this.userVehicles.find(v => v.id === tempData.reservationVehicleId);
+        if (vehicle) {
+          this.selectedVehicle = vehicle.plate;
+          this.selectedVehicleDetails = vehicle;
+        }
+      }
+      
+      if (!this.selectedDate || !this.selectedVehicle) {
+        this.router.navigate(['/new-reservation']);
+        return;
+      }
+      
+      await this.updateAvailableSpots();
+    } catch (error) {
+      console.error('Error initializing spot selection:', error);
+    }
+  }
+  
+  async loadEditingReservation() {
+    if (this.editingReservationId) {
+      try {
+        const reservations = await this.dataService.getReservations();
         const editingReservation = reservations.find(r => r.id === this.editingReservationId);
         
         if (editingReservation) {
           this.selectedSpot = editingReservation.spot;
           
-          if (!vehicleId && editingReservation.vehicle) {
+          if (editingReservation.vehicle) {
             const vehicle = this.userVehicles.find(v => v.plate === editingReservation.vehicle);
             if (vehicle) {
-              localStorage.setItem('reservationVehicleId', vehicle.id.toString());
+              await this.dataService.storeTemporaryReservationData({
+                reservationVehicleId: vehicle.id
+              });
             }
           }
         }
+      } catch (error) {
+        console.error('Error loading reservation for editing:', error);
       }
     }
-    
-    if (dateStr) {
-      this.selectedDate = new Date(dateStr);
-    }
-    
-    if (vehicleId) {
-      const vehicle = this.userVehicles.find(v => v.id === parseInt(vehicleId));
-      if (vehicle) {
-        this.selectedVehicle = vehicle.plate;
-        this.selectedVehicleDetails = vehicle;
-      }
-    }
-    
-    if (!this.selectedDate || !this.selectedVehicle) {
-      this.router.navigate(['/new-reservation']);
-    }
-    
-    this.updateAvailableSpots();
   }
   
-  updateAvailableSpots() {
-    const storedReservations = localStorage.getItem('userReservations');
-    if (storedReservations && this.selectedDate) {
-      const reservations: Reservation[] = JSON.parse(storedReservations);
-      
-      reservations.forEach(res => {
-        if (typeof res.date === 'string') {
-          res.date = new Date(res.date);
-        }
-      });
-      
-      const selectedDateStr = this.selectedDate.toDateString();
-      const reservationsOnSelectedDate = reservations.filter(res => {
-        if (this.isEditing && res.id === this.editingReservationId) {
-          return false;
-        }
-        return new Date(res.date).toDateString() === selectedDateStr;
-      });
-      
-      this.parkingSpots.forEach(spot => {
-        spot.available = !reservationsOnSelectedDate.some(res => res.spot === spot.id);
-      });
+  async updateAvailableSpots() {
+    if (this.selectedDate) {
+      try {
+        const reservations = await this.dataService.getReservations();
+        
+        const selectedDateStr = this.selectedDate.toDateString();
+        const reservationsOnSelectedDate = reservations.filter(res => {
+          if (this.isEditing && res.id === this.editingReservationId) {
+            return false;
+          }
+          return new Date(res.date).toDateString() === selectedDateStr;
+        });
+        
+        this.parkingSpots.forEach(spot => {
+          spot.available = !reservationsOnSelectedDate.some(res => res.spot === spot.id);
+        });
+      } catch (error) {
+        console.error('Error updating available spots:', error);
+      }
     }
   }
   
@@ -130,36 +128,31 @@ export class SpotSelectionComponent implements OnInit {
     }
   }
   
-  bookPlace() {
-    if (!this.selectedSpot || !this.selectedDate) {
+  async bookPlace() {
+    if (!this.selectedSpot || !this.selectedDate || !this.selectedVehicleDetails) {
       return;
     }
     
-    const newReservation: Reservation = {
-      id: this.isEditing && this.editingReservationId ? this.editingReservationId : Date.now(),
-      date: this.selectedDate,
-      spot: this.selectedSpot,
-      vehicle: this.selectedVehicle,
-      vehicleType: this.selectedVehicleDetails?.type || 'Unknown'
-    };
-    
-    const existingReservationsStr = localStorage.getItem('userReservations');
-    let existingReservations: Reservation[] = existingReservationsStr 
-      ? JSON.parse(existingReservationsStr) 
-      : [];
-    
-    if (this.isEditing && this.editingReservationId) {
-      existingReservations = existingReservations.filter(res => res.id !== this.editingReservationId);
+    try {
+      const newReservation: Reservation = {
+        id: this.isEditing && this.editingReservationId ? this.editingReservationId : Date.now(),
+        date: this.selectedDate,
+        spot: this.selectedSpot,
+        vehicle: this.selectedVehicle
+      };
+      
+      if (this.isEditing && this.editingReservationId) {
+        await this.dataService.updateReservation(newReservation);
+      } else {
+        await this.dataService.addReservation(newReservation);
+      }
+      
+      await this.dataService.clearTemporaryReservationData();
+      
+      this.router.navigate(['/reservations']);
+    } catch (error) {
+      console.error('Error saving reservation:', error);
     }
-    
-    existingReservations.push(newReservation);
-    localStorage.setItem('userReservations', JSON.stringify(existingReservations));
-    
-    localStorage.removeItem('reservationDate');
-    localStorage.removeItem('reservationVehicleId');
-    localStorage.removeItem('editingReservationId');
-    
-    this.router.navigate(['/reservations']);
   }
   
   goBack() {
