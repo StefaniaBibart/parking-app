@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { DataService, Vehicle } from './data.service';
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  cars?: Vehicle[];
-}
+import { DataService, User, Vehicle } from './data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,25 +13,14 @@ export class UserService {
     this.loadUserFromStorage();
   }
   
-  private loadUserFromStorage() {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        this.currentUserSubject.next(user);
-        
-        this.syncUserToFirebase(user);
-      } catch (error) {
-        console.error('Error parsing user data from storage:', error);
-      }
-    }
-  }
-  
-  private async syncUserToFirebase(user: User) {
+  private async loadUserFromStorage() {
     try {
-      await this.dataService.storeData(`users/${user.id}`, user);
+      const user = await this.dataService.getCurrentUser();
+      if (user) {
+        this.currentUserSubject.next(user);
+      }
     } catch (error) {
-      console.error('Error syncing user to Firebase:', error);
+      console.error('Error loading user from storage:', error);
     }
   }
   
@@ -53,10 +35,7 @@ export class UserService {
   
   async saveUserData(user: User): Promise<void> {
     try {
-      localStorage.setItem('userData', JSON.stringify(user));
-      
-      await this.dataService.storeData(`users/${user.id}`, user);
-      
+      await this.dataService.updateUser(user);
       this.currentUserSubject.next(user);
     } catch (error) {
       console.error('Error saving user data:', error);

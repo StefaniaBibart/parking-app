@@ -5,8 +5,9 @@ import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
-import { AuthService, User } from '../../shared/services/auth.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { DataService } from '../../shared/services/data.service';
+import { User } from '../../shared/services/data.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 

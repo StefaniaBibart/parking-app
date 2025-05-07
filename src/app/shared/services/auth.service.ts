@@ -1,24 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from } from 'rxjs';
-import { tap, map, catchError } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { 
   getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
   updateProfile,
-  User as FirebaseUser,
   UserCredential
 } from 'firebase/auth';
-
-export interface User {
-  email: string;
-  id: string;
-  token: string;
-  username: string;
-  phoneNumber?: string;
-}
+import { DataService, User } from './data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +19,25 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(null);
   user = this.userSubject.asObservable();
   
-  constructor(private router: Router) {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      this.userSubject.next(parsedUser);
+  constructor(
+    private router: Router,
+    private dataService: DataService
+  ) {
+    this.loadUserFromStorage();
+  }
+
+  private async loadUserFromStorage() {
+    try {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const authData = JSON.parse(userData);
+        
+        const user = await this.dataService.getCurrentUser();
+        
+        this.userSubject.next(user || authData);
+      }
+    } catch (error) {
+      console.error('Error loading user from storage:', error);
     }
   }
 
@@ -54,8 +60,11 @@ export class AuthService {
             phoneNumber: phoneNumber
           };
           
-          this.userSubject.next(user);
+          await this.dataService.storeUser(user);
+          
           localStorage.setItem('userData', JSON.stringify(user));
+          
+          this.userSubject.next(user);
         }
       }),
       catchError(error => {
@@ -72,25 +81,31 @@ export class AuthService {
         if (userCredential.user) {
           const token = await userCredential.user.getIdToken();
           
-          let phoneNumber = '';
-          const storedUserData = localStorage.getItem('userData');
-          if (storedUserData) {
-            const parsedData = JSON.parse(storedUserData);
-            if (parsedData.email === userCredential.user.email) {
-              phoneNumber = parsedData.phoneNumber || '';
-            }
-          }
+          const existingUser = await this.dataService.getCurrentUser();
           
-          const user: User = {
+          const authData = {
             email: userCredential.user.email || '',
             id: userCredential.user.uid,
             token: token,
-            username: userCredential.user.displayName || '',
-            phoneNumber: phoneNumber
+            username: userCredential.user.displayName || ''
           };
           
-          this.userSubject.next(user);
-          localStorage.setItem('userData', JSON.stringify(user));
+          localStorage.setItem('userData', JSON.stringify(authData));
+          
+          if (existingUser) {
+            const updatedUser = {
+              ...existingUser,
+              token: token,
+              email: userCredential.user.email || existingUser.email,
+              username: userCredential.user.displayName || existingUser.username
+            };
+            
+            await this.dataService.updateUser(updatedUser);
+            this.userSubject.next(updatedUser);
+          } else {
+            await this.dataService.storeUser(authData);
+            this.userSubject.next(authData);
+          }
         }
       }),
       catchError(error => {
@@ -100,21 +115,17 @@ export class AuthService {
     );
   }
 
-  logout(): void {
+  logout() {
     const auth = getAuth();
-    signOut(auth).then(() => {
+    signOut(auth).then(async () => {
       this.userSubject.next(null);
+      
       localStorage.removeItem('userData');
+      
       this.router.navigate(['/login']);
     }).catch(error => {
       console.error('Logout error:', error);
     });
-  }
-
-  isAuthenticated(): Observable<boolean> {
-    return this.user.pipe(
-      map(user => !!user)
-    );
   }
 
   getCurrentUser(): User | null {
@@ -123,10 +134,11 @@ export class AuthService {
 
   async updateUserProfile(user: User): Promise<void> {
     try {
+      await this.dataService.updateUser(user);
+      
       localStorage.setItem('userData', JSON.stringify(user));
       
       this.userSubject.next(user);
-      
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;

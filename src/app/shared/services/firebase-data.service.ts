@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { DataService, Reservation, Vehicle } from './data.service';
+import { DataService, Reservation, Vehicle, User } from './data.service';
 import { getDatabase, ref, get, set, update, remove, query, orderByChild } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
 
 @Injectable()
 export class FirebaseDataService extends DataService {
-  private baseUrl = 'https://parking-app-16597-default-rtdb.europe-west1.firebasedatabase.app/';
   private reservationsPath = 'reservations';
   private tempDataPath = 'tempReservationData';
   private usersPath = 'users';
@@ -13,7 +13,7 @@ export class FirebaseDataService extends DataService {
     super();
   }
   
-  async getData(path: string): Promise<any> {
+  protected async getData(path: string): Promise<any> {
     try {
       const db = getDatabase();
       const dataRef = ref(db, path);
@@ -25,7 +25,7 @@ export class FirebaseDataService extends DataService {
     }
   }
   
-  async storeData(path: string, data: any): Promise<void> {
+  protected async storeData(path: string, data: any): Promise<void> {
     try {
       const db = getDatabase();
       const dataRef = ref(db, path);
@@ -36,7 +36,7 @@ export class FirebaseDataService extends DataService {
     }
   }
   
-  async updateData(path: string, data: any): Promise<void> {
+  protected async updateData(path: string, data: any): Promise<void> {
     try {
       const db = getDatabase();
       const dataRef = ref(db, path);
@@ -47,7 +47,7 @@ export class FirebaseDataService extends DataService {
     }
   }
   
-  async deleteData(path: string): Promise<void> {
+  protected async deleteData(path: string): Promise<void> {
     try {
       const db = getDatabase();
       const dataRef = ref(db, path);
@@ -58,7 +58,7 @@ export class FirebaseDataService extends DataService {
     }
   }
   
-  async clearAllData(): Promise<void> {
+  protected async clearAllData(): Promise<void> {
     try {
       const userId = this.getCurrentUserId();
       await this.deleteData(`${this.reservationsPath}/${userId}`);
@@ -295,5 +295,53 @@ export class FirebaseDataService extends DataService {
       return user.id || 'anonymous';
     }
     return 'anonymous';
+  }
+  
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (currentUser) {
+        const userId = currentUser.uid;
+        const path = `${this.usersPath}/${userId}`;
+        return await this.getData(path);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting current user from Firebase:', error);
+      return null;
+    }
+  }
+  
+  async storeUser(user: User): Promise<void> {
+    try {
+      const path = `${this.usersPath}/${user.id}`;
+      await this.storeData(path, user);
+    } catch (error) {
+      console.error('Error storing user to Firebase:', error);
+      throw error;
+    }
+  }
+  
+  async updateUser(user: User): Promise<void> {
+    try {
+      const path = `${this.usersPath}/${user.id}`;
+      await this.updateData(path, user);
+    } catch (error) {
+      console.error('Error updating user in Firebase:', error);
+      throw error;
+    }
+  }
+  
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      const path = `${this.usersPath}/${userId}`;
+      await this.deleteData(path);
+    } catch (error) {
+      console.error('Error deleting user from Firebase:', error);
+      throw error;
+    }
   }
 }

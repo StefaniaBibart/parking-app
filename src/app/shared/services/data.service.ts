@@ -13,13 +13,22 @@ export interface Vehicle {
   plate: string;
 }
 
+export interface User {
+  email: string;
+  id: string;
+  token: string;
+  username: string;
+  phoneNumber?: string;
+  cars?: Vehicle[];
+}
+
 @Injectable()
 export abstract class DataService {
-  abstract getData(path: string): Promise<any>;
-  abstract storeData(path: string, data: any): Promise<void>;
-  abstract updateData(path: string, data: any): Promise<void>;
-  abstract deleteData(path: string): Promise<void>;
-  abstract clearAllData(): Promise<void>;
+  protected abstract getData(path: string): Promise<any>;
+  protected abstract storeData(path: string, data: any): Promise<void>;
+  protected abstract updateData(path: string, data: any): Promise<void>;
+  protected abstract deleteData(path: string): Promise<void>;
+  protected abstract clearAllData(): Promise<void>;
   
   abstract getReservations(): Promise<Reservation[]>;
   abstract addReservation(reservation: Reservation): Promise<void>;
@@ -47,4 +56,9 @@ export abstract class DataService {
   abstract updateVehicle(vehicle: Vehicle): Promise<void>;
   abstract deleteVehicle(id: number): Promise<void>;
   abstract findVehicleByPlate(plate: string): Promise<Vehicle | undefined>;
+  
+  abstract getCurrentUser(): Promise<User | null>;
+  abstract storeUser(user: User): Promise<void>;
+  abstract updateUser(user: User): Promise<void>;
+  abstract deleteUser(userId: string): Promise<void>;
 }

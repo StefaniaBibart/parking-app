@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DataService, Reservation, Vehicle } from './data.service';
+import { DataService, Reservation, Vehicle, User } from './data.service';
 
 @Injectable()
 export class LocalstorageDataService extends DataService {
@@ -11,7 +11,7 @@ export class LocalstorageDataService extends DataService {
     super();
   }
   
-  async getData(path: string): Promise<any> {
+  protected async getData(path: string): Promise<any> {
     try {
       const storageKey = this.getStorageKey(path);
       const data = localStorage.getItem(storageKey);
@@ -22,7 +22,7 @@ export class LocalstorageDataService extends DataService {
     }
   }
   
-  async storeData(path: string, data: any): Promise<void> {
+  protected async storeData(path: string, data: any): Promise<void> {
     try {
       const storageKey = this.getStorageKey(path);
       localStorage.setItem(storageKey, JSON.stringify(data));
@@ -32,7 +32,7 @@ export class LocalstorageDataService extends DataService {
     }
   }
   
-  async updateData(path: string, data: any): Promise<void> {
+  protected async updateData(path: string, data: any): Promise<void> {
     try {
       const storageKey = this.getStorageKey(path);
       const existingData = localStorage.getItem(storageKey);
@@ -49,7 +49,7 @@ export class LocalstorageDataService extends DataService {
     }
   }
   
-  async deleteData(path: string): Promise<void> {
+  protected async deleteData(path: string): Promise<void> {
     try {
       const storageKey = this.getStorageKey(path);
       localStorage.removeItem(storageKey);
@@ -59,7 +59,7 @@ export class LocalstorageDataService extends DataService {
     }
   }
   
-  async clearAllData(): Promise<void> {
+  protected async clearAllData(): Promise<void> {
     try {
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith(this.prefix)) {
@@ -287,6 +287,50 @@ export class LocalstorageDataService extends DataService {
     } catch (error) {
       console.error('Error finding vehicle by plate:', error);
       return undefined;
+    }
+  }
+
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      const userData = localStorage.getItem('userData');
+      return userData ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error('Error getting current user from localStorage:', error);
+      return null;
+    }
+  }
+
+  async storeUser(user: User): Promise<void> {
+    try {
+      localStorage.setItem('userData', JSON.stringify(user));
+    } catch (error) {
+      console.error('Error storing user to localStorage:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(user: User): Promise<void> {
+    try {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const currentUser = JSON.parse(userData);
+        const updatedUser = { ...currentUser, ...user };
+        localStorage.setItem('userData', JSON.stringify(updatedUser));
+      } else {
+        localStorage.setItem('userData', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Error updating user in localStorage:', error);
+      throw error;
+    }
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      localStorage.removeItem('userData');
+    } catch (error) {
+      console.error('Error deleting user from localStorage:', error);
+      throw error;
     }
   }
 }
