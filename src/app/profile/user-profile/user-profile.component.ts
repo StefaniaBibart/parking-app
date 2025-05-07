@@ -20,13 +20,9 @@ import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { DataService } from '../../shared/services/data.service';
 import { User } from '../../shared/models/user.model';
+import { Vehicle } from '../../shared/models/vehicle.model';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-
-interface Car {
-  id: number;
-  plate: string;
-}
 
 @Component({
   selector: 'app-user-profile',
@@ -53,14 +49,14 @@ export class UserProfileComponent implements OnInit {
   licensePlateError = signal('');
   emailError = signal('');
 
-  cars: Car[] = [];
+  cars: Vehicle[] = [];
 
   constructor(
     private validationService: ValidationService,
     private authService: AuthService,
     private dataService: DataService,
     private cdr: ChangeDetectorRef,
-    private router: Router,
+    private router: Router
   ) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
@@ -123,7 +119,7 @@ export class UserProfileComponent implements OnInit {
 
     if (!this.validationService.validatePhoneNumber(phoneValue)) {
       this.phoneNumberError.set(
-        this.validationService.getPhoneNumberErrorMessage(phoneValue),
+        this.validationService.getPhoneNumberErrorMessage(phoneValue)
       );
       return false;
     }
