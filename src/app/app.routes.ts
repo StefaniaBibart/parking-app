@@ -14,9 +14,25 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
-  { path: 'profile', component: UserProfileComponent, canActivate: [AuthGuard] },
-  { path: 'reservations', component: ReservationListComponent, canActivate: [AuthGuard] },
-  { path: 'new-reservation', component: ReservationFormComponent, canActivate: [AuthGuard] },
-  { path: 'select-spot', component: SpotSelectionComponent, canActivate: [AuthGuard] },
-  { path: '**', redirectTo: '/home' }
+  {
+    path: 'profile',
+    component: UserProfileComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'reservations',
+    component: ReservationListComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'new-reservation',
+    component: ReservationFormComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'select-spot',
+    component: SpotSelectionComponent,
+    canActivate: [AuthGuard],
+  },
+  { path: '**', redirectTo: '/home' },
 ];

@@ -7,18 +7,20 @@ export enum DataProviderType {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataProviderService {
   private providerType: DataProviderType = DataProviderType.FIREBASE;
-  private providerChanged = new BehaviorSubject<DataProviderType>(this.providerType);
-  
+  private providerChanged = new BehaviorSubject<DataProviderType>(
+    this.providerType,
+  );
+
   providerChanged$ = this.providerChanged.asObservable();
 
   setProvider(type: DataProviderType) {
     const oldType = this.providerType;
     this.providerType = type;
-    
+
     if (oldType !== type) {
       this.providerChanged.next(type);
     }

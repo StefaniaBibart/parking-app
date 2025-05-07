@@ -9,18 +9,18 @@ import { ThemeService } from '../../services/theme.service';
   standalone: true,
   imports: [MaterialModule, CommonModule],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
   isDarkTheme = false;
 
   constructor(
     private router: Router,
-    private themeService: ThemeService
+    private themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
-    this.themeService.isDarkTheme$.subscribe(isDark => {
+    this.themeService.isDarkTheme$.subscribe((isDark) => {
       this.isDarkTheme = isDark;
     });
   }

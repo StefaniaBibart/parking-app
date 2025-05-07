@@ -3,7 +3,7 @@ import {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
-  HttpParams
+  HttpParams,
 } from '@angular/common/http';
 import { take, exhaustMap } from 'rxjs/operators';
 import { AuthService } from '../shared/services/auth.service';
@@ -16,18 +16,18 @@ export class AuthInterceptorService implements HttpInterceptor {
     if (req.url.includes('?auth=')) {
       return next.handle(req);
     }
-    
+
     return this.authService.user.pipe(
       take(1),
-      exhaustMap(user => {
+      exhaustMap((user) => {
         if (!user) {
           return next.handle(req);
         }
         const modifiedReq = req.clone({
-          params: new HttpParams().set('auth', user.token || '')
+          params: new HttpParams().set('auth', user.token || ''),
         });
         return next.handle(modifiedReq);
-      })
+      }),
     );
   }
 }

@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import {
+  RouterOutlet,
+  Router,
+  NavigationStart,
+  NavigationEnd,
+  NavigationCancel,
+  NavigationError,
+} from '@angular/router';
 import { MaterialModule } from './material.module';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
@@ -12,36 +19,36 @@ import { AuthService } from './shared/services/auth.service';
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet, 
-    MaterialModule, 
+    RouterOutlet,
+    MaterialModule,
     CommonModule,
     SidebarComponent,
     HomeComponent,
-    LoaderComponent
+    LoaderComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
   title = 'parking-app';
   isLoggedIn = false;
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private loaderService: LoaderService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.setupRouterEvents();
   }
 
   ngOnInit() {
-    this.authService.user.subscribe(user => {
+    this.authService.user.subscribe((user) => {
       this.isLoggedIn = !!user;
     });
   }
 
   setupRouterEvents() {
-    this.router.events.subscribe(event => {
+    this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.loaderService.show();
       } else if (

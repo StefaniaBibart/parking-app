@@ -5,27 +5,29 @@ import { LocalstorageDataService } from './localstorage-data.service';
 import { DataProviderService, DataProviderType } from './data-provider.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataServiceFactory {
   private currentService: DataService;
-  
+
   constructor(
     private firebaseService: FirebaseDataService,
     private localStorageService: LocalstorageDataService,
-    private providerService: DataProviderService
+    private providerService: DataProviderService,
   ) {
-    this.currentService = this.getServiceForProvider(providerService.getProviderType());
-    
-    this.providerService.providerChanged$.subscribe(providerType => {
+    this.currentService = this.getServiceForProvider(
+      providerService.getProviderType(),
+    );
+
+    this.providerService.providerChanged$.subscribe((providerType) => {
       this.currentService = this.getServiceForProvider(providerType);
     });
   }
-  
+
   getCurrentService(): DataService {
     return this.currentService;
   }
-  
+
   private getServiceForProvider(providerType: DataProviderType): DataService {
     switch (providerType) {
       case DataProviderType.FIREBASE:
@@ -36,4 +38,4 @@ export class DataServiceFactory {
         return this.firebaseService;
     }
   }
-} 
+}

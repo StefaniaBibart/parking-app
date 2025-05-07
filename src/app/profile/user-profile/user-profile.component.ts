@@ -1,7 +1,19 @@
-import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  signal,
+  ViewChild,
+  OnInit,
+} from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
@@ -22,25 +34,25 @@ interface Car {
   imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.css']
+  styleUrls: ['./user-profile.component.css'],
 })
 export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
-  
+
   userName: string = '';
   email = new FormControl('', [Validators.required, Validators.email]);
   phoneNumber = new FormControl('', [Validators.required]);
   profileImage: string = 'assets/avatar.png';
-  
+
   isEditing: boolean = false;
   editEmail: string = '';
-  
+
   newCarPlate = new FormControl('');
-  
+
   phoneNumberError = signal('');
   licensePlateError = signal('');
   emailError = signal('');
-  
+
   cars: Car[] = [];
 
   constructor(
@@ -48,16 +60,16 @@ export class UserProfileComponent implements OnInit {
     private authService: AuthService,
     private dataService: DataService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
   ) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateEmailError());
-    
+
     merge(this.phoneNumber.statusChanges, this.phoneNumber.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.validatePhoneNumber());
-    
+
     merge(this.newCarPlate.statusChanges, this.newCarPlate.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.validateLicensePlate());
@@ -75,15 +87,15 @@ export class UserProfileComponent implements OnInit {
       console.error('Error initializing user profile:', error);
     }
   }
-  
+
   async loadUserData(user: User) {
     this.userName = user.username;
     this.email.setValue(user.email);
-    
+
     if (user.phoneNumber) {
       this.phoneNumber.setValue(user.phoneNumber);
     }
-    
+
     try {
       this.cars = await this.dataService.getUserVehicles();
       this.cdr.markForCheck();
@@ -101,32 +113,37 @@ export class UserProfileComponent implements OnInit {
       this.emailError.set('');
     }
   }
-  
+
   validatePhoneNumber(): boolean {
     const phoneValue = this.phoneNumber.value || '';
     if (!phoneValue) {
       this.phoneNumberError.set('Phone number is required');
       return false;
     }
-    
+
     if (!this.validationService.validatePhoneNumber(phoneValue)) {
-      this.phoneNumberError.set(this.validationService.getPhoneNumberErrorMessage(phoneValue));
+      this.phoneNumberError.set(
+        this.validationService.getPhoneNumberErrorMessage(phoneValue),
+      );
       return false;
     }
-    
+
     this.phoneNumberError.set('');
     return true;
   }
-  
+
   validateLicensePlate() {
     const plateValue = this.newCarPlate.value || '';
-    if (plateValue && !this.validationService.validateRomanianLicensePlate(plateValue)) {
+    if (
+      plateValue &&
+      !this.validationService.validateRomanianLicensePlate(plateValue)
+    ) {
       this.licensePlateError.set('Invalid license plate format');
     } else {
       this.licensePlateError.set('');
     }
   }
-  
+
   async toggleEdit() {
     if (this.isEditing) {
       if (this.validatePhoneNumber()) {
@@ -138,11 +155,10 @@ export class UserProfileComponent implements OnInit {
               email: this.email.value || currentUser.email,
               phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
             };
-            
+
             await this.authService.updateUserProfile(updatedUser);
-            
           }
-          
+
           this.isEditing = false;
         } catch (error) {
           console.error('Error updating user profile:', error);
@@ -154,15 +170,15 @@ export class UserProfileComponent implements OnInit {
       this.isEditing = true;
     }
   }
-  
+
   onPhoneNumberKeyPress(event: KeyboardEvent): boolean {
     return this.validationService.onPhoneNumberKeyPress(event);
   }
-  
+
   triggerFileInput() {
     this.fileInput.nativeElement.click();
   }
-  
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -174,18 +190,21 @@ export class UserProfileComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
-  
+
   async addCar() {
     const plateValue = this.newCarPlate.value || '';
-    if (plateValue && this.validationService.validateRomanianLicensePlate(plateValue)) {
+    if (
+      plateValue &&
+      this.validationService.validateRomanianLicensePlate(plateValue)
+    ) {
       try {
         const newVehicle = {
           id: Date.now(),
-          plate: plateValue
+          plate: plateValue,
         };
-        
+
         await this.dataService.addVehicle(newVehicle);
-        
+
         this.cars = await this.dataService.getUserVehicles();
         this.newCarPlate.setValue('');
         this.cdr.markForCheck();
@@ -196,28 +215,32 @@ export class UserProfileComponent implements OnInit {
       this.licensePlateError.set('Invalid license plate format');
     }
   }
-  
+
   async removeCar(id: number) {
     try {
       await this.dataService.deleteVehicle(id);
-      
+
       this.cars = await this.dataService.getUserVehicles();
       this.cdr.markForCheck();
     } catch (error) {
       console.error('Error removing vehicle:', error);
     }
   }
-  
+
   onLicensePlateInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = input.value.toUpperCase();
-    
+
     if (value.length === 2 && !value.includes(' ')) {
       value += ' ';
-    } else if (value.length === 5 && value[2] === ' ' && !value.includes(' ', 3)) {
+    } else if (
+      value.length === 5 &&
+      value[2] === ' ' &&
+      !value.includes(' ', 3)
+    ) {
       value += ' ';
     }
-    
+
     this.newCarPlate.setValue(value);
     this.validateLicensePlate();
   }

@@ -10,12 +10,16 @@ import { environment } from '../environments/environment.development';
 import { DataService } from './shared/services/data.service';
 import { FirebaseDataService } from './shared/services/firebase-data.service';
 import { LocalstorageDataService } from './shared/services/localstorage-data.service';
-import { DataProviderType, DataProviderService } from './shared/services/data-provider.service';
+import {
+  DataProviderType,
+  DataProviderService,
+} from './shared/services/data-provider.service';
 import { DataServiceFactory } from './shared/services/data-service-factory';
 
 const firebaseConfig = {
   apiKey: environment.FIREBASE_AUTH_KEY,
-  databaseURL: 'https://parking-app-16597-default-rtdb.europe-west1.firebasedatabase.app/'
+  databaseURL:
+    'https://parking-app-16597-default-rtdb.europe-west1.firebasedatabase.app/',
 };
 
 try {
@@ -28,31 +32,31 @@ const DEFAULT_DATA_PROVIDER = DataProviderType.FIREBASE;
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), 
-    provideRouter(routes), 
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
     provideAnimationsAsync(),
     ThemeService,
-    
+
     FirebaseDataService,
     LocalstorageDataService,
-    
+
     {
       provide: DataProviderService,
       useFactory: () => {
         const service = new DataProviderService();
         service.setProvider(DEFAULT_DATA_PROVIDER);
         return service;
-      }
+      },
     },
-    
+
     DataServiceFactory,
-    
+
     {
       provide: DataService,
       useFactory: (factory: DataServiceFactory) => {
         return factory.getCurrentService();
       },
-      deps: [DataServiceFactory]
-    }
-  ]
+      deps: [DataServiceFactory],
+    },
+  ],
 };

@@ -11,7 +11,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, MaterialModule, FormsModule, ReactiveFormsModule],
   templateUrl: './vehicle-management.component.html',
-  styleUrls: ['./vehicle-management.component.css']
+  styleUrls: ['./vehicle-management.component.css'],
 })
 export class VehicleManagementComponent implements OnInit {
   vehicles: Vehicle[] = [];
@@ -19,20 +19,20 @@ export class VehicleManagementComponent implements OnInit {
   isEditing = false;
   editingVehicleId: number | null = null;
   vehicleForm: FormGroup;
-  
+
   constructor(
     private dataService: DataService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {
     this.vehicleForm = this.fb.group({
-      plate: ['', [Validators.required]]
+      plate: ['', [Validators.required]],
     });
   }
-  
+
   async ngOnInit() {
     await this.loadVehicles();
   }
-  
+
   async loadVehicles() {
     try {
       this.vehicles = await this.dataService.getUserVehicles();
@@ -41,16 +41,16 @@ export class VehicleManagementComponent implements OnInit {
       console.error('Error loading vehicles:', error);
     }
   }
-  
+
   editVehicle(vehicle: Vehicle) {
     this.isEditing = true;
     this.editingVehicleId = vehicle.id;
     this.vehicleForm.patchValue({
-      plate: vehicle.plate
+      plate: vehicle.plate,
     });
     this.showAddVehicleForm = true;
   }
-  
+
   async deleteVehicle(id: number) {
     try {
       await this.dataService.deleteVehicle(id);
@@ -59,44 +59,44 @@ export class VehicleManagementComponent implements OnInit {
       console.error('Error deleting vehicle:', error);
     }
   }
-  
+
   async saveVehicle() {
     if (this.vehicleForm.invalid) return;
-    
+
     try {
       const vehicleData = this.vehicleForm.value;
-      
+
       if (this.isEditing && this.editingVehicleId) {
         const updatedVehicle: Vehicle = {
           id: this.editingVehicleId,
-          plate: vehicleData.plate
+          plate: vehicleData.plate,
         };
-        
+
         await this.dataService.updateVehicle(updatedVehicle);
       } else {
         const newVehicle: Vehicle = {
           id: Date.now(),
-          plate: vehicleData.plate
+          plate: vehicleData.plate,
         };
-        
+
         await this.dataService.addVehicle(newVehicle);
       }
-      
+
       this.resetForm();
       await this.loadVehicles();
     } catch (error) {
       console.error('Error saving vehicle:', error);
     }
   }
-  
+
   cancelForm() {
     this.resetForm();
   }
-  
+
   resetForm() {
     this.vehicleForm.reset();
     this.showAddVehicleForm = false;
     this.isEditing = false;
     this.editingVehicleId = null;
   }
-} 
+}

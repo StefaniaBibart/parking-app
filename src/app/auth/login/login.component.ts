@@ -1,5 +1,10 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
@@ -12,67 +17,68 @@ import { of } from 'rxjs';
   standalone: true,
   imports: [MaterialModule, ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
   loginForm: FormGroup;
   isLoading = false;
   hidePassword = true;
   errorMessage = '';
-  
+
   constructor(
     private router: Router,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
     });
   }
-  
+
   get email() {
     return this.loginForm.get('email');
   }
-  
+
   get password() {
     return this.loginForm.get('password');
   }
-  
+
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
   }
-  
+
   onLogin() {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
-      
+
       const email = this.email?.value;
       const password = this.password?.value;
-      
-      this.authService.login(email, password)
+
+      this.authService
+        .login(email, password)
         .pipe(
-          catchError(error => {
+          catchError((error) => {
             this.errorMessage = this.getErrorMessage(error);
             return of(null);
           }),
           finalize(() => {
             this.isLoading = false;
-          })
+          }),
         )
-        .subscribe(result => {
+        .subscribe((result) => {
           if (result) {
             this.router.navigate(['/new-reservation']);
           }
         });
     } else {
-      Object.keys(this.loginForm.controls).forEach(key => {
+      Object.keys(this.loginForm.controls).forEach((key) => {
         this.loginForm.get(key)?.markAsTouched();
       });
     }
   }
-  
+
   onSignup() {
     this.router.navigate(['/signup']);
   }

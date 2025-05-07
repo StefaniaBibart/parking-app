@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ValidationService {
-
-  constructor() { }
+  constructor() {}
 
   /**
    * Validates a Romanian phone number
@@ -16,21 +15,21 @@ export class ValidationService {
     if (!phoneNumber || !phoneNumber.trim()) {
       return false;
     }
-    
+
     // Check if phone number contains invalid characters
     const containsInvalidChars = /[^0-9+\s\-()]/.test(phoneNumber);
     if (containsInvalidChars) {
       return false;
     }
-    
+
     // Clean the number for validation
     const cleanedNumber = phoneNumber.replace(/[\s\-()]/g, '');
-    
+
     // Check Romanian phone number format
     const mobileRegex = /^(\+407|07)\d{8}$/;
     const landlineRegex = /^(\+402|02)\d{8}$/;
-    
-    return (mobileRegex.test(cleanedNumber) || landlineRegex.test(cleanedNumber));
+
+    return mobileRegex.test(cleanedNumber) || landlineRegex.test(cleanedNumber);
   }
 
   /**
@@ -42,21 +41,23 @@ export class ValidationService {
     if (!phoneNumber || !phoneNumber.trim()) {
       return 'You must enter a phone number';
     }
-    
+
     const containsInvalidChars = /[^0-9+\s\-()]/.test(phoneNumber);
     if (containsInvalidChars) {
       return 'Phone number can only contain digits, +, spaces, hyphens and parentheses';
     }
-    
+
     const cleanedNumber = phoneNumber.replace(/[\s\-()]/g, '');
-    
+
     const mobileRegex = /^(\+407|07)\d{8}$/;
     const landlineRegex = /^(\+402|02)\d{8}$/;
-    
-    if (!(mobileRegex.test(cleanedNumber) || landlineRegex.test(cleanedNumber))) {
+
+    if (
+      !(mobileRegex.test(cleanedNumber) || landlineRegex.test(cleanedNumber))
+    ) {
       return 'Please enter a valid Romanian phone number';
     }
-    
+
     return '';
   }
 
@@ -69,7 +70,7 @@ export class ValidationService {
     if (!licensePlate || !licensePlate.trim()) {
       return false;
     }
-    
+
     const plateRegex = /^[A-Z]{1,2}\s?[0-9]{2,3}\s?[A-Z]{3}$/;
     return plateRegex.test(licensePlate);
   }
@@ -83,14 +84,14 @@ export class ValidationService {
     if (!licensePlate || !licensePlate.trim()) {
       return '';
     }
-    
+
     if (!this.validateRomanianLicensePlate(licensePlate)) {
       return 'Not a valid Romanian license plate';
     }
-    
+
     return '';
   }
-  
+
   /**
    * Validates email format
    * @param email The email to validate
@@ -100,11 +101,11 @@ export class ValidationService {
     if (!email || !email.trim()) {
       return false;
     }
-    
+
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   }
-  
+
   /**
    * Gets the email error message
    * @param email The email to validate
@@ -114,14 +115,14 @@ export class ValidationService {
     if (!email || !email.trim()) {
       return 'You must enter an email';
     }
-    
+
     if (!this.validateEmail(email)) {
       return 'Not a valid email';
     }
-    
+
     return '';
   }
-  
+
   /**
    * Validates if passwords match
    * @param password The password
@@ -131,21 +132,24 @@ export class ValidationService {
   validatePasswordsMatch(password: string, confirmPassword: string): boolean {
     return password === confirmPassword;
   }
-  
+
   /**
    * Gets the password match error message
    * @param password The password
    * @param confirmPassword The confirmation password
    * @returns The error message or empty string if valid
    */
-  getPasswordMatchErrorMessage(password: string, confirmPassword: string): string {
+  getPasswordMatchErrorMessage(
+    password: string,
+    confirmPassword: string,
+  ): string {
     if (password !== confirmPassword) {
       return 'Passwords do not match';
     }
-    
+
     return '';
   }
-  
+
   /**
    * Handles phone number key press to only allow valid characters
    * @param event The keyboard event
@@ -154,11 +158,11 @@ export class ValidationService {
   onPhoneNumberKeyPress(event: KeyboardEvent): boolean {
     const allowedChars = /[0-9\+\s\-\(\)]/;
     const inputChar = event.key;
-    
+
     if (inputChar.length === 1 && !allowedChars.test(inputChar)) {
       event.preventDefault();
       return false;
     }
     return true;
   }
-} 
+}

@@ -3,4 +3,4 @@ export interface Reservation {
   date: Date | string;
   spot: string;
   vehicle: string;
-} 
+}

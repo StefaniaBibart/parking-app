@@ -8,7 +8,7 @@ import { LoaderService } from '../../services/loader.service';
   standalone: true,
   imports: [CommonModule, MaterialModule],
   templateUrl: './loader.component.html',
-  styleUrls: ['./loader.component.css']
+  styleUrls: ['./loader.component.css'],
 })
 export class LoaderComponent implements OnInit {
   isLoading = false;
@@ -16,7 +16,7 @@ export class LoaderComponent implements OnInit {
   constructor(private loaderService: LoaderService) {}
 
   ngOnInit() {
-    this.loaderService.isLoading$.subscribe(isLoading => {
+    this.loaderService.isLoading$.subscribe((isLoading) => {
       this.isLoading = isLoading;
     });
   }

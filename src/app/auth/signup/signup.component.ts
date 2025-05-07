@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import { MaterialModule } from '../../material.module';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ValidationService } from '../../shared/services/validation.service';
@@ -13,7 +18,7 @@ import { of } from 'rxjs';
   standalone: true,
   imports: [MaterialModule, ReactiveFormsModule, CommonModule],
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']
+  styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent {
   signupForm: FormGroup;
@@ -21,27 +26,37 @@ export class SignupComponent {
   hidePassword = true;
   hideConfirmPassword = true;
   errorMessage = '';
-  
+
   constructor(
     private router: Router,
     private validationService: ValidationService,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.signupForm = this.fb.group({
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
     });
   }
 
-  get username() { return this.signupForm.get('username'); }
-  get email() { return this.signupForm.get('email'); }
-  get phoneNumber() { return this.signupForm.get('phoneNumber'); }
-  get password() { return this.signupForm.get('password'); }
-  get confirmPassword() { return this.signupForm.get('confirmPassword'); }
+  get username() {
+    return this.signupForm.get('username');
+  }
+  get email() {
+    return this.signupForm.get('email');
+  }
+  get phoneNumber() {
+    return this.signupForm.get('phoneNumber');
+  }
+  get password() {
+    return this.signupForm.get('password');
+  }
+  get confirmPassword() {
+    return this.signupForm.get('confirmPassword');
+  }
 
   getUsernameError(): string {
     if (this.username?.hasError('required')) {
@@ -64,12 +79,12 @@ export class SignupComponent {
     if (this.phoneNumber?.hasError('required')) {
       return 'You must enter a phone number';
     }
-    
+
     const phoneValue = this.phoneNumber?.value || '';
     if (phoneValue && !this.validationService.validatePhoneNumber(phoneValue)) {
       return this.validationService.getPhoneNumberErrorMessage(phoneValue);
     }
-    
+
     return '';
   }
 
@@ -87,33 +102,33 @@ export class SignupComponent {
     if (this.confirmPassword?.hasError('required')) {
       return 'You must confirm your password';
     }
-    
+
     const passwordValue = this.password?.value || '';
     const confirmValue = this.confirmPassword?.value || '';
-    
+
     if (passwordValue && confirmValue && passwordValue !== confirmValue) {
       return 'Passwords do not match';
     }
-    
+
     return '';
   }
-  
+
   validatePhoneNumber(): void {
     const phoneValue = this.phoneNumber?.value || '';
     if (phoneValue && !this.validationService.validatePhoneNumber(phoneValue)) {
       this.phoneNumber?.setErrors({ invalidFormat: true });
     }
   }
-  
+
   validatePasswordMatch(): void {
     const passwordValue = this.password?.value || '';
     const confirmValue = this.confirmPassword?.value || '';
-    
+
     if (passwordValue && confirmValue && passwordValue !== confirmValue) {
       this.confirmPassword?.setErrors({ mismatch: true });
     }
   }
-  
+
   onPhoneNumberKeyPress(event: KeyboardEvent): boolean {
     return this.validationService.onPhoneNumberKeyPress(event);
   }
@@ -121,33 +136,34 @@ export class SignupComponent {
   onSignup() {
     this.validatePhoneNumber();
     this.validatePasswordMatch();
-    
+
     if (this.signupForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
-      
+
       const email = this.email?.value;
       const password = this.password?.value;
       const username = this.username?.value;
       const phoneNumber = this.phoneNumber?.value;
-      
-      this.authService.signup(email, password, username, phoneNumber)
+
+      this.authService
+        .signup(email, password, username, phoneNumber)
         .pipe(
-          catchError(error => {
+          catchError((error) => {
             this.errorMessage = this.getSignupErrorMessage(error);
             return of(null);
           }),
           finalize(() => {
             this.isLoading = false;
-          })
+          }),
         )
-        .subscribe(result => {
+        .subscribe((result) => {
           if (result) {
             this.router.navigate(['/home']);
           }
         });
     } else {
-      Object.keys(this.signupForm.controls).forEach(key => {
+      Object.keys(this.signupForm.controls).forEach((key) => {
         this.signupForm.get(key)?.markAsTouched();
       });
     }

@@ -34,7 +34,9 @@
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
   max-width: 400px;
 }
 
@@ -85,4 +87,4 @@ p {
 .cta-button:hover {
   background-color: white;
   color: var(--primary);
-} 
+}

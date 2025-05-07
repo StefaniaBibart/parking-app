@@ -7,4 +7,4 @@ export interface User {
   username: string;
   phoneNumber?: string;
   cars?: Vehicle[];
-} 
+}

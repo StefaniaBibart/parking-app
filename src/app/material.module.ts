@@ -35,7 +35,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatBadgeModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   exports: [
     MatButtonModule,
@@ -54,6 +54,6 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatBadgeModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-  ]
+  ],
 })
-export class MaterialModule { } 
+export class MaterialModule {}
