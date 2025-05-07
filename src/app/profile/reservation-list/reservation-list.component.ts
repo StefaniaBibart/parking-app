@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { DataService, Reservation } from '../../shared/services/data.service';
+import { DataService } from '../../shared/services/data.service';
+import { Reservation } from '../../shared/models/reservation.model';
 
 @Component({
   selector: 'app-reservation-list',

@@ -3,7 +3,8 @@ import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DataService, Vehicle } from '../../shared/services/data.service';
+import { DataService } from '../../shared/services/data.service';
+import { Vehicle } from '../../shared/models/vehicle.model';
 
 @Component({
   selector: 'app-reservation-form',

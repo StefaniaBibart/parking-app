@@ -10,7 +10,8 @@ import {
   updateProfile,
   UserCredential
 } from 'firebase/auth';
-import { DataService, User } from './data.service';
+import { DataService } from './data.service';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'

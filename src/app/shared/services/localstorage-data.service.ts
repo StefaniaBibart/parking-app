@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { DataService, Reservation, Vehicle, User } from './data.service';
+import { DataService } from './data.service';
+import { Reservation } from '../models/reservation.model';
+import { Vehicle } from '../models/vehicle.model';
+import { User } from '../models/user.model';
 
 @Injectable()
 export class LocalstorageDataService extends DataService {

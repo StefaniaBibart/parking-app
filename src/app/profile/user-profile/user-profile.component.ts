@@ -7,7 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { DataService } from '../../shared/services/data.service';
-import { User } from '../../shared/services/data.service';
+import { User } from '../../shared/models/user.model';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 

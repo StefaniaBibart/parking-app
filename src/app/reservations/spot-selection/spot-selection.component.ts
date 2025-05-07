@@ -3,7 +3,9 @@ import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DataService, Reservation, Vehicle } from '../../shared/services/data.service';
+import { DataService } from '../../shared/services/data.service';
+import { Reservation } from '../../shared/models/reservation.model';
+import { Vehicle } from '../../shared/models/vehicle.model';
 
 @Component({
   selector: 'app-spot-selection',

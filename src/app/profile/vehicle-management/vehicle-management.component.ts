@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DataService, Vehicle } from '../../shared/services/data.service';
+import { DataService } from '../../shared/services/data.service';
+import { Vehicle } from '../../shared/models/vehicle.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
