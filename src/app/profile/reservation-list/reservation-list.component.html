@@ -29,8 +29,8 @@
       class="reservation-card"
     >
       <div class="reservation-date">
-        <div class="date-day">{{ reservation.date | date : "dd" }}</div>
-        <div class="date-month">{{ reservation.date | date : "MMM" }}</div>
+        <div class="date-day">{{ reservation.date | date: "dd" }}</div>
+        <div class="date-month">{{ reservation.date | date: "MMM" }}</div>
       </div>
 
       <div class="reservation-details">
@@ -56,7 +56,7 @@
         <button
           mat-stroked-button
           color="warn"
-          (click)="cancelReservation(reservation.id)"
+          (click)="deleteReservation(reservation.id)"
         >
           Cancel
         </button>
@@ -70,8 +70,8 @@
   >
     <div *ngFor="let reservation of pastReservations" class="reservation-card">
       <div class="reservation-date">
-        <div class="date-day">{{ reservation.date | date : "dd" }}</div>
-        <div class="date-month">{{ reservation.date | date : "MMM" }}</div>
+        <div class="date-day">{{ reservation.date | date: "dd" }}</div>
+        <div class="date-month">{{ reservation.date | date: "MMM" }}</div>
       </div>
 
       <div class="reservation-details">

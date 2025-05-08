@@ -1,67 +1,82 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from } from 'rxjs';
-import { tap, map, catchError } from 'rxjs/operators';
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
+import { tap, catchError } from 'rxjs/operators';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
   updateProfile,
-  User as FirebaseUser,
-  UserCredential
+  UserCredential,
 } from 'firebase/auth';
-
-export interface User {
-  email: string;
-  id: string;
-  token: string;
-  username: string;
-  phoneNumber?: string;
-}
+import { DataService } from './data.service';
+import { User } from '../models/user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(null);
   user = this.userSubject.asObservable();
-  
-  constructor(private router: Router) {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      this.userSubject.next(parsedUser);
+
+  constructor(
+    private router: Router,
+    private dataService: DataService,
+  ) {
+    this.loadUserFromStorage();
+  }
+
+  private async loadUserFromStorage() {
+    try {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const authData = JSON.parse(userData);
+
+        const user = await this.dataService.getCurrentUser();
+
+        this.userSubject.next(user || authData);
+      }
+    } catch (error) {
+      console.error('Error loading user from storage:', error);
     }
   }
 
-  signup(email: string, password: string, username: string, phoneNumber: string): Observable<UserCredential> {
+  signup(
+    email: string,
+    password: string,
+    username: string,
+    phoneNumber: string,
+  ): Observable<UserCredential> {
     const auth = getAuth();
     return from(createUserWithEmailAndPassword(auth, email, password)).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
           await updateProfile(userCredential.user, {
-            displayName: username
+            displayName: username,
           });
-          
+
           const token = await userCredential.user.getIdToken();
-          
+
           const user: User = {
             email: email,
             id: userCredential.user.uid,
             token: token,
             username: username,
-            phoneNumber: phoneNumber
+            phoneNumber: phoneNumber,
           };
-          
-          this.userSubject.next(user);
+
+          await this.dataService.storeUser(user);
+
           localStorage.setItem('userData', JSON.stringify(user));
+
+          this.userSubject.next(user);
         }
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Signup error:', error);
         throw error;
-      })
+      }),
     );
   }
 
@@ -70,59 +85,72 @@ export class AuthService {
     return from(signInWithEmailAndPassword(auth, email, password)).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
-          // Get the token
           const token = await userCredential.user.getIdToken();
-          
-          // Try to get user data from localStorage to retrieve phone number
-          let phoneNumber = '';
-          const storedUserData = localStorage.getItem('userData');
-          if (storedUserData) {
-            const parsedData = JSON.parse(storedUserData);
-            // If the stored user has the same email, use their phone number
-            if (parsedData.email === userCredential.user.email) {
-              phoneNumber = parsedData.phoneNumber || '';
-            }
-          }
-          
-          // Create user object
-          const user: User = {
+
+          const existingUser = await this.dataService.getCurrentUser();
+
+          const authData = {
             email: userCredential.user.email || '',
             id: userCredential.user.uid,
             token: token,
             username: userCredential.user.displayName || '',
-            phoneNumber: phoneNumber
           };
-          
-          // Store user data
-          this.userSubject.next(user);
-          localStorage.setItem('userData', JSON.stringify(user));
+
+          localStorage.setItem('userData', JSON.stringify(authData));
+
+          if (existingUser) {
+            const updatedUser = {
+              ...existingUser,
+              token: token,
+              email: userCredential.user.email || existingUser.email,
+              username:
+                userCredential.user.displayName || existingUser.username,
+            };
+
+            await this.dataService.updateUser(updatedUser);
+            this.userSubject.next(updatedUser);
+          } else {
+            await this.dataService.storeUser(authData);
+            this.userSubject.next(authData);
+          }
         }
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Login error:', error);
         throw error;
-      })
+      }),
     );
   }
 
-  logout(): void {
+  logout() {
     const auth = getAuth();
-    signOut(auth).then(() => {
-      this.userSubject.next(null);
-      localStorage.removeItem('userData');
-      this.router.navigate(['/login']);
-    }).catch(error => {
-      console.error('Logout error:', error);
-    });
-  }
+    signOut(auth)
+      .then(async () => {
+        this.userSubject.next(null);
 
-  isAuthenticated(): Observable<boolean> {
-    return this.user.pipe(
-      map(user => !!user)
-    );
+        localStorage.removeItem('userData');
+
+        this.router.navigate(['/login']);
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+      });
   }
 
   getCurrentUser(): User | null {
     return this.userSubject.value;
+  }
+
+  async updateUserProfile(user: User): Promise<void> {
+    try {
+      await this.dataService.updateUser(user);
+
+      localStorage.setItem('userData', JSON.stringify(user));
+
+      this.userSubject.next(user);
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
   }
 }

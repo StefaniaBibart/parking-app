@@ -11,16 +11,18 @@ import { CommonModule } from '@angular/common';
       <h2>{{ componentName }} works!</h2>
     </div>
   `,
-  styles: [`
-    .placeholder-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      font-size: 24px;
-      color: var(--text);
-    }
-  `]
+  styles: [
+    `
+      .placeholder-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        font-size: 24px;
+        color: var(--text);
+      }
+    `,
+  ],
 })
 export class PlaceholderComponent implements OnInit {
   componentName: string = 'Component';
@@ -31,4 +33,4 @@ export class PlaceholderComponent implements OnInit {
     const path = this.route.snapshot.routeConfig?.path || '';
     this.componentName = path.charAt(0).toUpperCase() + path.slice(1);
   }
-} 
+}

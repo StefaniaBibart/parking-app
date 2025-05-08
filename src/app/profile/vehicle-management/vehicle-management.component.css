@@ -1,0 +1,57 @@
+.vehicle-management {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h2 {
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.vehicle-list {
+  margin-bottom: 30px;
+}
+
+.vehicle-card {
+  margin-bottom: 10px;
+  background-color: var(--card-bg);
+}
+
+.vehicle-card mat-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vehicle-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.plate {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.no-vehicles {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.vehicle-form-card {
+  margin-top: 20px;
+  background-color: var(--card-bg);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}

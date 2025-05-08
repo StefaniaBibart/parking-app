@@ -1,16 +1,28 @@
-import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  signal,
+  ViewChild,
+  OnInit,
+} from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
-import { AuthService, User } from '../../shared/services/auth.service';
-
-interface Car {
-  id: number;
-  plate: string;
-}
+import { AuthService } from '../../shared/services/auth.service';
+import { DataService } from '../../shared/services/data.service';
+import { User } from '../../shared/models/user.model';
+import { Vehicle } from '../../shared/models/vehicle.model';
+import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-profile',
@@ -18,71 +30,73 @@ interface Car {
   imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.css']
+  styleUrls: ['./user-profile.component.css'],
 })
 export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
-  
+
   userName: string = '';
   email = new FormControl('', [Validators.required, Validators.email]);
   phoneNumber = new FormControl('', [Validators.required]);
   profileImage: string = 'assets/avatar.png';
-  
+
   isEditing: boolean = false;
   editEmail: string = '';
-  
+
   newCarPlate = new FormControl('');
-  
+
   phoneNumberError = signal('');
   licensePlateError = signal('');
   emailError = signal('');
-  
-  cars: Car[] = [];
+
+  cars: Vehicle[] = [];
 
   constructor(
     private validationService: ValidationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private dataService: DataService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateEmailError());
-    
+
     merge(this.phoneNumber.statusChanges, this.phoneNumber.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.validatePhoneNumber());
-    
+
     merge(this.newCarPlate.statusChanges, this.newCarPlate.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.validateLicensePlate());
   }
 
-  ngOnInit() {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.loadUserData(currentUser);
-    }
-    
-    this.authService.user.subscribe(user => {
+  async ngOnInit() {
+    try {
+      const user = this.authService.getCurrentUser();
       if (user) {
         this.loadUserData(user);
+      } else {
+        this.router.navigate(['/login']);
       }
-    });
+    } catch (error) {
+      console.error('Error initializing user profile:', error);
+    }
   }
-  
-  loadUserData(user: User) {
+
+  async loadUserData(user: User) {
     this.userName = user.username;
     this.email.setValue(user.email);
-    
+
     if (user.phoneNumber) {
       this.phoneNumber.setValue(user.phoneNumber);
     }
-    
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      if (parsedData.cars && Array.isArray(parsedData.cars)) {
-        this.cars = parsedData.cars;
-      }
+
+    try {
+      this.cars = await this.dataService.getUserVehicles();
+      this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading vehicles:', error);
     }
   }
 
@@ -95,53 +109,56 @@ export class UserProfileComponent implements OnInit {
       this.emailError.set('');
     }
   }
-  
+
   validatePhoneNumber(): boolean {
     const phoneValue = this.phoneNumber.value || '';
     if (!phoneValue) {
       this.phoneNumberError.set('Phone number is required');
       return false;
     }
-    
+
     if (!this.validationService.validatePhoneNumber(phoneValue)) {
-      this.phoneNumberError.set(this.validationService.getPhoneNumberErrorMessage(phoneValue));
+      this.phoneNumberError.set(
+        this.validationService.getPhoneNumberErrorMessage(phoneValue)
+      );
       return false;
     }
-    
+
     this.phoneNumberError.set('');
     return true;
   }
-  
+
   validateLicensePlate() {
     const plateValue = this.newCarPlate.value || '';
-    if (plateValue && !this.validationService.validateRomanianLicensePlate(plateValue)) {
+    if (
+      plateValue &&
+      !this.validationService.validateRomanianLicensePlate(plateValue)
+    ) {
       this.licensePlateError.set('Invalid license plate format');
     } else {
       this.licensePlateError.set('');
     }
   }
-  
-  toggleEdit() {
+
+  async toggleEdit() {
     if (this.isEditing) {
       if (this.validatePhoneNumber()) {
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser) {
-          const updatedUser: User = {
-            ...currentUser,
-            email: this.email.value || currentUser.email,
-            phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
-          };
-          
-          const userData = {
-            ...updatedUser,
-            cars: this.cars
-          };
-          
-          localStorage.setItem('userData', JSON.stringify(userData));
-          this.authService['userSubject'].next(updatedUser);
+        try {
+          const currentUser = this.authService.getCurrentUser();
+          if (currentUser) {
+            const updatedUser: User = {
+              ...currentUser,
+              email: this.email.value || currentUser.email,
+              phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
+            };
+
+            await this.authService.updateUserProfile(updatedUser);
+          }
+
+          this.isEditing = false;
+        } catch (error) {
+          console.error('Error updating user profile:', error);
         }
-        
-        this.isEditing = false;
       }
     } else {
       this.editEmail = this.email.value || '';
@@ -149,15 +166,15 @@ export class UserProfileComponent implements OnInit {
       this.isEditing = true;
     }
   }
-  
+
   onPhoneNumberKeyPress(event: KeyboardEvent): boolean {
     return this.validationService.onPhoneNumberKeyPress(event);
   }
-  
+
   triggerFileInput() {
     this.fileInput.nativeElement.click();
   }
-  
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -169,54 +186,57 @@ export class UserProfileComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
-  
-  addCar() {
+
+  async addCar() {
     const plateValue = this.newCarPlate.value || '';
-    if (plateValue && this.validationService.validateRomanianLicensePlate(plateValue)) {
-      const newId = this.cars.length > 0 
-        ? Math.max(...this.cars.map(car => car.id)) + 1 
-        : 1;
-      
-      const newCar = {
-        id: newId,
-        plate: plateValue
-      };
-      
-      this.cars = [...this.cars, newCar];
-      this.newCarPlate.setValue('');
-      
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        const parsedData = JSON.parse(userData);
-        parsedData.cars = this.cars;
-        localStorage.setItem('userData', JSON.stringify(parsedData));
+    if (
+      plateValue &&
+      this.validationService.validateRomanianLicensePlate(plateValue)
+    ) {
+      try {
+        const newVehicle = {
+          id: Date.now(),
+          plate: plateValue,
+        };
+
+        await this.dataService.addVehicle(newVehicle);
+
+        this.cars = await this.dataService.getUserVehicles();
+        this.newCarPlate.setValue('');
+        this.cdr.markForCheck();
+      } catch (error) {
+        console.error('Error adding vehicle:', error);
       }
     } else {
       this.licensePlateError.set('Invalid license plate format');
     }
   }
-  
-  removeCar(id: number) {
-    this.cars = this.cars.filter(car => car.id !== id);
-    
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      parsedData.cars = this.cars;
-      localStorage.setItem('userData', JSON.stringify(parsedData));
+
+  async removeCar(id: number) {
+    try {
+      await this.dataService.deleteVehicle(id);
+
+      this.cars = await this.dataService.getUserVehicles();
+      this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error removing vehicle:', error);
     }
   }
-  
+
   onLicensePlateInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = input.value.toUpperCase();
-    
+
     if (value.length === 2 && !value.includes(' ')) {
       value += ' ';
-    } else if (value.length === 5 && value[2] === ' ' && !value.includes(' ', 3)) {
+    } else if (
+      value.length === 5 &&
+      value[2] === ' ' &&
+      !value.includes(' ', 3)
+    ) {
       value += ' ';
     }
-    
+
     this.newCarPlate.setValue(value);
     this.validateLicensePlate();
   }

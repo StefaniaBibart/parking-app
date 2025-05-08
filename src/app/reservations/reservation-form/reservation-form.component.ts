@@ -3,74 +3,84 @@ import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DataService } from '../../shared/services/data.service';
+import { Vehicle } from '../../shared/models/vehicle.model';
 
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
   imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './reservation-form.component.html',
-  styleUrls: ['./reservation-form.component.css']
+  styleUrls: ['./reservation-form.component.css'],
 })
 export class ReservationFormComponent implements OnInit {
   selectedDate: Date | null = null;
   minDate = new Date();
   maxDate = new Date(new Date().setMonth(new Date().getMonth() + 2));
-  
-  userVehicles: any[] = [];
-  
+
+  userVehicles: Vehicle[] = [];
+
   selectedVehicleId: number | null = null;
   isEditing = false;
   editingReservationId: number | null = null;
-  
-  constructor(private router: Router) {}
-  
-  ngOnInit() {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      if (parsedData.cars && Array.isArray(parsedData.cars)) {
-        this.userVehicles = parsedData.cars;
+
+  constructor(
+    private router: Router,
+    private dataService: DataService,
+  ) {}
+
+  async ngOnInit() {
+    try {
+      this.userVehicles = await this.dataService.getUserVehicles();
+
+      const tempData = await this.dataService.getTemporaryReservationData();
+
+      if (tempData.editingReservationId) {
+        this.isEditing = true;
+        this.editingReservationId = tempData.editingReservationId;
       }
-    }
-    
-    const editingId = localStorage.getItem('editingReservationId');
-    if (editingId) {
-      this.isEditing = true;
-      this.editingReservationId = parseInt(editingId);
-    }
-    
-    const dateStr = localStorage.getItem('reservationDate');
-    if (dateStr) {
-      this.selectedDate = new Date(dateStr);
-    }
-    
-    const vehicleId = localStorage.getItem('reservationVehicleId');
-    if (vehicleId) {
-      this.selectedVehicleId = parseInt(vehicleId);
+
+      if (tempData.reservationDate) {
+        this.selectedDate = new Date(tempData.reservationDate);
+      }
+
+      if (tempData.reservationVehicleId) {
+        this.selectedVehicleId = tempData.reservationVehicleId;
+      }
+    } catch (error) {
+      console.error('Error initializing reservation form:', error);
     }
   }
-  
+
   onDateSelected(date: Date) {
     this.selectedDate = date;
   }
-  
+
   selectVehicle(vehicleId: number) {
     this.selectedVehicleId = vehicleId;
   }
-  
-  proceedToSpotSelection() {
+
+  async proceedToSpotSelection() {
     if (this.selectedDate && this.selectedVehicleId) {
-      localStorage.setItem('reservationDate', this.selectedDate.toISOString());
-      localStorage.setItem('reservationVehicleId', this.selectedVehicleId.toString());
-      
-      if (this.isEditing && this.editingReservationId) {
-        localStorage.setItem('editingReservationId', this.editingReservationId.toString());
+      try {
+        await this.dataService.storeTemporaryReservationData({
+          reservationDate: this.selectedDate.toISOString(),
+          reservationVehicleId: this.selectedVehicleId,
+        });
+
+        if (this.isEditing && this.editingReservationId) {
+          await this.dataService.storeTemporaryReservationData({
+            editingReservationId: this.editingReservationId,
+          });
+        }
+
+        this.router.navigate(['/select-spot']);
+      } catch (error) {
+        console.error('Error storing temporary reservation data:', error);
       }
-      
-      this.router.navigate(['/select-spot']);
     }
   }
-  
+
   addNewVehicle() {
     this.router.navigate(['/profile'], { queryParams: { addVehicle: true } });
   }

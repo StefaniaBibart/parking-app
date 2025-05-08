@@ -59,43 +59,67 @@
   position: relative;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-text-field-wrapper {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-text-field-wrapper {
   background-color: white !important;
   border-radius: 4px !important;
   padding: 0 !important;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mdc-line-ripple {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mdc-line-ripple {
   display: none;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-flex {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-flex {
   padding: 0 10px !important;
   height: 48px;
   border-radius: 4px;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-infix {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-infix {
   padding: 12px 0 !important;
   width: auto;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-floating-label {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-floating-label {
   display: none;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill input.mat-mdc-input-element {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  input.mat-mdc-input-element {
   color: rgba(0, 0, 0, 0.87) !important;
   font-size: 16px;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-icon-prefix {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-icon-prefix {
   color: var(--primary);
   margin-right: 10px;
 }
 
 /* Fix error message display */
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-subscript-wrapper {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-subscript-wrapper {
   padding: 0 !important;
   position: absolute !important;
   bottom: -20px !important;
@@ -106,8 +130,14 @@
   display: block !important;
 }
 
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-hint,
-::ng-deep .login-form .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-error {
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-hint,
+::ng-deep
+  .login-form
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-error {
   font-size: 12px !important;
   display: block !important;
   position: static !important;

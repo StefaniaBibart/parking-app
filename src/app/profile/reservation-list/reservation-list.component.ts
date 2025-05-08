@@ -2,96 +2,89 @@ import { Component, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
-interface Reservation {
-  id: number;
-  date: Date;
-  spot: string;
-  vehicle: string;
-  vehicleType: string;
-}
+import { DataService } from '../../shared/services/data.service';
+import { Reservation } from '../../shared/models/reservation.model';
 
 @Component({
   selector: 'app-reservation-list',
   standalone: true,
   imports: [MaterialModule, CommonModule],
   templateUrl: './reservation-list.component.html',
-  styleUrls: ['./reservation-list.component.css']
+  styleUrls: ['./reservation-list.component.css'],
 })
 export class ReservationListComponent implements OnInit {
   activeTab = 'upcoming';
-  
+
   upcomingReservations: Reservation[] = [];
   pastReservations: Reservation[] = [];
-  
-  constructor(private router: Router) {}
-  
-  ngOnInit() {
-    this.loadReservations();
+
+  constructor(
+    private router: Router,
+    private dataService: DataService,
+  ) {}
+
+  async ngOnInit() {
+    await this.loadReservations();
   }
-  
-  loadReservations() {
-    const storedReservations = localStorage.getItem('userReservations');
-    
-    if (storedReservations) {
-      const reservations: Reservation[] = JSON.parse(storedReservations);
-      
-      reservations.forEach(res => {
-        res.date = new Date(res.date);
-      });
-      
-      const now = new Date();
-      
-      this.upcomingReservations = reservations.filter(res => new Date(res.date) >= now)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      
-      this.pastReservations = reservations.filter(res => new Date(res.date) < now)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  async loadReservations() {
+    try {
+      this.upcomingReservations =
+        await this.dataService.getUpcomingReservations();
+      this.pastReservations = await this.dataService.getPastReservations();
+    } catch (error) {
+      console.error('Error loading reservations:', error);
     }
   }
-  
+
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
-  
-  cancelReservation(id: number) {
-    this.upcomingReservations = this.upcomingReservations.filter(res => res.id !== id);
-    
-    const allReservations = [...this.upcomingReservations, ...this.pastReservations];
-    localStorage.setItem('userReservations', JSON.stringify(allReservations));
+
+  formatDate(date: Date | string): string {
+    const d = new Date(date);
+    return d.toLocaleDateString();
   }
-  
-  editReservation(reservation: Reservation) {
-    localStorage.setItem('editingReservationId', reservation.id.toString());
-    
-    localStorage.setItem('reservationDate', reservation.date.toISOString());
-    
-    let vehicleFound = false;
-    
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      if (parsedData.cars && Array.isArray(parsedData.cars)) {
-        const vehicle = parsedData.cars.find((car: any) => car.plate === reservation.vehicle);
-        if (vehicle) {
-          localStorage.setItem('reservationVehicleId', vehicle.id.toString());
-          vehicleFound = true;
-        }
+
+  async deleteReservation(id: number) {
+    try {
+      await this.dataService.deleteReservation(id);
+      await this.loadReservations();
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+    }
+  }
+
+  async editReservation(reservation: Reservation) {
+    try {
+      const vehicles = await this.dataService.getUserVehicles();
+      const vehicle = vehicles.find((v) => v.plate === reservation.vehicle);
+
+      if (vehicle) {
+        await this.dataService.storeTemporaryReservationData({
+          editingReservationId: reservation.id,
+          reservationDate:
+            reservation.date instanceof Date
+              ? reservation.date.toISOString()
+              : reservation.date.toString(),
+          reservationVehicleId: vehicle.id,
+        });
+      } else {
+        console.warn('Vehicle not found in user profile:', reservation.vehicle);
       }
+
+      this.router.navigate(['/new-reservation']);
+    } catch (error) {
+      console.error('Error preparing reservation for editing:', error);
     }
-    
-    if (!vehicleFound) {
-      console.warn('Vehicle not found in user profile:', reservation.vehicle);
-    }
-    
-    this.router.navigate(['/new-reservation']);
   }
-  
-  createNewReservation() {
-    localStorage.removeItem('editingReservationId');
-    localStorage.removeItem('reservationDate');
-    localStorage.removeItem('reservationVehicleId');
-    
-    this.router.navigate(['/new-reservation']);
+
+  async createNewReservation() {
+    try {
+      await this.dataService.clearTemporaryReservationData();
+      this.router.navigate(['/new-reservation']);
+    } catch (error) {
+      console.error('Error clearing temporary reservation data:', error);
+    }
   }
 }

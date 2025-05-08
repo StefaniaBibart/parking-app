@@ -48,7 +48,9 @@
   position: relative;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-text-field-wrapper {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-text-field-wrapper {
   background-color: white !important;
   border-radius: 4px !important;
   padding: 0 !important;
@@ -58,33 +60,45 @@
   display: none;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-flex {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-flex {
   padding: 0 10px !important;
   height: 48px;
   border-radius: 4px;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-infix {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-infix {
   padding: 12px 0 !important;
   width: auto;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-floating-label {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-floating-label {
   display: none;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill input.mat-mdc-input-element {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  input.mat-mdc-input-element {
   color: rgba(0, 0, 0, 0.87) !important;
   font-size: 16px;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-icon-prefix {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-icon-prefix {
   color: var(--primary);
   margin-right: 10px;
 }
 
 /* Fix error message display */
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-subscript-wrapper {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-subscript-wrapper {
   padding: 0 !important;
   position: absolute !important;
   bottom: -20px !important;
@@ -95,8 +109,12 @@
   display: block !important;
 }
 
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-hint,
-::ng-deep .mat-mdc-form-field.mat-form-field-appearance-fill .mat-mdc-form-field-error {
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-hint,
+::ng-deep
+  .mat-mdc-form-field.mat-form-field-appearance-fill
+  .mat-mdc-form-field-error {
   font-size: 12px !important;
   display: block !important;
   position: static !important;
