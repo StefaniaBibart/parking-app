@@ -12,6 +12,7 @@ export abstract class DataService {
   protected abstract clearAllData(): Promise<void>;
 
   abstract getReservations(): Promise<Reservation[]>;
+  abstract getAllReservations(): Promise<Reservation[]>;
   abstract addReservation(reservation: Reservation): Promise<void>;
   abstract updateReservation(reservation: Reservation): Promise<void>;
   abstract deleteReservation(id: number): Promise<void>;

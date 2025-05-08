@@ -162,12 +162,12 @@ export class FirebaseDataService extends DataService {
       return allReservations
         .filter((res) => new Date(res.date) >= now)
         .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
     } catch (error) {
       console.error(
         'Error getting upcoming reservations from Firebase:',
-        error,
+        error
       );
       return [];
     }
@@ -181,7 +181,7 @@ export class FirebaseDataService extends DataService {
       return allReservations
         .filter((res) => new Date(res.date) < now)
         .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
     } catch (error) {
       console.error('Error getting past reservations from Firebase:', error);
@@ -205,7 +205,7 @@ export class FirebaseDataService extends DataService {
     } catch (error) {
       console.error(
         'Error storing temporary reservation data in Firebase:',
-        error,
+        error
       );
       throw error;
     }
@@ -224,7 +224,7 @@ export class FirebaseDataService extends DataService {
     } catch (error) {
       console.error(
         'Error getting temporary reservation data from Firebase:',
-        error,
+        error
       );
       return {};
     }
@@ -238,7 +238,7 @@ export class FirebaseDataService extends DataService {
     } catch (error) {
       console.error(
         'Error clearing temporary reservation data from Firebase:',
-        error,
+        error
       );
       throw error;
     }
@@ -378,6 +378,38 @@ export class FirebaseDataService extends DataService {
     } catch (error) {
       console.error('Error deleting user from Firebase:', error);
       throw error;
+    }
+  }
+
+  async getAllReservations(): Promise<Reservation[]> {
+    try {
+      const path = this.reservationsPath;
+      const data = await this.getData(path);
+
+      if (!data) return [];
+
+      const allReservations: Reservation[] = [];
+
+      Object.keys(data).forEach((userId) => {
+        const userReservations = data[userId];
+        if (userReservations) {
+          const reservationsArray = Array.isArray(userReservations)
+            ? userReservations
+            : Object.values(userReservations);
+
+          reservationsArray.forEach((res: any) => {
+            allReservations.push({
+              ...res,
+              date: res.date ? new Date(res.date) : null,
+            });
+          });
+        }
+      });
+
+      return allReservations;
+    } catch (error) {
+      console.error('Error getting all reservations from Firebase:', error);
+      return [];
     }
   }
 }

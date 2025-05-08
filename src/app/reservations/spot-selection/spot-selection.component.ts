@@ -37,10 +37,7 @@ export class SpotSelectionComponent implements OnInit {
     { id: 'B11', available: true },
   ];
 
-  constructor(
-    private router: Router,
-    private dataService: DataService,
-  ) {}
+  constructor(private router: Router, private dataService: DataService) {}
 
   async ngOnInit() {
     try {
@@ -60,7 +57,7 @@ export class SpotSelectionComponent implements OnInit {
 
       if (tempData.reservationVehicleId) {
         const vehicle = this.userVehicles.find(
-          (v) => v.id === tempData.reservationVehicleId,
+          (v) => v.id === tempData.reservationVehicleId
         );
         if (vehicle) {
           this.selectedVehicle = vehicle.plate;
@@ -84,7 +81,7 @@ export class SpotSelectionComponent implements OnInit {
       try {
         const reservations = await this.dataService.getReservations();
         const editingReservation = reservations.find(
-          (r) => r.id === this.editingReservationId,
+          (r) => r.id === this.editingReservationId
         );
 
         if (editingReservation) {
@@ -92,7 +89,7 @@ export class SpotSelectionComponent implements OnInit {
 
           if (editingReservation.vehicle) {
             const vehicle = this.userVehicles.find(
-              (v) => v.plate === editingReservation.vehicle,
+              (v) => v.plate === editingReservation.vehicle
             );
             if (vehicle) {
               await this.dataService.storeTemporaryReservationData({
@@ -110,7 +107,7 @@ export class SpotSelectionComponent implements OnInit {
   async updateAvailableSpots() {
     if (this.selectedDate) {
       try {
-        const reservations = await this.dataService.getReservations();
+        const reservations = await this.dataService.getAllReservations();
 
         const selectedDateStr = this.selectedDate.toDateString();
         const reservationsOnSelectedDate = reservations.filter((res) => {
@@ -122,7 +119,7 @@ export class SpotSelectionComponent implements OnInit {
 
         this.parkingSpots.forEach((spot) => {
           spot.available = !reservationsOnSelectedDate.some(
-            (res) => res.spot === spot.id,
+            (res) => res.spot === spot.id
           );
         });
       } catch (error) {

@@ -9,6 +9,7 @@ export class LocalstorageDataService extends DataService {
   private prefix = 'app_data_';
   private reservationsKey = 'userReservations';
   private tempReservationKey = 'temp_reservation_data';
+  private allReservationsKey = 'all_reservations';
 
   constructor() {
     super();
@@ -101,6 +102,13 @@ export class LocalstorageDataService extends DataService {
       const reservations = await this.getReservations();
       reservations.push(reservation);
       localStorage.setItem(this.reservationsKey, JSON.stringify(reservations));
+
+      const allReservations = await this.getAllReservations();
+      allReservations.push(reservation);
+      localStorage.setItem(
+        this.allReservationsKey,
+        JSON.stringify(allReservations)
+      );
     } catch (error) {
       console.error('Error adding reservation to localStorage:', error);
       throw error;
@@ -116,8 +124,21 @@ export class LocalstorageDataService extends DataService {
         reservations[index] = reservation;
         localStorage.setItem(
           this.reservationsKey,
-          JSON.stringify(reservations),
+          JSON.stringify(reservations)
         );
+
+        const allReservations = await this.getAllReservations();
+        const globalIndex = allReservations.findIndex(
+          (r) => r.id === reservation.id
+        );
+
+        if (globalIndex !== -1) {
+          allReservations[globalIndex] = reservation;
+          localStorage.setItem(
+            this.allReservationsKey,
+            JSON.stringify(allReservations)
+          );
+        }
       } else {
         throw new Error(`Reservation with id ${reservation.id} not found`);
       }
@@ -133,7 +154,16 @@ export class LocalstorageDataService extends DataService {
       const filteredReservations = reservations.filter((r) => r.id !== id);
       localStorage.setItem(
         this.reservationsKey,
-        JSON.stringify(filteredReservations),
+        JSON.stringify(filteredReservations)
+      );
+
+      const allReservations = await this.getAllReservations();
+      const filteredAllReservations = allReservations.filter(
+        (r) => r.id !== id
+      );
+      localStorage.setItem(
+        this.allReservationsKey,
+        JSON.stringify(filteredAllReservations)
       );
     } catch (error) {
       console.error('Error deleting reservation from localStorage:', error);
@@ -149,12 +179,12 @@ export class LocalstorageDataService extends DataService {
       return reservations
         .filter((res) => new Date(res.date) >= now)
         .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
     } catch (error) {
       console.error(
         'Error getting upcoming reservations from localStorage:',
-        error,
+        error
       );
       return [];
     }
@@ -168,12 +198,12 @@ export class LocalstorageDataService extends DataService {
       return reservations
         .filter((res) => new Date(res.date) < now)
         .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
     } catch (error) {
       console.error(
         'Error getting past reservations from localStorage:',
-        error,
+        error
       );
       return [];
     }
@@ -189,7 +219,7 @@ export class LocalstorageDataService extends DataService {
       const updatedData = { ...existingData, ...data };
       localStorage.setItem(
         this.tempReservationKey,
-        JSON.stringify(updatedData),
+        JSON.stringify(updatedData)
       );
     } catch (error) {
       console.error('Error storing temporary reservation data:', error);
@@ -353,6 +383,29 @@ export class LocalstorageDataService extends DataService {
     } catch (error) {
       console.error('Error deleting user from localStorage:', error);
       throw error;
+    }
+  }
+
+  async getAllReservations(): Promise<Reservation[]> {
+    try {
+      const allReservationsStr = localStorage.getItem(this.allReservationsKey);
+      if (!allReservationsStr) {
+        const userReservations = await this.getReservations();
+        localStorage.setItem(
+          this.allReservationsKey,
+          JSON.stringify(userReservations)
+        );
+        return userReservations;
+      }
+
+      const allReservations: Reservation[] = JSON.parse(allReservationsStr);
+      return allReservations.map((res) => ({
+        ...res,
+        date: new Date(res.date),
+      }));
+    } catch (error) {
+      console.error('Error getting all reservations from localStorage:', error);
+      return [];
     }
   }
 }
