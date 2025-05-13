@@ -1,6 +1,7 @@
 export interface Reservation {
   id: number;
-  date: Date | string;
+  startDate: Date | string;
+  endDate: Date | string;
   spot: string;
   vehicle: string;
 }

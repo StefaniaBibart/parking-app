@@ -4,7 +4,7 @@
   <div class="step-indicator">
     <div class="step active">
       <div class="step-number">1</div>
-      <div class="step-label">Select Date</div>
+      <div class="step-label">Select Dates</div>
     </div>
     <div class="step-connector"></div>
     <div class="step">
@@ -14,27 +14,50 @@
   </div>
 
   <section class="date-selection">
-    <h2>Select a date for your reservation</h2>
-    <div class="calendar-container">
-      <mat-calendar
-        [selected]="selectedDate"
-        [minDate]="minDate"
-        [maxDate]="maxDate"
-        (selectedChange)="onDateSelected($event)"
-      >
-      </mat-calendar>
+    <h2>Select dates for your reservation</h2>
+    <div class="date-range-container">
+      <mat-form-field appearance="fill" class="date-range-field">
+        <mat-label>Enter a date range</mat-label>
+        <mat-date-range-input
+          [formGroup]="dateRange"
+          [rangePicker]="picker"
+          [min]="minDate"
+          [max]="maxDate"
+        >
+          <input
+            matStartDate
+            formControlName="start"
+            placeholder="Start date"
+          />
+          <input matEndDate formControlName="end" placeholder="End date" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="picker"
+        ></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
     </div>
 
-    <div class="selected-date-display" *ngIf="selectedDate">
+    <div
+      class="selected-date-display"
+      *ngIf="dateRange.get('start')?.value && dateRange.get('end')?.value"
+    >
       <mat-icon>event</mat-icon>
-      <span
-        >Selected date:
-        <strong>{{ selectedDate | date: "fullDate" }}</strong></span
-      >
+      <span>
+        Selected dates:
+        <strong
+          >{{ dateRange.get("start")?.value | date : "mediumDate" }} -
+          {{ dateRange.get("end")?.value | date : "mediumDate" }}</strong
+        >
+      </span>
     </div>
   </section>
 
-  <section class="vehicle-selection" *ngIf="selectedDate">
+  <section
+    class="vehicle-selection"
+    *ngIf="dateRange.get('start')?.value && dateRange.get('end')?.value"
+  >
     <h2>Select your vehicle</h2>
 
     <div *ngIf="userVehicles.length === 0" class="no-vehicles-message">
@@ -73,7 +96,7 @@
     <button
       mat-raised-button
       color="primary"
-      [disabled]="!selectedDate || !selectedVehicleId"
+      [disabled]="!dateRange.valid || !selectedVehicleId"
       (click)="proceedToSpotSelection()"
     >
       {{ isEditing ? "Continue to Update" : "Continue to Spot Selection" }}

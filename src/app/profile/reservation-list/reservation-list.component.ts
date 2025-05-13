@@ -18,10 +18,7 @@ export class ReservationListComponent implements OnInit {
   upcomingReservations: Reservation[] = [];
   pastReservations: Reservation[] = [];
 
-  constructor(
-    private router: Router,
-    private dataService: DataService,
-  ) {}
+  constructor(private router: Router, private dataService: DataService) {}
 
   async ngOnInit() {
     await this.loadReservations();
@@ -63,10 +60,14 @@ export class ReservationListComponent implements OnInit {
       if (vehicle) {
         await this.dataService.storeTemporaryReservationData({
           editingReservationId: reservation.id,
-          reservationDate:
-            reservation.date instanceof Date
-              ? reservation.date.toISOString()
-              : reservation.date.toString(),
+          reservationStartDate:
+            reservation.startDate instanceof Date
+              ? reservation.startDate.toISOString()
+              : reservation.startDate.toString(),
+          reservationEndDate:
+            reservation.endDate instanceof Date
+              ? reservation.endDate.toISOString()
+              : reservation.endDate.toString(),
           reservationVehicleId: vehicle.id,
         });
       } else {
@@ -86,5 +87,15 @@ export class ReservationListComponent implements OnInit {
     } catch (error) {
       console.error('Error clearing temporary reservation data:', error);
     }
+  }
+
+  isSameDay(date1: Date | string, date2: Date | string): boolean {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
   }
 }
