@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { DataService } from '../../shared/services/data.service';
 import { Vehicle } from '../../shared/models/vehicle.model';
@@ -14,7 +19,11 @@ import { Vehicle } from '../../shared/models/vehicle.model';
   styleUrls: ['./reservation-form.component.css'],
 })
 export class ReservationFormComponent implements OnInit {
-  selectedDate: Date | null = null;
+  dateRange = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
+
   minDate = new Date();
   maxDate = new Date(new Date().setMonth(new Date().getMonth() + 2));
 
@@ -24,10 +33,7 @@ export class ReservationFormComponent implements OnInit {
   isEditing = false;
   editingReservationId: number | null = null;
 
-  constructor(
-    private router: Router,
-    private dataService: DataService,
-  ) {}
+  constructor(private router: Router, private dataService: DataService) {}
 
   async ngOnInit() {
     try {
@@ -40,8 +46,16 @@ export class ReservationFormComponent implements OnInit {
         this.editingReservationId = tempData.editingReservationId;
       }
 
-      if (tempData.reservationDate) {
-        this.selectedDate = new Date(tempData.reservationDate);
+      if (tempData.reservationStartDate) {
+        this.dateRange
+          .get('start')
+          ?.setValue(new Date(tempData.reservationStartDate));
+      }
+
+      if (tempData.reservationEndDate) {
+        this.dateRange
+          .get('end')
+          ?.setValue(new Date(tempData.reservationEndDate));
       }
 
       if (tempData.reservationVehicleId) {
@@ -52,19 +66,19 @@ export class ReservationFormComponent implements OnInit {
     }
   }
 
-  onDateSelected(date: Date) {
-    this.selectedDate = date;
-  }
-
   selectVehicle(vehicleId: number) {
     this.selectedVehicleId = vehicleId;
   }
 
   async proceedToSpotSelection() {
-    if (this.selectedDate && this.selectedVehicleId) {
+    const startDate = this.dateRange.get('start')?.value;
+    const endDate = this.dateRange.get('end')?.value;
+
+    if (startDate && endDate && this.selectedVehicleId) {
       try {
         await this.dataService.storeTemporaryReservationData({
-          reservationDate: this.selectedDate.toISOString(),
+          reservationStartDate: startDate.toISOString(),
+          reservationEndDate: endDate.toISOString(),
           reservationVehicleId: this.selectedVehicleId,
         });
 

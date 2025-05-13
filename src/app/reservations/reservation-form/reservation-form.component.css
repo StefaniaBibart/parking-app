@@ -200,3 +200,17 @@ h2 {
   margin: 0 0 20px 0;
   color: var(--text-secondary);
 }
+
+.date-range-container {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.date-range-field {
+  width: 100%;
+}
+
+mat-form-field {
+  background-color: var(--background);
+  border-radius: 8px;
+}

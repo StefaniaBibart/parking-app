@@ -2,7 +2,7 @@
   <div class="step-indicator">
     <div class="step">
       <div class="step-number">1</div>
-      <div class="step-label">Select Date</div>
+      <div class="step-label">Select Dates</div>
     </div>
     <div class="step-connector"></div>
     <div class="step active">
@@ -13,7 +13,10 @@
 
   <div class="reservation-date">
     <mat-icon>calendar_today</mat-icon>
-    <span>{{ selectedDate | date: "EEEE, MMMM d, y" }}</span>
+    <span
+      >{{ selectedStartDate | date : "MMM d" }} -
+      {{ selectedEndDate | date : "MMM d, y" }}</span
+    >
   </div>
 
   <section class="vehicle-selection">

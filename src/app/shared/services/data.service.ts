@@ -21,13 +21,15 @@ export abstract class DataService {
 
   abstract storeTemporaryReservationData(data: {
     editingReservationId?: number;
-    reservationDate?: string;
+    reservationStartDate?: string;
+    reservationEndDate?: string;
     reservationVehicleId?: number;
   }): Promise<void>;
 
   abstract getTemporaryReservationData(): Promise<{
     editingReservationId?: number;
-    reservationDate?: string;
+    reservationStartDate?: string;
+    reservationEndDate?: string;
     reservationVehicleId?: number;
   }>;
 

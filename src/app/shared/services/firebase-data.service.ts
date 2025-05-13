@@ -12,14 +12,16 @@ import {
   remove,
   query,
   orderByChild,
+  child,
 } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
 @Injectable()
 export class FirebaseDataService extends DataService {
   private reservationsPath = 'reservations';
-  private tempDataPath = 'tempReservationData';
+  private tempDataPath = 'temp_reservation_data';
   private usersPath = 'users';
+  private vehiclesPath = 'vehicles';
 
   constructor() {
     super();
@@ -95,7 +97,8 @@ export class FirebaseDataService extends DataService {
 
       return reservationsArray.map((res: any) => ({
         ...res,
-        date: res.date ? new Date(res.date) : null,
+        startDate: res.startDate ? new Date(res.startDate) : null,
+        endDate: res.endDate ? new Date(res.endDate) : null,
       }));
     } catch (error) {
       console.error('Error getting reservations from Firebase:', error);
@@ -110,10 +113,14 @@ export class FirebaseDataService extends DataService {
 
       const reservationToStore = {
         ...reservation,
-        date:
-          reservation.date instanceof Date
-            ? reservation.date.toISOString()
-            : reservation.date,
+        startDate:
+          reservation.startDate instanceof Date
+            ? reservation.startDate.toLocaleString()
+            : reservation.startDate,
+        endDate:
+          reservation.endDate instanceof Date
+            ? reservation.endDate.toLocaleString()
+            : reservation.endDate,
       };
 
       await this.storeData(path, reservationToStore);
@@ -130,10 +137,14 @@ export class FirebaseDataService extends DataService {
 
       const reservationToStore = {
         ...reservation,
-        date:
-          reservation.date instanceof Date
-            ? reservation.date.toISOString()
-            : reservation.date,
+        startDate:
+          reservation.startDate instanceof Date
+            ? reservation.startDate.toLocaleString()
+            : reservation.startDate,
+        endDate:
+          reservation.endDate instanceof Date
+            ? reservation.endDate.toLocaleString()
+            : reservation.endDate,
       };
 
       await this.storeData(path, reservationToStore);
@@ -160,9 +171,10 @@ export class FirebaseDataService extends DataService {
       const now = new Date();
 
       return allReservations
-        .filter((res) => new Date(res.date) >= now)
+        .filter((res) => new Date(res.startDate) >= now)
         .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          (a, b) =>
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
         );
     } catch (error) {
       console.error(
@@ -179,9 +191,10 @@ export class FirebaseDataService extends DataService {
       const now = new Date();
 
       return allReservations
-        .filter((res) => new Date(res.date) < now)
+        .filter((res) => new Date(res.endDate) < now)
         .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          (a, b) =>
+            new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
         );
     } catch (error) {
       console.error('Error getting past reservations from Firebase:', error);
@@ -191,7 +204,8 @@ export class FirebaseDataService extends DataService {
 
   async storeTemporaryReservationData(data: {
     editingReservationId?: number;
-    reservationDate?: string;
+    reservationStartDate?: string;
+    reservationEndDate?: string;
     reservationVehicleId?: number;
   }): Promise<void> {
     try {
@@ -213,7 +227,8 @@ export class FirebaseDataService extends DataService {
 
   async getTemporaryReservationData(): Promise<{
     editingReservationId?: number;
-    reservationDate?: string;
+    reservationStartDate?: string;
+    reservationEndDate?: string;
     reservationVehicleId?: number;
   }> {
     try {
@@ -400,7 +415,8 @@ export class FirebaseDataService extends DataService {
           reservationsArray.forEach((res: any) => {
             allReservations.push({
               ...res,
-              date: res.date ? new Date(res.date) : null,
+              startDate: res.startDate ? new Date(res.startDate) : null,
+              endDate: res.endDate ? new Date(res.endDate) : null,
             });
           });
         }

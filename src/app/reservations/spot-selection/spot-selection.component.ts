@@ -18,7 +18,8 @@ export class SpotSelectionComponent implements OnInit {
   selectedVehicle: string = '';
   selectedVehicleDetails: Vehicle | null = null;
   selectedSpot: string = '';
-  selectedDate: Date | null = null;
+  selectedStartDate: Date | null = null;
+  selectedEndDate: Date | null = null;
   isEditing = false;
   editingReservationId: number | null = null;
 
@@ -51,8 +52,12 @@ export class SpotSelectionComponent implements OnInit {
         await this.loadEditingReservation();
       }
 
-      if (tempData.reservationDate) {
-        this.selectedDate = new Date(tempData.reservationDate);
+      if (tempData.reservationStartDate) {
+        this.selectedStartDate = new Date(tempData.reservationStartDate);
+      }
+
+      if (tempData.reservationEndDate) {
+        this.selectedEndDate = new Date(tempData.reservationEndDate);
       }
 
       if (tempData.reservationVehicleId) {
@@ -65,7 +70,11 @@ export class SpotSelectionComponent implements OnInit {
         }
       }
 
-      if (!this.selectedDate || !this.selectedVehicle) {
+      if (
+        !this.selectedStartDate ||
+        !this.selectedEndDate ||
+        !this.selectedVehicle
+      ) {
         this.router.navigate(['/new-reservation']);
         return;
       }
@@ -105,22 +114,36 @@ export class SpotSelectionComponent implements OnInit {
   }
 
   async updateAvailableSpots() {
-    if (this.selectedDate) {
+    if (this.selectedStartDate && this.selectedEndDate) {
       try {
         const reservations = await this.dataService.getAllReservations();
 
-        const selectedDateStr = this.selectedDate.toDateString();
-        const reservationsOnSelectedDate = reservations.filter((res) => {
-          if (this.isEditing && res.id === this.editingReservationId) {
-            return false;
-          }
-          return new Date(res.date).toDateString() === selectedDateStr;
-        });
+        // Reset all spots to available
+        this.parkingSpots.forEach((spot) => (spot.available = true));
 
-        this.parkingSpots.forEach((spot) => {
-          spot.available = !reservationsOnSelectedDate.some(
-            (res) => res.spot === spot.id
+        // Check each reservation for overlap with our selected date range
+        reservations.forEach((res) => {
+          // Skip the current reservation if we're editing
+          if (this.isEditing && res.id === this.editingReservationId) {
+            return;
+          }
+
+          const resStartDate = new Date(res.startDate);
+          const resEndDate = new Date(res.endDate);
+
+          // Check if there's an overlap between the reservation and our selected dates
+          const overlap = !(
+            this.selectedEndDate! < resStartDate ||
+            this.selectedStartDate! > resEndDate
           );
+
+          if (overlap) {
+            // Mark the spot as unavailable
+            const spot = this.parkingSpots.find((s) => s.id === res.spot);
+            if (spot) {
+              spot.available = false;
+            }
+          }
         });
       } catch (error) {
         console.error('Error updating available spots:', error);
@@ -138,7 +161,8 @@ export class SpotSelectionComponent implements OnInit {
   async bookPlace() {
     if (
       !this.selectedSpot ||
-      !this.selectedDate ||
+      !this.selectedStartDate ||
+      !this.selectedEndDate ||
       !this.selectedVehicleDetails
     ) {
       return;
@@ -150,7 +174,8 @@ export class SpotSelectionComponent implements OnInit {
           this.isEditing && this.editingReservationId
             ? this.editingReservationId
             : Date.now(),
-        date: this.selectedDate,
+        startDate: this.selectedStartDate,
+        endDate: this.selectedEndDate,
         spot: this.selectedSpot,
         vehicle: this.selectedVehicle,
       };
