@@ -16,6 +16,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   imports: [
@@ -36,6 +37,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatTooltipModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
+    MatDialogModule,
   ],
   exports: [
     MatButtonModule,
@@ -54,6 +56,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatBadgeModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    ReactiveFormsModule,
+    MatDialogModule,
   ],
 })
 export class MaterialModule {}

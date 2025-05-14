@@ -96,7 +96,12 @@
     <button
       mat-raised-button
       color="primary"
-      [disabled]="!dateRange.valid || !selectedVehicleId"
+      [disabled]="
+        !dateRange.valid ||
+        !selectedVehicleId ||
+        !dateRange.get('start')?.value ||
+        !dateRange.get('end')?.value
+      "
       (click)="proceedToSpotSelection()"
     >
       {{ isEditing ? "Continue to Update" : "Continue to Spot Selection" }}

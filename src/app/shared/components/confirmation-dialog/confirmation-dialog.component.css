@@ -1,0 +1,23 @@
+h2 {
+  color: var(--text);
+  margin-top: 0;
+}
+
+p {
+  color: var(--text);
+}
+
+mat-dialog-actions {
+  margin-bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button-container {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  margin-left: 0 !important;
+}
