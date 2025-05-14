@@ -5,6 +5,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../shared/services/data.service';
 import { Vehicle } from '../../shared/models/vehicle.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-vehicle-management',
@@ -23,6 +25,7 @@ export class VehicleManagementComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private fb: FormBuilder,
+    private dialog: MatDialog
   ) {
     this.vehicleForm = this.fb.group({
       plate: ['', [Validators.required]],
@@ -52,12 +55,26 @@ export class VehicleManagementComponent implements OnInit {
   }
 
   async deleteVehicle(id: number) {
-    try {
-      await this.dataService.deleteVehicle(id);
-      await this.loadVehicles();
-    } catch (error) {
-      console.error('Error deleting vehicle:', error);
-    }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Delete Vehicle',
+        message: 'Are you sure you want to delete this vehicle?',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          await this.dataService.deleteVehicle(id);
+          await this.loadVehicles();
+        } catch (error) {
+          console.error('Error deleting vehicle:', error);
+        }
+      }
+    });
   }
 
   async saveVehicle() {

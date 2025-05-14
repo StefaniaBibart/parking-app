@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DataService } from '../../shared/services/data.service';
 import { Reservation } from '../../shared/models/reservation.model';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-reservation-list',
@@ -18,7 +20,11 @@ export class ReservationListComponent implements OnInit {
   upcomingReservations: Reservation[] = [];
   pastReservations: Reservation[] = [];
 
-  constructor(private router: Router, private dataService: DataService) {}
+  constructor(
+    private router: Router,
+    private dataService: DataService,
+    private dialog: MatDialog
+  ) {}
 
   async ngOnInit() {
     await this.loadReservations();
@@ -44,12 +50,26 @@ export class ReservationListComponent implements OnInit {
   }
 
   async deleteReservation(id: number) {
-    try {
-      await this.dataService.deleteReservation(id);
-      await this.loadReservations();
-    } catch (error) {
-      console.error('Error deleting reservation:', error);
-    }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Cancel Reservation',
+        message: 'Are you sure you want to cancel this reservation?',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          await this.dataService.deleteReservation(id);
+          await this.loadReservations();
+        } catch (error) {
+          console.error('Error deleting reservation:', error);
+        }
+      }
+    });
   }
 
   async editReservation(reservation: Reservation) {
