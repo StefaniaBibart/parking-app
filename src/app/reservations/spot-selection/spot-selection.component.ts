@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { DataService } from '../../shared/services/data.service';
 import { Reservation } from '../../shared/models/reservation.model';
 import { Vehicle } from '../../shared/models/vehicle.model';
+import { ConfigService } from '../../shared/services/config.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-spot-selection',
@@ -24,6 +26,9 @@ export class SpotSelectionComponent implements OnInit {
   editingReservationId: number | null = null;
 
   userVehicles: Vehicle[] = [];
+  userReservations: Reservation[] = [];
+
+  errorMessage: string = '';
 
   parkingSpots = [
     { id: 'A1', available: true },
@@ -38,11 +43,17 @@ export class SpotSelectionComponent implements OnInit {
     { id: 'B11', available: true },
   ];
 
-  constructor(private router: Router, private dataService: DataService) {}
+  constructor(
+    private router: Router,
+    private dataService: DataService,
+    private configService: ConfigService,
+    private snackBar: MatSnackBar
+  ) {}
 
   async ngOnInit() {
     try {
       this.userVehicles = await this.dataService.getUserVehicles();
+      this.userReservations = await this.dataService.getReservations();
 
       const tempData = await this.dataService.getTemporaryReservationData();
 
@@ -75,6 +86,15 @@ export class SpotSelectionComponent implements OnInit {
         !this.selectedEndDate ||
         !this.selectedVehicle
       ) {
+        this.router.navigate(['/new-reservation']);
+        return;
+      }
+
+      if (!(await this.validateDateSelection())) {
+        this.snackBar.open(this.errorMessage, 'Close', {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+        });
         this.router.navigate(['/new-reservation']);
         return;
       }
@@ -118,12 +138,9 @@ export class SpotSelectionComponent implements OnInit {
       try {
         const reservations = await this.dataService.getAllReservations();
 
-        // Reset all spots to available
         this.parkingSpots.forEach((spot) => (spot.available = true));
 
-        // Check each reservation for overlap with our selected date range
         reservations.forEach((res) => {
-          // Skip the current reservation if we're editing
           if (this.isEditing && res.id === this.editingReservationId) {
             return;
           }
@@ -131,20 +148,32 @@ export class SpotSelectionComponent implements OnInit {
           const resStartDate = new Date(res.startDate);
           const resEndDate = new Date(res.endDate);
 
-          // Check if there's an overlap between the reservation and our selected dates
           const overlap = !(
             this.selectedEndDate! < resStartDate ||
             this.selectedStartDate! > resEndDate
           );
 
           if (overlap) {
-            // Mark the spot as unavailable
             const spot = this.parkingSpots.find((s) => s.id === res.spot);
             if (spot) {
               spot.available = false;
             }
           }
         });
+
+        const allSpotsBooked = this.parkingSpots.every(
+          (spot) => !spot.available
+        );
+
+        if (allSpotsBooked) {
+          this.errorMessage =
+            'All parking spots are booked for the selected dates. Please choose different dates.';
+
+          // Optional: Navigate back to the reservation form
+          // setTimeout(() => {
+          //   this.router.navigate(['/new-reservation']);
+          // }, 1000);
+        }
       } catch (error) {
         console.error('Error updating available spots:', error);
       }
@@ -165,6 +194,14 @@ export class SpotSelectionComponent implements OnInit {
       !this.selectedEndDate ||
       !this.selectedVehicleDetails
     ) {
+      return;
+    }
+
+    if (!(await this.validateDateSelection())) {
+      this.snackBar.open(this.errorMessage, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar'],
+      });
       return;
     }
 
@@ -196,5 +233,70 @@ export class SpotSelectionComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/new-reservation']);
+  }
+
+  async validateDateSelection(): Promise<boolean> {
+    this.errorMessage = '';
+
+    if (!this.selectedStartDate || !this.selectedEndDate) {
+      this.errorMessage = 'Invalid date selection';
+      return false;
+    }
+
+    const start = new Date(this.selectedStartDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(this.selectedEndDate);
+    end.setHours(23, 59, 59, 999);
+
+    const existingReservations = this.userReservations.filter((res) => {
+      if (this.isEditing && res.id === this.editingReservationId) {
+        return false;
+      }
+
+      const resStart = new Date(res.startDate);
+      resStart.setHours(0, 0, 0, 0);
+
+      const resEnd = new Date(res.endDate);
+      resEnd.setHours(23, 59, 59, 999);
+
+      return !(end < resStart || start > resEnd);
+    });
+
+    if (existingReservations.length > 0) {
+      this.errorMessage =
+        'You already have a reservation during this period. Please select different dates.';
+      return false;
+    }
+
+    if (!this.configService.allowOverlappingReservations) {
+      await this.checkForOverlappingReservations(start, end);
+    }
+
+    return this.errorMessage === '';
+  }
+
+  async checkForOverlappingReservations(start: Date, end: Date): Promise<void> {
+    try {
+      const allReservations = await this.dataService.getAllReservations();
+
+      const overlappingReservations = allReservations.filter((res) => {
+        if (this.isEditing && res.id === this.editingReservationId) {
+          return false;
+        }
+
+        const resStart = new Date(res.startDate);
+        const resEnd = new Date(res.endDate);
+
+        return !(end < resStart || start > resEnd);
+      });
+
+      if (overlappingReservations.length > 0) {
+        this.errorMessage =
+          'These dates are already booked. Please select different dates.';
+      }
+    } catch (error) {
+      console.error('Error checking for overlapping reservations:', error);
+    }
   }
 }

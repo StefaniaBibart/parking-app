@@ -214,3 +214,32 @@ mat-form-field {
   background-color: var(--background);
   border-radius: 8px;
 }
+
+.date-error-message {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  color: #d32f2f;
+}
+
+.date-error-message mat-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.checking-availability {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.checking-availability mat-spinner {
+  margin-right: 10px;
+}
