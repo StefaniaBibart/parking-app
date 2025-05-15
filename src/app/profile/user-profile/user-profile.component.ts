@@ -220,7 +220,8 @@ export class UserProfileComponent implements OnInit {
       width: '350px',
       data: {
         title: 'Delete Vehicle',
-        message: 'Are you sure you want to delete this vehicle?',
+        message:
+          'Are you sure you want to delete this vehicle? All reservations made with this vehicle will also be deleted.',
         confirmButtonText: 'Yes',
         cancelButtonText: 'No',
       },

@@ -90,8 +90,26 @@ export class UserService {
       if (!user) throw new Error('No user logged in');
       if (!user.cars) throw new Error('User has no vehicles');
 
-      user.cars = user.cars.filter((v) => v.id !== id);
+      // Get the vehicle to be deleted
+      const vehicleToDelete = user.cars.find((v) => v.id === id);
 
+      if (!vehicleToDelete) {
+        throw new Error(`Vehicle with id ${id} not found`);
+      }
+
+      // Use the data service to delete associated reservations
+      // This assumes you have access to the dataService
+      const reservations = await this.dataService.getReservations();
+      const reservationsToDelete = reservations.filter(
+        (res) => res.vehicle === vehicleToDelete.plate
+      );
+
+      for (const reservation of reservationsToDelete) {
+        await this.dataService.deleteReservation(reservation.id);
+      }
+
+      // Now delete the vehicle
+      user.cars = user.cars.filter((v) => v.id !== id);
       await this.saveUserData(user);
     } catch (error) {
       console.error('Error deleting vehicle:', error);
