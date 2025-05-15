@@ -19,6 +19,11 @@
     >
   </div>
 
+  <div class="error-message" *ngIf="errorMessage">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
   <section class="vehicle-selection">
     <h2>Your selected vehicle</h2>
     <div class="selected-vehicle">
