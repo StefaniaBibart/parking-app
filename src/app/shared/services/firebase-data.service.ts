@@ -316,13 +316,32 @@ export class FirebaseDataService extends DataService {
   async deleteVehicle(id: number): Promise<void> {
     try {
       const userId = this.getCurrentUserId();
-      const path = `${this.usersPath}/${userId}/cars`;
+      const vehiclePath = `${this.usersPath}/${userId}/cars`;
 
+      // First, get the vehicle to be deleted
       const vehicles = await this.getUserVehicles();
+      const vehicleToDelete = vehicles.find((v) => v.id === id);
 
+      if (!vehicleToDelete) {
+        throw new Error(`Vehicle with id ${id} not found`);
+      }
+
+      // Get all reservations for this user
+      const reservations = await this.getReservations();
+
+      // Find reservations that use this vehicle
+      const reservationsToDelete = reservations.filter(
+        (res) => res.vehicle === vehicleToDelete.plate
+      );
+
+      // Delete each reservation that uses this vehicle
+      for (const reservation of reservationsToDelete) {
+        await this.deleteReservation(reservation.id);
+      }
+
+      // Now delete the vehicle
       const updatedVehicles = vehicles.filter((v) => v.id !== id);
-
-      await this.storeData(path, updatedVehicles);
+      await this.storeData(vehiclePath, updatedVehicles);
     } catch (error) {
       console.error('Error deleting vehicle from Firebase:', error);
       throw error;
