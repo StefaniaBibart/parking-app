@@ -8,6 +8,7 @@ import { Reservation } from '../../shared/models/reservation.model';
 import { Vehicle } from '../../shared/models/vehicle.model';
 import { ConfigService } from '../../shared/services/config.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ParkingSpot } from '../../shared/models/parking-spot.model';
 
 @Component({
   selector: 'app-spot-selection',
@@ -30,25 +31,20 @@ export class SpotSelectionComponent implements OnInit {
 
   errorMessage: string = '';
 
-  parkingSpots = [
-    { id: 'A1', available: true },
-    { id: 'A2', available: true },
-    { id: 'A3', available: true },
-    { id: 'A4', available: true },
-    { id: 'A5', available: true },
-    { id: 'B7', available: true },
-    { id: 'B8', available: true },
-    { id: 'B9', available: true },
-    { id: 'B10', available: true },
-    { id: 'B11', available: true },
-  ];
+  parkingSpots: ParkingSpot[] = [];
+
+  currentFloorIndex = 0;
+  visibleFloors: string[] = ['A', 'B'];
 
   constructor(
     private router: Router,
     private dataService: DataService,
     private configService: ConfigService,
     private snackBar: MatSnackBar
-  ) {}
+  ) {
+    this.parkingSpots = this.configService.generateParkingSpots();
+    this.updateVisibleFloors();
+  }
 
   async ngOnInit() {
     try {
@@ -298,5 +294,38 @@ export class SpotSelectionComponent implements OnInit {
     } catch (error) {
       console.error('Error checking for overlapping reservations:', error);
     }
+  }
+
+  getFloorSpots(floor: string): ParkingSpot[] {
+    return this.parkingSpots.filter((spot) => spot.floor === floor);
+  }
+
+  nextFloor() {
+    if (
+      this.currentFloorIndex <
+      this.configService.parkingLayout.floors.length - 2
+    ) {
+      this.currentFloorIndex += 2;
+      this.updateVisibleFloors();
+    }
+  }
+
+  previousFloor() {
+    if (this.currentFloorIndex > 0) {
+      this.currentFloorIndex -= 2;
+      this.updateVisibleFloors();
+    }
+  }
+
+  updateVisibleFloors() {
+    const allFloors = this.configService.parkingLayout.floors;
+    this.visibleFloors = [
+      allFloors[this.currentFloorIndex],
+      allFloors[this.currentFloorIndex + 1],
+    ];
+  }
+
+  getMaxFloorIndex(): number {
+    return this.configService.parkingLayout.floors.length - 2;
   }
 }
