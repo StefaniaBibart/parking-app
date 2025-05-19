@@ -143,18 +143,9 @@ export class ReservationFormComponent implements OnInit {
 
   async checkAvailableSpots(startDate: Date, endDate: Date): Promise<string[]> {
     try {
-      const allSpots = [
-        'A1',
-        'A2',
-        'A3',
-        'A4',
-        'A5',
-        'B7',
-        'B8',
-        'B9',
-        'B10',
-        'B11',
-      ];
+      const allSpots = this.configService
+        .generateParkingSpots()
+        .map((spot) => spot.id);
 
       const reservations = await this.dataService.getAllReservations();
 

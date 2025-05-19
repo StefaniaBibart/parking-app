@@ -37,9 +37,10 @@
   <section class="spot-selection">
     <h2>Choose a parking spot <mat-icon>info</mat-icon></h2>
     <div class="parking-layout">
+      <!-- First visible floor -->
       <div class="parking-row">
         <div
-          *ngFor="let spot of parkingSpots.slice(0, 5)"
+          *ngFor="let spot of getFloorSpots(visibleFloors[0])"
           [class.selected]="selectedSpot === spot.id"
           [class.occupied]="!spot.available"
           class="parking-spot"
@@ -51,14 +52,27 @@
       </div>
 
       <div class="floor-selector">
-        <mat-icon>arrow_back</mat-icon>
-        <span>A-B Floor</span>
-        <mat-icon>arrow_forward</mat-icon>
+        <button
+          mat-icon-button
+          (click)="previousFloor()"
+          [disabled]="currentFloorIndex === 0"
+        >
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>{{ visibleFloors[0] }}-{{ visibleFloors[1] }} Floor</span>
+        <button
+          mat-icon-button
+          (click)="nextFloor()"
+          [disabled]="currentFloorIndex >= getMaxFloorIndex()"
+        >
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
       </div>
 
+      <!-- Second visible floor -->
       <div class="parking-row">
         <div
-          *ngFor="let spot of parkingSpots.slice(5)"
+          *ngFor="let spot of getFloorSpots(visibleFloors[1])"
           [class.selected]="selectedSpot === spot.id"
           [class.occupied]="!spot.available"
           class="parking-spot"
