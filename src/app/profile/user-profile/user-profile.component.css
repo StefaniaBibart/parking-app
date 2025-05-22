@@ -59,11 +59,18 @@
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+  justify-content: space-between;
 }
 
 .name-section h2 {
   margin: 0;
   color: var(--text);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .edit-button {

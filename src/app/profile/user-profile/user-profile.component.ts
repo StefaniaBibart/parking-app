@@ -37,19 +37,18 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
 
-  userName: string = '';
-  email = new FormControl('', [Validators.required, Validators.email]);
+  username = new FormControl('', [Validators.required]);
+  email = new FormControl({ value: '', disabled: true });
   phoneNumber = new FormControl('', [Validators.required]);
   profileImage: string = 'assets/avatar.png';
 
   isEditing: boolean = false;
-  editEmail: string = '';
 
   newCarPlate = new FormControl('');
 
+  usernameError = signal('');
   phoneNumberError = signal('');
   licensePlateError = signal('');
-  emailError = signal('');
 
   cars: Vehicle[] = [];
 
@@ -61,9 +60,9 @@ export class UserProfileComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog
   ) {
-    merge(this.email.statusChanges, this.email.valueChanges)
+    merge(this.username.statusChanges, this.username.valueChanges)
       .pipe(takeUntilDestroyed())
-      .subscribe(() => this.updateEmailError());
+      .subscribe(() => this.updateUsernameError());
 
     merge(this.phoneNumber.statusChanges, this.phoneNumber.valueChanges)
       .pipe(takeUntilDestroyed())
@@ -88,7 +87,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   async loadUserData(user: User) {
-    this.userName = user.username;
+    this.username.setValue(user.username);
     this.email.setValue(user.email);
 
     if (user.phoneNumber) {
@@ -103,13 +102,11 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
-  updateEmailError() {
-    if (this.email.hasError('required')) {
-      this.emailError.set('You must enter a value');
-    } else if (this.email.hasError('email')) {
-      this.emailError.set('Not a valid email');
+  updateUsernameError() {
+    if (this.username.hasError('required')) {
+      this.usernameError.set('You must enter a username');
     } else {
-      this.emailError.set('');
+      this.usernameError.set('');
     }
   }
 
@@ -145,28 +142,33 @@ export class UserProfileComponent implements OnInit {
 
   async toggleEdit() {
     if (this.isEditing) {
-      if (this.validatePhoneNumber()) {
-        try {
-          const currentUser = this.authService.getCurrentUser();
-          if (currentUser) {
-            const updatedUser: User = {
-              ...currentUser,
-              email: this.email.value || currentUser.email,
-              phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
-            };
+      return;
+    } else {
+      this.phoneNumberError.set('');
+      this.usernameError.set('');
+      this.isEditing = true;
+    }
+  }
 
-            await this.authService.updateUserProfile(updatedUser);
-          }
+  async confirmEdit() {
+    if (this.validatePhoneNumber() && this.username.valid) {
+      try {
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser) {
+          const updatedUser: User = {
+            ...currentUser,
+            username: this.username.value || currentUser.username,
+            phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
+          };
+
+          await this.authService.updateUserProfile(updatedUser);
 
           this.isEditing = false;
-        } catch (error) {
-          console.error('Error updating user profile:', error);
+          this.cdr.markForCheck();
         }
+      } catch (error) {
+        console.error('Error updating user profile:', error);
       }
-    } else {
-      this.editEmail = this.email.value || '';
-      this.phoneNumberError.set('');
-      this.isEditing = true;
     }
   }
 
@@ -260,5 +262,18 @@ export class UserProfileComponent implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  cancelEdit() {
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.username.setValue(user.username);
+      this.phoneNumber.setValue(user.phoneNumber || '');
+    }
+
+    this.phoneNumberError.set('');
+    this.usernameError.set('');
+
+    this.isEditing = false;
   }
 }
