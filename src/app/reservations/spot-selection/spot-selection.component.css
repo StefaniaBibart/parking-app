@@ -157,15 +157,29 @@ section {
   opacity: 0.5;
 }
 
+.floor-label {
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 15px;
+  margin-bottom: 5px;
+  padding-left: 5px;
+  border-left: 3px solid var(--accent);
+}
+
 .floor-selector {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: var(--secondary);
   border-radius: 20px;
-  padding: 10px 15px;
-  margin: 10px 0;
+  padding: 5px 10px;
+  margin: 15px 0;
   color: var(--text);
+}
+
+.floor-selector button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .booking-summary {
@@ -193,4 +207,21 @@ section {
 
 .action-buttons button {
   min-width: 100px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  color: #d32f2f;
+}
+
+.error-message mat-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
 }

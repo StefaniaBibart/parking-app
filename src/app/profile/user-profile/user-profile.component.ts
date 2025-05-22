@@ -23,6 +23,8 @@ import { User } from '../../shared/models/user.model';
 import { Vehicle } from '../../shared/models/vehicle.model';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -56,7 +58,8 @@ export class UserProfileComponent implements OnInit {
     private authService: AuthService,
     private dataService: DataService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {
     merge(this.email.statusChanges, this.email.valueChanges)
       .pipe(takeUntilDestroyed())
@@ -213,14 +216,28 @@ export class UserProfileComponent implements OnInit {
   }
 
   async removeCar(id: number) {
-    try {
-      await this.dataService.deleteVehicle(id);
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Delete Vehicle',
+        message:
+          'Are you sure you want to delete this vehicle? All reservations made with this vehicle will also be deleted.',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      },
+    });
 
-      this.cars = await this.dataService.getUserVehicles();
-      this.cdr.markForCheck();
-    } catch (error) {
-      console.error('Error removing vehicle:', error);
-    }
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          await this.dataService.deleteVehicle(id);
+          this.cars = await this.dataService.getUserVehicles();
+          this.cdr.markForCheck();
+        } catch (error) {
+          console.error('Error removing vehicle:', error);
+        }
+      }
+    });
   }
 
   onLicensePlateInput(event: Event) {

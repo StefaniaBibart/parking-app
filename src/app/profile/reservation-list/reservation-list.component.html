@@ -29,8 +29,26 @@
       class="reservation-card"
     >
       <div class="reservation-date">
-        <div class="date-day">{{ reservation.date | date: "dd" }}</div>
-        <div class="date-month">{{ reservation.date | date: "MMM" }}</div>
+        <div class="date-content">
+          <div class="date-day">{{ reservation.startDate | date : "dd" }}</div>
+          <div class="date-month">
+            {{ reservation.startDate | date : "MMM" }}
+          </div>
+          <ng-container
+            *ngIf="
+              reservation.endDate &&
+              !isSameDay(reservation.startDate, reservation.endDate)
+            "
+          >
+            <mat-icon>arrow_forward</mat-icon>
+            <div class="date-day">
+              {{ reservation.endDate | date : "dd" }}
+            </div>
+            <div class="date-month">
+              {{ reservation.endDate | date : "MMM" }}
+            </div>
+          </ng-container>
+        </div>
       </div>
 
       <div class="reservation-details">
@@ -46,19 +64,22 @@
 
       <div class="reservation-actions">
         <button
-          mat-stroked-button
+          mat-icon-button
           color="primary"
           (click)="editReservation(reservation)"
           class="edit-button"
+          aria-label="Edit reservation"
         >
-          Edit
+          <mat-icon>edit</mat-icon>
         </button>
         <button
-          mat-stroked-button
+          mat-icon-button
           color="warn"
           (click)="deleteReservation(reservation.id)"
+          class="cancel-button"
+          aria-label="Cancel reservation"
         >
-          Cancel
+          <mat-icon>delete</mat-icon>
         </button>
       </div>
     </div>
@@ -70,8 +91,26 @@
   >
     <div *ngFor="let reservation of pastReservations" class="reservation-card">
       <div class="reservation-date">
-        <div class="date-day">{{ reservation.date | date: "dd" }}</div>
-        <div class="date-month">{{ reservation.date | date: "MMM" }}</div>
+        <div class="date-content">
+          <div class="date-day">{{ reservation.startDate | date : "dd" }}</div>
+          <div class="date-month">
+            {{ reservation.startDate | date : "MMM" }}
+          </div>
+          <ng-container
+            *ngIf="
+              reservation.endDate &&
+              !isSameDay(reservation.startDate, reservation.endDate)
+            "
+          >
+            <mat-icon>arrow_forward</mat-icon>
+            <div class="date-day">
+              {{ reservation.endDate | date : "dd" }}
+            </div>
+            <div class="date-month">
+              {{ reservation.endDate | date : "MMM" }}
+            </div>
+          </ng-container>
+        </div>
       </div>
 
       <div class="reservation-details">

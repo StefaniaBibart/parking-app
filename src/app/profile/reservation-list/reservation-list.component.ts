@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DataService } from '../../shared/services/data.service';
 import { Reservation } from '../../shared/models/reservation.model';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-reservation-list',
@@ -21,6 +23,7 @@ export class ReservationListComponent implements OnInit {
   constructor(
     private router: Router,
     private dataService: DataService,
+    private dialog: MatDialog
   ) {}
 
   async ngOnInit() {
@@ -47,12 +50,26 @@ export class ReservationListComponent implements OnInit {
   }
 
   async deleteReservation(id: number) {
-    try {
-      await this.dataService.deleteReservation(id);
-      await this.loadReservations();
-    } catch (error) {
-      console.error('Error deleting reservation:', error);
-    }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Cancel Reservation',
+        message: 'Are you sure you want to cancel this reservation?',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          await this.dataService.deleteReservation(id);
+          await this.loadReservations();
+        } catch (error) {
+          console.error('Error deleting reservation:', error);
+        }
+      }
+    });
   }
 
   async editReservation(reservation: Reservation) {
@@ -63,10 +80,14 @@ export class ReservationListComponent implements OnInit {
       if (vehicle) {
         await this.dataService.storeTemporaryReservationData({
           editingReservationId: reservation.id,
-          reservationDate:
-            reservation.date instanceof Date
-              ? reservation.date.toISOString()
-              : reservation.date.toString(),
+          reservationStartDate:
+            reservation.startDate instanceof Date
+              ? reservation.startDate.toISOString()
+              : reservation.startDate.toString(),
+          reservationEndDate:
+            reservation.endDate instanceof Date
+              ? reservation.endDate.toISOString()
+              : reservation.endDate.toString(),
           reservationVehicleId: vehicle.id,
         });
       } else {
@@ -86,5 +107,15 @@ export class ReservationListComponent implements OnInit {
     } catch (error) {
       console.error('Error clearing temporary reservation data:', error);
     }
+  }
+
+  isSameDay(date1: Date | string, date2: Date | string): boolean {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
   }
 }

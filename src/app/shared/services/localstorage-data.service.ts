@@ -89,7 +89,8 @@ export class LocalstorageDataService extends DataService {
 
       return reservations.map((res) => ({
         ...res,
-        date: new Date(res.date),
+        startDate: new Date(res.startDate),
+        endDate: new Date(res.endDate),
       }));
     } catch (error) {
       console.error('Error getting reservations from localStorage:', error);
@@ -177,9 +178,10 @@ export class LocalstorageDataService extends DataService {
       const now = new Date();
 
       return reservations
-        .filter((res) => new Date(res.date) >= now)
+        .filter((res) => new Date(res.startDate) >= now)
         .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          (a, b) =>
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
         );
     } catch (error) {
       console.error(
@@ -196,9 +198,10 @@ export class LocalstorageDataService extends DataService {
       const now = new Date();
 
       return reservations
-        .filter((res) => new Date(res.date) < now)
+        .filter((res) => new Date(res.endDate) < now)
         .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          (a, b) =>
+            new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
         );
     } catch (error) {
       console.error(
@@ -211,7 +214,8 @@ export class LocalstorageDataService extends DataService {
 
   async storeTemporaryReservationData(data: {
     editingReservationId?: number;
-    reservationDate?: string;
+    reservationStartDate?: string;
+    reservationEndDate?: string;
     reservationVehicleId?: number;
   }): Promise<void> {
     try {
@@ -229,7 +233,8 @@ export class LocalstorageDataService extends DataService {
 
   async getTemporaryReservationData(): Promise<{
     editingReservationId?: number;
-    reservationDate?: string;
+    reservationStartDate?: string;
+    reservationEndDate?: string;
     reservationVehicleId?: number;
   }> {
     try {
@@ -321,6 +326,27 @@ export class LocalstorageDataService extends DataService {
           throw new Error('No vehicles found in user data');
         }
 
+        // Get the vehicle to be deleted
+        const vehicleToDelete = user.cars.find((v: Vehicle) => v.id === id);
+
+        if (!vehicleToDelete) {
+          throw new Error(`Vehicle with id ${id} not found`);
+        }
+
+        // Get all reservations
+        const reservations = await this.getReservations();
+
+        // Find reservations that use this vehicle
+        const reservationsToDelete = reservations.filter(
+          (res) => res.vehicle === vehicleToDelete.plate
+        );
+
+        // Delete each reservation that uses this vehicle
+        for (const reservation of reservationsToDelete) {
+          await this.deleteReservation(reservation.id);
+        }
+
+        // Now delete the vehicle
         user.cars = user.cars.filter((v: Vehicle) => v.id !== id);
         localStorage.setItem('userData', JSON.stringify(user));
       } else {
@@ -401,7 +427,8 @@ export class LocalstorageDataService extends DataService {
       const allReservations: Reservation[] = JSON.parse(allReservationsStr);
       return allReservations.map((res) => ({
         ...res,
-        date: new Date(res.date),
+        startDate: new Date(res.startDate),
+        endDate: new Date(res.endDate),
       }));
     } catch (error) {
       console.error('Error getting all reservations from localStorage:', error);
