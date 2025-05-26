@@ -38,99 +38,89 @@
     <span>Loading reservations...</span>
   </div>
 
-  <div
-    class="no-reservations"
-    *ngIf="!isLoading && filteredReservations.length === 0"
-  >
+  <div class="no-reservations" *ngIf="!isLoading && totalItems === 0">
     <mat-icon>event_busy</mat-icon>
     <p>No reservations found</p>
   </div>
 
-  <div
-    class="reservations-table-container"
-    *ngIf="!isLoading && filteredReservations.length > 0"
-  >
-    <table
-      mat-table
-      [dataSource]="filteredReservations"
-      class="reservations-table"
+  <div class="table-wrapper" *ngIf="!isLoading && totalItems > 0">
+    <div class="reservations-table-container">
+      <table mat-table [dataSource]="dataSource" class="reservations-table">
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.user || "Unknown" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="dates">
+          <th mat-header-cell *matHeaderCellDef>Dates</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.startDate | date : "MMM d, y" }}
+            <ng-container
+              *ngIf="!isSameDay(reservation.startDate, reservation.endDate)"
+            >
+              - {{ reservation.endDate | date : "MMM d, y" }}
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="spot">
+          <th mat-header-cell *matHeaderCellDef>Spot</th>
+          <td mat-cell *matCellDef="let reservation">{{ reservation.spot }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="vehicle">
+          <th mat-header-cell *matHeaderCellDef>Vehicle</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.vehicle }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let reservation">
+            <div
+              class="status-badge"
+              [ngClass]="getReservationStatus(reservation)"
+            >
+              {{ getReservationStatus(reservation) | titlecase }}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let reservation">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="cancelReservation(reservation)"
+              [disabled]="getReservationStatus(reservation) === 'past'"
+              aria-label="Cancel reservation"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+      class="table-paginator"
     >
-      <ng-container matColumnDef="user">
-        <th mat-header-cell *matHeaderCellDef>User</th>
-        <td mat-cell *matCellDef="let reservation">
-          {{ reservation.user || "Unknown" }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="dates">
-        <th mat-header-cell *matHeaderCellDef>Dates</th>
-        <td mat-cell *matCellDef="let reservation">
-          {{ reservation.startDate | date : "MMM d, y" }}
-          <ng-container
-            *ngIf="!isSameDay(reservation.startDate, reservation.endDate)"
-          >
-            - {{ reservation.endDate | date : "MMM d, y" }}
-          </ng-container>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="spot">
-        <th mat-header-cell *matHeaderCellDef>Spot</th>
-        <td mat-cell *matCellDef="let reservation">{{ reservation.spot }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="vehicle">
-        <th mat-header-cell *matHeaderCellDef>Vehicle</th>
-        <td mat-cell *matCellDef="let reservation">
-          {{ reservation.vehicle }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let reservation">
-          <div
-            class="status-badge"
-            [ngClass]="getReservationStatus(reservation)"
-          >
-            {{ getReservationStatus(reservation) | titlecase }}
-          </div>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let reservation">
-          <button
-            mat-icon-button
-            color="warn"
-            (click)="cancelReservation(reservation)"
-            [disabled]="getReservationStatus(reservation) === 'past'"
-            aria-label="Cancel reservation"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <tr
-        mat-header-row
-        *matHeaderRowDef="[
-          'user',
-          'dates',
-          'spot',
-          'vehicle',
-          'status',
-          'actions'
-        ]"
-      ></tr>
-      <tr
-        mat-row
-        *matRowDef="
-          let row;
-          columns: ['user', 'dates', 'spot', 'vehicle', 'status', 'actions']
-        "
-      ></tr>
-    </table>
+    </mat-paginator>
   </div>
 </div>

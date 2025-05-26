@@ -19,6 +19,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
   imports: [
@@ -42,6 +43,7 @@ import { MatTableModule } from '@angular/material/table';
     MatDialogModule,
     MatButtonToggleModule,
     MatTableModule,
+    MatPaginatorModule,
   ],
   exports: [
     MatButtonModule,
@@ -64,6 +66,7 @@ import { MatTableModule } from '@angular/material/table';
     MatDialogModule,
     MatButtonToggleModule,
     MatTableModule,
+    MatPaginatorModule,
   ],
 })
 export class MaterialModule {}

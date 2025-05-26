@@ -7,6 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { FormsModule } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-admin-reservations-list',
@@ -18,11 +20,26 @@ import { FormsModule } from '@angular/forms';
 export class AdminReservationsListComponent implements OnInit {
   allReservations: Reservation[] = [];
   filteredReservations: Reservation[] = [];
+  dataSource = new MatTableDataSource<Reservation>([]);
   isLoading = true;
   currentDate = new Date();
 
   filterStatus: 'all' | 'upcoming' | 'active' | 'past' = 'all';
   searchTerm: string = '';
+
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [5, 10, 25, 50];
+  totalItems = 0;
+
+  displayedColumns: string[] = [
+    'user',
+    'dates',
+    'spot',
+    'vehicle',
+    'status',
+    'actions',
+  ];
 
   constructor(
     private dataService: DataService,
@@ -83,13 +100,31 @@ export class AdminReservationsListComponent implements OnInit {
     this.filteredReservations.sort((a, b) => {
       return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
     });
+
+    this.totalItems = this.filteredReservations.length;
+    this.updateDataSource();
+  }
+
+  updateDataSource() {
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    const paginatedData = this.filteredReservations.slice(startIndex, endIndex);
+    this.dataSource.data = paginatedData;
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateDataSource();
   }
 
   onFilterChange() {
+    this.pageIndex = 0;
     this.applyFilters();
   }
 
   onSearchChange() {
+    this.pageIndex = 0;
     this.applyFilters();
   }
 
