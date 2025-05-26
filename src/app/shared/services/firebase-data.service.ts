@@ -3,17 +3,7 @@ import { DataService } from './data.service';
 import { Reservation } from '../models/reservation.model';
 import { Vehicle } from '../models/vehicle.model';
 import { User } from '../models/user.model';
-import {
-  getDatabase,
-  ref,
-  get,
-  set,
-  update,
-  remove,
-  query,
-  orderByChild,
-  child,
-} from 'firebase/database';
+import { getDatabase, ref, get, set, update, remove } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
 @Injectable()
@@ -21,7 +11,6 @@ export class FirebaseDataService extends DataService {
   private reservationsPath = 'reservations';
   private tempDataPath = 'temp_reservation_data';
   private usersPath = 'users';
-  private vehiclesPath = 'vehicles';
 
   constructor() {
     super();
@@ -318,7 +307,6 @@ export class FirebaseDataService extends DataService {
       const userId = this.getCurrentUserId();
       const vehiclePath = `${this.usersPath}/${userId}/cars`;
 
-      // First, get the vehicle to be deleted
       const vehicles = await this.getUserVehicles();
       const vehicleToDelete = vehicles.find((v) => v.id === id);
 
@@ -326,20 +314,16 @@ export class FirebaseDataService extends DataService {
         throw new Error(`Vehicle with id ${id} not found`);
       }
 
-      // Get all reservations for this user
       const reservations = await this.getReservations();
 
-      // Find reservations that use this vehicle
       const reservationsToDelete = reservations.filter(
         (res) => res.vehicle === vehicleToDelete.plate
       );
 
-      // Delete each reservation that uses this vehicle
       for (const reservation of reservationsToDelete) {
         await this.deleteReservation(reservation.id);
       }
 
-      // Now delete the vehicle
       const updatedVehicles = vehicles.filter((v) => v.id !== id);
       await this.storeData(vehiclePath, updatedVehicles);
     } catch (error) {
@@ -424,6 +408,8 @@ export class FirebaseDataService extends DataService {
 
       const allReservations: Reservation[] = [];
 
+      const usersData = await this.getData(this.usersPath);
+
       Object.keys(data).forEach((userId) => {
         const userReservations = data[userId];
         if (userReservations) {
@@ -431,9 +417,15 @@ export class FirebaseDataService extends DataService {
             ? userReservations
             : Object.values(userReservations);
 
+          const username =
+            usersData?.[userId]?.username ||
+            usersData?.[userId]?.email ||
+            'Unknown User';
+
           reservationsArray.forEach((res: any) => {
             allReservations.push({
               ...res,
+              user: username,
               startDate: res.startDate ? new Date(res.startDate) : null,
               endDate: res.endDate ? new Date(res.endDate) : null,
             });

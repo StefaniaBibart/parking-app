@@ -9,6 +9,7 @@ import { ReservationFormComponent } from './reservations/reservation-form/reserv
 import { SpotSelectionComponent } from './reservations/spot-selection/spot-selection.component';
 import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
 import { AuthGuard } from './auth/auth.guard';
+import { AdminReservationsListComponent } from './admin/reservations-list/admin-reservations-list.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -39,6 +40,10 @@ export const routes: Routes = [
     path: 'admin/dashboard',
     component: AdminDashboardComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'admin/reservations',
+    component: AdminReservationsListComponent,
   },
   { path: '**', redirectTo: '/home' },
 ];
