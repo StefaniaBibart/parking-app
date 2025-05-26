@@ -7,6 +7,7 @@ import { UserProfileComponent } from './profile/user-profile/user-profile.compon
 import { ReservationListComponent } from './profile/reservation-list/reservation-list.component';
 import { ReservationFormComponent } from './reservations/reservation-form/reservation-form.component';
 import { SpotSelectionComponent } from './reservations/spot-selection/spot-selection.component';
+import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
 import { AuthGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
@@ -32,6 +33,11 @@ export const routes: Routes = [
   {
     path: 'select-spot',
     component: SpotSelectionComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'admin/dashboard',
+    component: AdminDashboardComponent,
     canActivate: [AuthGuard],
   },
   { path: '**', redirectTo: '/home' },

@@ -1,0 +1,131 @@
+<div class="admin-dashboard-container">
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Admin Dashboard</h1>
+      <div class="current-date">
+        {{ currentDate | date : "EEEE, MMMM d, y" }}
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-metrics">
+    <div class="metric-card">
+      <div class="metric-icon">
+        <mat-icon>local_parking</mat-icon>
+      </div>
+      <div class="metric-content">
+        <div class="metric-value">{{ totalSpots }}</div>
+        <div class="metric-label">Total Parking Spots</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon available">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="metric-content">
+        <div class="metric-value">{{ availableSpots }}</div>
+        <div class="metric-label">Available Spots</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon occupied">
+        <mat-icon>directions_car</mat-icon>
+      </div>
+      <div class="metric-content">
+        <div class="metric-value">{{ occupiedSpots }}</div>
+        <div class="metric-label">Occupied Spots</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon">
+        <mat-icon>event</mat-icon>
+      </div>
+      <div class="metric-content">
+        <div class="metric-value">{{ totalReservations }}</div>
+        <div class="metric-label">Total Reservations</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-sections">
+    <section class="floor-stats">
+      <h2>Parking Spots by Floor</h2>
+      <div class="floor-stats-container">
+        <div class="floor-card" *ngFor="let floorData of spotsByFloor">
+          <div class="floor-header">
+            <h3>Floor {{ floorData.floor }}</h3>
+          </div>
+          <div class="floor-metrics">
+            <div class="floor-metric">
+              <div class="floor-metric-value">{{ floorData.total }}</div>
+              <div class="floor-metric-label">Total</div>
+            </div>
+            <div class="floor-metric">
+              <div class="floor-metric-value available">
+                {{ floorData.available }}
+              </div>
+              <div class="floor-metric-label">Available</div>
+            </div>
+            <div class="floor-metric">
+              <div class="floor-metric-value occupied">
+                {{ floorData.occupied }}
+              </div>
+              <div class="floor-metric-label">Occupied</div>
+            </div>
+          </div>
+          <div class="floor-progress">
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [style.width.%]="(floorData.occupied / floorData.total) * 100"
+              ></div>
+            </div>
+            <div class="progress-label">
+              {{
+                (floorData.occupied / floorData.total) * 100 | number : "1.0-0"
+              }}% Occupied
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="reservation-stats">
+      <h2>Reservation Statistics</h2>
+      <div class="reservation-stats-container">
+        <div class="reservation-stat-card">
+          <div class="reservation-stat-icon today">
+            <mat-icon>today</mat-icon>
+          </div>
+          <div class="reservation-stat-content">
+            <div class="reservation-stat-value">{{ todayReservations }}</div>
+            <div class="reservation-stat-label">Today's Reservations</div>
+          </div>
+        </div>
+
+        <div class="reservation-stat-card">
+          <div class="reservation-stat-icon upcoming">
+            <mat-icon>update</mat-icon>
+          </div>
+          <div class="reservation-stat-content">
+            <div class="reservation-stat-value">{{ upcomingReservations }}</div>
+            <div class="reservation-stat-label">Upcoming Reservations</div>
+          </div>
+        </div>
+
+        <div class="reservation-stat-card">
+          <div class="reservation-stat-icon past">
+            <mat-icon>history</mat-icon>
+          </div>
+          <div class="reservation-stat-content">
+            <div class="reservation-stat-value">{{ pastReservations }}</div>
+            <div class="reservation-stat-label">Past Reservations</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

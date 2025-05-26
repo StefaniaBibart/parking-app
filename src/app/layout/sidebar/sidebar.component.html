@@ -4,20 +4,48 @@
   </div>
 
   <div class="menu-items">
-    <div class="menu-item" (click)="navigateTo('/new-reservation')">
+    <div
+      class="menu-item"
+      (click)="navigateTo('/new-reservation')"
+      matTooltip="New Reservation"
+      matTooltipPosition="right"
+    >
       <mat-icon>calendar_today</mat-icon>
     </div>
-    <div class="menu-item" (click)="navigateTo('/reservations')">
+    <div
+      class="menu-item"
+      (click)="navigateTo('/reservations')"
+      matTooltip="My Reservations"
+      matTooltipPosition="right"
+    >
       <mat-icon>list</mat-icon>
+    </div>
+    <div
+      class="menu-item"
+      (click)="navigateTo('/admin/dashboard')"
+      matTooltip="Admin Dashboard"
+      matTooltipPosition="right"
+    >
+      <mat-icon>dashboard</mat-icon>
     </div>
   </div>
 
   <div class="bottom-controls">
-    <div class="menu-item theme-toggle" (click)="toggleTheme()">
+    <div
+      class="menu-item theme-toggle"
+      (click)="toggleTheme()"
+      matTooltip="Toggle Theme"
+      matTooltipPosition="right"
+    >
       <mat-icon>{{ isDarkTheme ? "light_mode" : "dark_mode" }}</mat-icon>
     </div>
 
-    <div class="user-profile" (click)="navigateTo('/profile')">
+    <div
+      class="user-profile"
+      (click)="navigateTo('/profile')"
+      matTooltip="My Profile"
+      matTooltipPosition="right"
+    >
       <div class="avatar">
         <img
           src="assets/avatar.png"
