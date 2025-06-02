@@ -13,9 +13,14 @@ import { AdminReservationsListComponent } from './admin/reservations-list/admin-
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './shared/guards/admin.guard';
 import { UserGuard } from './shared/guards/user.guard';
+import { RootRedirectGuard } from './shared/guards/root-redirect.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  {
+    path: '',
+    component: PlaceholderComponent,
+    canActivate: [RootRedirectGuard],
+  },
   {
     path: 'home',
     component: HomeComponent,
@@ -58,5 +63,5 @@ export const routes: Routes = [
     component: AdminParkingSpotsComponent,
     canActivate: [AuthGuard, AdminGuard],
   },
-  { path: '**', redirectTo: '/admin/dashboard' },
+  { path: '**', redirectTo: '/home' },
 ];

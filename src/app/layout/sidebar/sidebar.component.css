@@ -103,6 +103,20 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.logout-button {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.logout-button:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+}
+
+.logout-button mat-icon {
+  color: #ff6b6b;
+}
+
 .user-profile {
   display: flex;
   justify-content: center;

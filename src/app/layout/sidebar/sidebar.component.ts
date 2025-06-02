@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AdminService } from '../../shared/services/admin.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -20,7 +21,8 @@ export class SidebarComponent implements OnInit {
   constructor(
     private router: Router,
     private themeService: ThemeService,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private authService: AuthService
   ) {
     this.isAdmin$ = this.adminService.isAdmin();
   }
@@ -46,5 +48,9 @@ export class SidebarComponent implements OnInit {
 
   toggleTheme() {
     this.themeService.toggleTheme();
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

@@ -14,10 +14,16 @@
 }
 
 .page-header {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: var(--text);
   margin: 0 0 4px 0;
+}
+
+.page-subheader {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
 }
 
 .stats-container {
@@ -134,7 +140,6 @@
   flex: 1;
 }
 
-/* Visual parking layout styles */
 .spots-visual-container {
   background-color: var(--surface);
   border-radius: 12px;

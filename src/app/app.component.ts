@@ -33,6 +33,7 @@ import { AdminService } from './shared/services/admin.service';
 export class AppComponent implements OnInit {
   title = 'parking-app';
   isLoggedIn = false;
+  hasNavigatedFromRoot = false;
 
   constructor(
     private router: Router,
@@ -44,17 +45,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.user.subscribe(async (user) => {
+    this.authService.user.subscribe((user) => {
       this.isLoggedIn = !!user;
-
-      if (user && this.router.url === '/') {
-        const isAdmin = await this.adminService.isAdminAsync();
-        if (isAdmin) {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/home']);
-        }
-      }
     });
   }
 

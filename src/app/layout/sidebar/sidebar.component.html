@@ -58,6 +58,16 @@
     </div>
 
     <div
+      *ngIf="(isAdmin$ | async) === true"
+      class="menu-item logout-button"
+      (click)="logout()"
+      matTooltip="Logout"
+      matTooltipPosition="right"
+    >
+      <mat-icon>exit_to_app</mat-icon>
+    </div>
+
+    <div
       *ngIf="(isAdmin$ | async) === false"
       class="user-profile"
       (click)="navigateTo('/profile')"
