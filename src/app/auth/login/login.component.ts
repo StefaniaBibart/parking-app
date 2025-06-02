@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { AdminService } from '../../shared/services/admin.service';
 
 @Component({
   selector: 'app-login',
@@ -29,6 +30,7 @@ export class LoginComponent {
     private router: Router,
     private fb: FormBuilder,
     private authService: AuthService,
+    private adminService: AdminService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -65,11 +67,17 @@ export class LoginComponent {
           }),
           finalize(() => {
             this.isLoading = false;
-          }),
+          })
         )
-        .subscribe((result) => {
+        .subscribe(async (result) => {
           if (result) {
-            this.router.navigate(['/new-reservation']);
+            // Check if user is admin and redirect accordingly
+            const isAdmin = await this.adminService.isAdminAsync();
+            if (isAdmin) {
+              this.router.navigate(['/admin/dashboard']);
+            } else {
+              this.router.navigate(['/new-reservation']);
+            }
           }
         });
     } else {

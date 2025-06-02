@@ -9,48 +9,54 @@ import { ReservationFormComponent } from './reservations/reservation-form/reserv
 import { SpotSelectionComponent } from './reservations/spot-selection/spot-selection.component';
 import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
 import { AdminParkingSpotsComponent } from './admin/parking-spots/admin-parking-spots.component';
-import { AuthGuard } from './auth/auth.guard';
 import { AdminReservationsListComponent } from './admin/reservations-list/admin-reservations-list.component';
+import { AuthGuard } from './auth/auth.guard';
+import { AdminGuard } from './shared/guards/admin.guard';
+import { UserGuard } from './shared/guards/user.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
+  {
+    path: 'home',
+    component: HomeComponent,
+    canActivate: [UserGuard],
+  },
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
   {
     path: 'profile',
     component: UserProfileComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, UserGuard],
   },
   {
     path: 'reservations',
     component: ReservationListComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, UserGuard],
   },
   {
     path: 'new-reservation',
     component: ReservationFormComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, UserGuard],
   },
   {
     path: 'select-spot',
     component: SpotSelectionComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, UserGuard],
   },
   {
     path: 'admin/dashboard',
     component: AdminDashboardComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminGuard],
   },
   {
     path: 'admin/reservations',
     component: AdminReservationsListComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminGuard],
   },
   {
     path: 'admin/parking-spots',
     component: AdminParkingSpotsComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminGuard],
   },
-  { path: '**', redirectTo: '/home' },
+  { path: '**', redirectTo: '/admin/dashboard' },
 ];

@@ -14,6 +14,7 @@ import { HomeComponent } from './home/home.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { LoaderService } from './shared/services/loader.service';
 import { AuthService } from './shared/services/auth.service';
+import { AdminService } from './shared/services/admin.service';
 
 @Component({
   selector: 'app-root',
@@ -37,13 +38,23 @@ export class AppComponent implements OnInit {
     private router: Router,
     private loaderService: LoaderService,
     private authService: AuthService,
+    private adminService: AdminService
   ) {
     this.setupRouterEvents();
   }
 
   ngOnInit() {
-    this.authService.user.subscribe((user) => {
+    this.authService.user.subscribe(async (user) => {
       this.isLoggedIn = !!user;
+
+      if (user && this.router.url === '/') {
+        const isAdmin = await this.adminService.isAdminAsync();
+        if (isAdmin) {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/home']);
+        }
+      }
     });
   }
 

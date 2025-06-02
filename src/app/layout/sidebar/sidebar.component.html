@@ -1,49 +1,50 @@
 <div class="sidebar-container">
-  <div class="logo-container">
+  <div class="logo-container" *ngIf="(isAdmin$ | async) === false">
     <div class="p-logo" (click)="navigateToHome()">P</div>
   </div>
 
+  <div class="logo-container" *ngIf="(isAdmin$ | async) === true">
+    <div class="admin-logo" (click)="navigateToHome()">A</div>
+  </div>
+
   <div class="menu-items">
-    <div
-      class="menu-item"
-      (click)="navigateTo('/new-reservation')"
-      matTooltip="New Reservation"
-      matTooltipPosition="right"
-    >
-      <mat-icon>edit_calendar</mat-icon>
-    </div>
-    <div
-      class="menu-item"
-      (click)="navigateTo('/reservations')"
-      matTooltip="My Reservations"
-      matTooltipPosition="right"
-    >
-      <mat-icon>list</mat-icon>
-    </div>
-    <div
-      class="menu-item"
-      (click)="navigateTo('/admin/dashboard')"
-      matTooltip="Admin Dashboard"
-      matTooltipPosition="right"
-    >
-      <mat-icon>dashboard</mat-icon>
-    </div>
-    <div
-      class="menu-item"
-      (click)="navigateTo('/admin/reservations')"
-      matTooltip="Admin Reservations"
-      matTooltipPosition="right"
-    >
-      <mat-icon>event_note</mat-icon>
-    </div>
-    <div
-      class="menu-item"
-      (click)="navigateTo('/admin/parking-spots')"
-      matTooltip="Manage Parking Spots"
-      matTooltipPosition="right"
-    >
-      <mat-icon>garage</mat-icon>
-    </div>
+    <ng-container *ngIf="(isAdmin$ | async) === false">
+      <div
+        class="menu-item"
+        (click)="navigateTo('/new-reservation')"
+        matTooltip="New Reservation"
+        matTooltipPosition="right"
+      >
+        <mat-icon>edit_calendar</mat-icon>
+      </div>
+      <div
+        class="menu-item"
+        (click)="navigateTo('/reservations')"
+        matTooltip="My Reservations"
+        matTooltipPosition="right"
+      >
+        <mat-icon>list</mat-icon>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="(isAdmin$ | async) === true">
+      <div
+        class="menu-item"
+        (click)="navigateTo('/admin/reservations')"
+        matTooltip="Admin Reservations"
+        matTooltipPosition="right"
+      >
+        <mat-icon>event_note</mat-icon>
+      </div>
+      <div
+        class="menu-item"
+        (click)="navigateTo('/admin/parking-spots')"
+        matTooltip="Manage Parking Spots"
+        matTooltipPosition="right"
+      >
+        <mat-icon>garage</mat-icon>
+      </div>
+    </ng-container>
   </div>
 
   <div class="bottom-controls">
@@ -57,6 +58,7 @@
     </div>
 
     <div
+      *ngIf="(isAdmin$ | async) === false"
       class="user-profile"
       (click)="navigateTo('/profile')"
       matTooltip="My Profile"
