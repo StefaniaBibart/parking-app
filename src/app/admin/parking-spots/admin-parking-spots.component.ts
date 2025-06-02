@@ -91,8 +91,8 @@ export class AdminParkingSpotsComponent implements OnInit {
       data: {
         title: 'Remove Parking Spot',
         message: `Are you sure you want to remove parking spot ${spot.id}? This will also cancel any existing reservations for this spot.`,
-        confirmText: 'Remove',
-        cancelText: 'Cancel',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
       },
     });
 
