@@ -20,10 +20,7 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(null);
   user = this.userSubject.asObservable();
 
-  constructor(
-    private router: Router,
-    private dataService: DataService,
-  ) {
+  constructor(private router: Router, private dataService: DataService) {
     this.loadUserFromStorage();
   }
 
@@ -35,7 +32,16 @@ export class AuthService {
 
         const user = await this.dataService.getCurrentUser();
 
-        this.userSubject.next(user || authData);
+        if (user) {
+          const completeUser = {
+            ...user,
+            token: authData.token,
+          };
+          localStorage.setItem('userData', JSON.stringify(completeUser));
+          this.userSubject.next(completeUser);
+        } else {
+          this.userSubject.next(authData);
+        }
       }
     } catch (error) {
       console.error('Error loading user from storage:', error);
@@ -46,7 +52,7 @@ export class AuthService {
     email: string,
     password: string,
     username: string,
-    phoneNumber: string,
+    phoneNumber: string
   ): Observable<UserCredential> {
     const auth = getAuth();
     return from(createUserWithEmailAndPassword(auth, email, password)).pipe(
@@ -76,7 +82,7 @@ export class AuthService {
       catchError((error) => {
         console.error('Signup error:', error);
         throw error;
-      }),
+      })
     );
   }
 
@@ -89,15 +95,6 @@ export class AuthService {
 
           const existingUser = await this.dataService.getCurrentUser();
 
-          const authData = {
-            email: userCredential.user.email || '',
-            id: userCredential.user.uid,
-            token: token,
-            username: userCredential.user.displayName || '',
-          };
-
-          localStorage.setItem('userData', JSON.stringify(authData));
-
           if (existingUser) {
             const updatedUser = {
               ...existingUser,
@@ -105,11 +102,21 @@ export class AuthService {
               email: userCredential.user.email || existingUser.email,
               username:
                 userCredential.user.displayName || existingUser.username,
+              phoneNumber: existingUser.phoneNumber,
             };
 
+            localStorage.setItem('userData', JSON.stringify(updatedUser));
             await this.dataService.updateUser(updatedUser);
             this.userSubject.next(updatedUser);
           } else {
+            const authData = {
+              email: userCredential.user.email || '',
+              id: userCredential.user.uid,
+              token: token,
+              username: userCredential.user.displayName || '',
+            };
+
+            localStorage.setItem('userData', JSON.stringify(authData));
             await this.dataService.storeUser(authData);
             this.userSubject.next(authData);
           }
@@ -118,7 +125,7 @@ export class AuthService {
       catchError((error) => {
         console.error('Login error:', error);
         throw error;
-      }),
+      })
     );
   }
 
