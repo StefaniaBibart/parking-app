@@ -10,7 +10,7 @@
       matTooltip="New Reservation"
       matTooltipPosition="right"
     >
-      <mat-icon>calendar_today</mat-icon>
+      <mat-icon>edit_calendar</mat-icon>
     </div>
     <div
       class="menu-item"
@@ -35,6 +35,14 @@
       matTooltipPosition="right"
     >
       <mat-icon>event_note</mat-icon>
+    </div>
+    <div
+      class="menu-item"
+      (click)="navigateTo('/admin/parking-spots')"
+      matTooltip="Manage Parking Spots"
+      matTooltipPosition="right"
+    >
+      <mat-icon>garage</mat-icon>
     </div>
   </div>
 

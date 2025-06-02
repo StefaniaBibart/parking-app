@@ -93,9 +93,9 @@ export class AdminDashboardComponent implements OnInit {
     allSpots: ParkingSpot[],
     activeReservations: Reservation[]
   ) {
-    const floors = this.configService.parkingLayout.floors;
+    const floors: string[] = this.configService.parkingLayout.floors;
 
-    this.spotsByFloor = floors.map((floor) => {
+    this.spotsByFloor = floors.map((floor: string) => {
       const floorSpots = allSpots.filter((spot) => spot.floor === floor);
       const occupiedFloorSpots = activeReservations.filter((res) =>
         res.spot.startsWith(floor)

@@ -1,0 +1,102 @@
+<div class="admin-parking-spots-container">
+  <div class="admin-parking-spots-header">
+    <h1 class="page-header">Parking Spots Management</h1>
+    <div class="page-subheader">
+      {{ currentDate | date : "EEEE, MMMM d, y" }}
+    </div>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <mat-icon>local_parking</mat-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalSpots }}</div>
+        <div class="stat-label">Total Spots</div>
+      </div>
+    </div>
+
+    <div class="stat-card" *ngFor="let floor of availableFloors">
+      <div class="stat-icon floor-icon">
+        <span>{{ floor }}</span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ spotsByFloor[floor] || 0 }}</div>
+        <div class="stat-label">Floor {{ floor }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spots-visual-container">
+    <h2>Parking Layout</h2>
+    <div class="parking-layout">
+      <div class="parking-row">
+        <div
+          *ngFor="let spot of getFloorSpots(visibleFloors[0])"
+          class="parking-spot"
+        >
+          <span>{{ spot.id }}</span>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="removeSpot(spot)"
+            class="remove-spot-btn"
+            aria-label="Remove spot"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div
+          class="parking-spot add-spot-placeholder"
+          (click)="addSpotToFloor(visibleFloors[0])"
+        >
+          <mat-icon>add</mat-icon>
+        </div>
+      </div>
+
+      <div class="floor-selector">
+        <button
+          mat-icon-button
+          (click)="previousFloor()"
+          [disabled]="currentFloorIndex === 0"
+        >
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>{{ visibleFloors[0] }}-{{ visibleFloors[1] }} Floor</span>
+        <button
+          mat-icon-button
+          (click)="nextFloor()"
+          [disabled]="currentFloorIndex >= getMaxFloorIndex()"
+        >
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="parking-row" *ngIf="visibleFloors[1]">
+        <div
+          *ngFor="let spot of getFloorSpots(visibleFloors[1])"
+          class="parking-spot"
+        >
+          <span>{{ spot.id }}</span>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="removeSpot(spot)"
+            class="remove-spot-btn"
+            aria-label="Remove spot"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div
+          class="parking-spot add-spot-placeholder"
+          (click)="addSpotToFloor(visibleFloors[1])"
+        >
+          <mat-icon>add</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

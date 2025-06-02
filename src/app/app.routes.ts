@@ -8,6 +8,7 @@ import { ReservationListComponent } from './profile/reservation-list/reservation
 import { ReservationFormComponent } from './reservations/reservation-form/reservation-form.component';
 import { SpotSelectionComponent } from './reservations/spot-selection/spot-selection.component';
 import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
+import { AdminParkingSpotsComponent } from './admin/parking-spots/admin-parking-spots.component';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminReservationsListComponent } from './admin/reservations-list/admin-reservations-list.component';
 
@@ -44,6 +45,12 @@ export const routes: Routes = [
   {
     path: 'admin/reservations',
     component: AdminReservationsListComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'admin/parking-spots',
+    component: AdminParkingSpotsComponent,
+    canActivate: [AuthGuard],
   },
   { path: '**', redirectTo: '/home' },
 ];
