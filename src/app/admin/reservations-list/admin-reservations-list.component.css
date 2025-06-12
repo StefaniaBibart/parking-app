@@ -1,0 +1,253 @@
+.admin-reservations-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-reservations-header {
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.page-header {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px 0;
+}
+
+.page-subheader {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.current-date {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-group {
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-group mat-form-field {
+  width: 100%;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.loading-indicator span {
+  margin-top: 16px;
+}
+
+.no-reservations {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  background-color: var(--surface);
+  border-radius: 8px;
+  flex: 1;
+}
+
+.no-reservations mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 16px;
+}
+
+.table-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reservations-table-container {
+  flex: 1;
+  overflow: auto;
+  background-color: var(--background);
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+
+.reservations-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.reservations-table-container::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+.reservations-table-container::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 4px;
+}
+
+.reservations-table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+.reservations-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--surface);
+}
+
+.reservations-table {
+  width: 100%;
+  background-color: var(--background);
+}
+
+::ng-deep .admin-reservations-container .reservations-table .mat-mdc-table {
+  background-color: var(--background) !important;
+}
+
+::ng-deep
+  .admin-reservations-container
+  .reservations-table
+  .mat-mdc-header-row {
+  background-color: var(--background) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 2px solid var(--secondary) !important;
+}
+
+::ng-deep
+  .admin-reservations-container
+  .reservations-table
+  .mat-mdc-header-cell {
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+  font-weight: 600 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  border-bottom: none !important;
+}
+
+::ng-deep .admin-reservations-container .reservations-table .mat-mdc-row {
+  background-color: var(--background) !important;
+}
+
+::ng-deep .admin-reservations-container .reservations-table .mat-mdc-cell {
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+  border-bottom: 1px solid var(--secondary) !important;
+}
+
+::ng-deep
+  .admin-reservations-container
+  .reservations-table
+  .mat-mdc-row:hover
+  .mat-mdc-cell {
+  background-color: var(--secondary) !important;
+  color: white !important;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-badge.upcoming {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-badge.active {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-badge.past {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+.table-paginator {
+  background-color: var(--surface);
+  border-top: none;
+  flex-shrink: 0;
+}
+
+::ng-deep .table-paginator .mat-mdc-paginator-container {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+::ng-deep .table-paginator .mat-mdc-select-value {
+  color: var(--text);
+}
+
+::ng-deep .table-paginator .mat-mdc-paginator-page-size-label,
+::ng-deep .table-paginator .mat-mdc-paginator-range-label {
+  color: var(--text);
+}
+
+::ng-deep .table-paginator .mat-mdc-icon-button {
+  color: var(--text);
+}
+
+::ng-deep .table-paginator .mat-mdc-icon-button[disabled] {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+  }
+
+  .filter-group,
+  .search-group {
+    width: 100%;
+  }
+
+  .admin-reservations-container {
+    padding: 10px;
+    height: calc(100vh - 20px);
+  }
+}

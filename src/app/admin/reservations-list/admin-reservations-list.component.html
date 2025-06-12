@@ -1,0 +1,126 @@
+<div class="admin-reservations-container">
+  <div class="admin-reservations-header">
+    <h1 class="page-header">All Reservations</h1>
+    <div class="page-subheader">
+      {{ currentDate | date : "EEEE, MMMM d, y" }}
+    </div>
+  </div>
+
+  <div class="filters-container">
+    <div class="filter-group">
+      <mat-button-toggle-group
+        [(ngModel)]="filterStatus"
+        (change)="onFilterChange()"
+      >
+        <mat-button-toggle value="all">All</mat-button-toggle>
+        <mat-button-toggle value="active">Active</mat-button-toggle>
+        <mat-button-toggle value="upcoming">Upcoming</mat-button-toggle>
+        <mat-button-toggle value="past">Past</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <div class="search-group">
+      <mat-form-field appearance="outline">
+        <mat-label>Search</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (keyup)="onSearchChange()"
+          placeholder="Search by user, vehicle, or spot"
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="loading-indicator" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Loading reservations...</span>
+  </div>
+
+  <div class="no-reservations" *ngIf="!isLoading && totalItems === 0">
+    <mat-icon>event_busy</mat-icon>
+    <p>No reservations found</p>
+  </div>
+
+  <div class="table-wrapper" *ngIf="!isLoading && totalItems > 0">
+    <div class="reservations-table-container">
+      <table mat-table [dataSource]="dataSource" class="reservations-table">
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.user || "Unknown" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="dates">
+          <th mat-header-cell *matHeaderCellDef>Dates</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.startDate | date : "MMM d, y" }}
+            <ng-container
+              *ngIf="!isSameDay(reservation.startDate, reservation.endDate)"
+            >
+              - {{ reservation.endDate | date : "MMM d, y" }}
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="spot">
+          <th mat-header-cell *matHeaderCellDef>Spot</th>
+          <td mat-cell *matCellDef="let reservation">{{ reservation.spot }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="vehicle">
+          <th mat-header-cell *matHeaderCellDef>Vehicle</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.vehicle }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let reservation">
+            <div
+              class="status-badge"
+              [ngClass]="getReservationStatus(reservation)"
+            >
+              {{ getReservationStatus(reservation) | titlecase }}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let reservation">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="cancelReservation(reservation)"
+              [disabled]="getReservationStatus(reservation) === 'past'"
+              aria-label="Cancel reservation"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+      class="table-paginator"
+    >
+    </mat-paginator>
+  </div>
+</div>

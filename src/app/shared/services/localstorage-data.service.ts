@@ -166,10 +166,38 @@ export class LocalstorageDataService extends DataService {
         this.allReservationsKey,
         JSON.stringify(filteredAllReservations)
       );
+
+      const allUsers = this.getAllStoredUsers();
+      for (const userId of allUsers) {
+        const userReservationsKey = `${userId}_${this.reservationsKey}`;
+        const userReservationsData = localStorage.getItem(userReservationsKey);
+        if (userReservationsData) {
+          const userReservations = JSON.parse(userReservationsData);
+          const filteredUserReservations = userReservations.filter(
+            (r: any) => r.id !== id
+          );
+          localStorage.setItem(
+            userReservationsKey,
+            JSON.stringify(filteredUserReservations)
+          );
+        }
+      }
     } catch (error) {
       console.error('Error deleting reservation from localStorage:', error);
       throw error;
     }
+  }
+
+  private getAllStoredUsers(): string[] {
+    const users: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.endsWith('_userReservations')) {
+        const userId = key.replace('_userReservations', '');
+        users.push(userId);
+      }
+    }
+    return users;
   }
 
   async getUpcomingReservations(): Promise<Reservation[]> {
@@ -326,27 +354,22 @@ export class LocalstorageDataService extends DataService {
           throw new Error('No vehicles found in user data');
         }
 
-        // Get the vehicle to be deleted
         const vehicleToDelete = user.cars.find((v: Vehicle) => v.id === id);
 
         if (!vehicleToDelete) {
           throw new Error(`Vehicle with id ${id} not found`);
         }
 
-        // Get all reservations
         const reservations = await this.getReservations();
 
-        // Find reservations that use this vehicle
         const reservationsToDelete = reservations.filter(
           (res) => res.vehicle === vehicleToDelete.plate
         );
 
-        // Delete each reservation that uses this vehicle
         for (const reservation of reservationsToDelete) {
           await this.deleteReservation(reservation.id);
         }
 
-        // Now delete the vehicle
         user.cars = user.cars.filter((v: Vehicle) => v.id !== id);
         localStorage.setItem('userData', JSON.stringify(user));
       } else {
@@ -415,18 +438,34 @@ export class LocalstorageDataService extends DataService {
   async getAllReservations(): Promise<Reservation[]> {
     try {
       const allReservationsStr = localStorage.getItem(this.allReservationsKey);
+
       if (!allReservationsStr) {
         const userReservations = await this.getReservations();
+        const currentUser = await this.getCurrentUser();
+        const username =
+          currentUser?.username || currentUser?.email || 'Unknown User';
+
+        const reservationsWithUser = userReservations.map((res) => ({
+          ...res,
+          user: username,
+        }));
+
         localStorage.setItem(
           this.allReservationsKey,
-          JSON.stringify(userReservations)
+          JSON.stringify(reservationsWithUser)
         );
-        return userReservations;
+        return reservationsWithUser;
       }
 
-      const allReservations: Reservation[] = JSON.parse(allReservationsStr);
+      const allReservations: any[] = JSON.parse(allReservationsStr);
+
+      const currentUser = await this.getCurrentUser();
+      const username =
+        currentUser?.username || currentUser?.email || 'Unknown User';
+
       return allReservations.map((res) => ({
         ...res,
+        user: res.user || username,
         startDate: new Date(res.startDate),
         endDate: new Date(res.endDate),
       }));

@@ -33,12 +33,36 @@
   transform: scale(1.1);
 }
 
+.admin-logo {
+  width: 40px;
+  height: 40px;
+  background-color: var(--accent);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.admin-logo:hover {
+  transform: scale(1.1);
+}
+
 .menu-items {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 15px;
   flex: 1;
+  margin-top: 15px;
+}
+
+.logo-container + .menu-items {
+  margin-top: 0;
 }
 
 .menu-item {
@@ -77,6 +101,20 @@
 
 .theme-toggle mat-icon {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.logout-button {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.logout-button:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+}
+
+.logout-button mat-icon {
+  color: #ff6b6b;
 }
 
 .user-profile {

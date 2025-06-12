@@ -17,6 +17,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
   imports: [
@@ -38,6 +41,9 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatDialogModule,
+    MatButtonToggleModule,
+    MatTableModule,
+    MatPaginatorModule,
   ],
   exports: [
     MatButtonModule,
@@ -58,6 +64,9 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatDialogModule,
+    MatButtonToggleModule,
+    MatTableModule,
+    MatPaginatorModule,
   ],
 })
 export class MaterialModule {}

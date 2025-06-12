@@ -14,6 +14,7 @@ import { HomeComponent } from './home/home.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { LoaderService } from './shared/services/loader.service';
 import { AuthService } from './shared/services/auth.service';
+import { AdminService } from './shared/services/admin.service';
 
 @Component({
   selector: 'app-root',
@@ -32,11 +33,13 @@ import { AuthService } from './shared/services/auth.service';
 export class AppComponent implements OnInit {
   title = 'parking-app';
   isLoggedIn = false;
+  hasNavigatedFromRoot = false;
 
   constructor(
     private router: Router,
     private loaderService: LoaderService,
     private authService: AuthService,
+    private adminService: AdminService
   ) {
     this.setupRouterEvents();
   }
