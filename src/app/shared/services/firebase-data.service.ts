@@ -145,9 +145,25 @@ export class FirebaseDataService extends DataService {
 
   async deleteReservation(id: number): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
-      const path = `${this.reservationsPath}/${userId}/${id}`;
-      await this.deleteData(path);
+      const allReservations = await this.getAllReservations();
+      const reservationToDelete = allReservations.find((r) => r.id === id);
+
+      if (!reservationToDelete) {
+        throw new Error(`Reservation with id ${id} not found`);
+      }
+
+      const usersSnapshot = await this.getData(this.usersPath);
+      if (usersSnapshot) {
+        for (const userId in usersSnapshot) {
+          const userReservationsPath = `${this.reservationsPath}/${userId}/${id}`;
+          try {
+            await this.deleteData(userReservationsPath);
+            break;
+          } catch (error) {
+            continue;
+          }
+        }
+      }
     } catch (error) {
       console.error('Error deleting reservation from Firebase:', error);
       throw error;

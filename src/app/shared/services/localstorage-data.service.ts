@@ -166,10 +166,38 @@ export class LocalstorageDataService extends DataService {
         this.allReservationsKey,
         JSON.stringify(filteredAllReservations)
       );
+
+      const allUsers = this.getAllStoredUsers();
+      for (const userId of allUsers) {
+        const userReservationsKey = `${userId}_${this.reservationsKey}`;
+        const userReservationsData = localStorage.getItem(userReservationsKey);
+        if (userReservationsData) {
+          const userReservations = JSON.parse(userReservationsData);
+          const filteredUserReservations = userReservations.filter(
+            (r: any) => r.id !== id
+          );
+          localStorage.setItem(
+            userReservationsKey,
+            JSON.stringify(filteredUserReservations)
+          );
+        }
+      }
     } catch (error) {
       console.error('Error deleting reservation from localStorage:', error);
       throw error;
     }
+  }
+
+  private getAllStoredUsers(): string[] {
+    const users: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.endsWith('_userReservations')) {
+        const userId = key.replace('_userReservations', '');
+        users.push(userId);
+      }
+    }
+    return users;
   }
 
   async getUpcomingReservations(): Promise<Reservation[]> {
