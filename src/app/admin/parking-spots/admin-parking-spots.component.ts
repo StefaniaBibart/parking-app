@@ -7,6 +7,7 @@ import { ParkingSpot } from '../../shared/models/parking-spot.model';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
   selector: 'app-admin-parking-spots',
@@ -30,6 +31,7 @@ export class AdminParkingSpotsComponent implements OnInit {
   constructor(
     private configService: ConfigService,
     private dataService: DataService,
+    private parkingSpotService: ParkingSpotService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
@@ -40,8 +42,8 @@ export class AdminParkingSpotsComponent implements OnInit {
     this.updateVisibleFloors();
   }
 
-  loadParkingSpots() {
-    this.parkingSpots = this.configService.generateParkingSpots();
+  async loadParkingSpots() {
+    this.parkingSpots = await this.parkingSpotService.getParkingSpots();
     this.calculateStatistics();
   }
 
@@ -108,7 +110,7 @@ export class AdminParkingSpotsComponent implements OnInit {
           await this.dataService.deleteReservation(reservation.id);
         }
 
-        this.configService.removeParkingSpot(spot.id);
+        await this.parkingSpotService.removeParkingSpot(spot.id);
         this.loadParkingSpots();
 
         const message =
@@ -134,7 +136,7 @@ export class AdminParkingSpotsComponent implements OnInit {
     }
   }
 
-  addSpotToFloor(floor: string) {
+  async addSpotToFloor(floor: string) {
     const floorSpots = this.parkingSpots.filter((spot) => spot.floor === floor);
     const spotNumbers = floorSpots.map((spot) =>
       parseInt(spot.id.substring(1))
@@ -144,7 +146,7 @@ export class AdminParkingSpotsComponent implements OnInit {
 
     const newSpotId = `${floor}${nextSpotNumber}`;
 
-    this.configService.addParkingSpot(floor, nextSpotNumber);
+    await this.parkingSpotService.addParkingSpot(floor, nextSpotNumber);
 
     this.loadParkingSpots();
 

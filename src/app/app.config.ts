@@ -15,6 +15,8 @@ import {
   DataProviderService,
 } from './shared/services/data-provider.service';
 import { DataServiceFactory } from './shared/services/data-service-factory';
+import { ParkingSpotService } from './shared/services/parking-spot.service';
+import { LocalStorageParkingSpotService } from './shared/services/localstorage-parking-spot.service';
 
 const firebaseConfig = {
   apiKey: environment.FIREBASE_AUTH_KEY,
@@ -39,6 +41,12 @@ export const appConfig: ApplicationConfig = {
 
     FirebaseDataService,
     LocalstorageDataService,
+    LocalStorageParkingSpotService,
+
+    {
+      provide: ParkingSpotService,
+      useClass: LocalStorageParkingSpotService,
+    },
 
     {
       provide: DataProviderService,

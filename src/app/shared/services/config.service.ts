@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ParkingSpot } from '../models/parking-spot.model';
 
 function generateSpotsForFloor(
   floor: string,
@@ -34,7 +33,7 @@ export class ConfigService {
     },
   };
 
-  private settings: any;
+  public settings: any;
 
   constructor() {
     this.loadSettings();
@@ -50,7 +49,7 @@ export class ConfigService {
     }
   }
 
-  private saveSettings() {
+  public saveSettings() {
     localStorage.setItem('parkingSettings', JSON.stringify(this.settings));
   }
 
@@ -64,41 +63,6 @@ export class ConfigService {
 
   get maxReservationsPerDay() {
     return this.settings.maxReservationsPerDay;
-  }
-
-  generateParkingSpots(): ParkingSpot[] {
-    return this.settings.parkingLayout.spots.map((spot: any) => ({
-      id: spot.id,
-      available: true,
-      floor: spot.floor,
-    }));
-  }
-
-  addParkingSpot(floor: string, spotNumber: number): void {
-    const newSpotId = `${floor}${spotNumber}`;
-
-    const existingSpot = this.settings.parkingLayout.spots.find(
-      (spot: any) => spot.id === newSpotId
-    );
-
-    if (!existingSpot) {
-      this.settings.parkingLayout.spots.push({
-        id: newSpotId,
-        floor: floor,
-      });
-      this.saveSettings();
-    }
-  }
-
-  removeParkingSpot(spotId: string): void {
-    const index = this.settings.parkingLayout.spots.findIndex(
-      (spot: any) => spot.id === spotId
-    );
-
-    if (index > -1) {
-      this.settings.parkingLayout.spots.splice(index, 1);
-      this.saveSettings();
-    }
   }
 
   resetToDefaults(): void {
