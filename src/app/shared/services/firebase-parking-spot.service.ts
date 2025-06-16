@@ -1,45 +1,60 @@
 import { Injectable } from '@angular/core';
+import { getDatabase, ref, get, set } from 'firebase/database';
 import { ParkingSpotService } from './parking-spot.service';
-import { ConfigService } from './config.service';
 import { ParkingSpot } from '../models/parking-spot.model';
+import { ConfigService } from './config.service';
 
 @Injectable()
-export class LocalStorageParkingSpotService extends ParkingSpotService {
+export class FirebaseParkingSpotService extends ParkingSpotService {
+  private settingsPath = 'parkingSettings';
   private settingsLoaded = false;
-  private parkingSettingsKey = 'parkingSettings';
 
   constructor(private configService: ConfigService) {
     super();
   }
 
-  private loadSettings(): void {
-    const savedSettings = localStorage.getItem(this.parkingSettingsKey);
-    if (savedSettings) {
-      this.configService.settings = JSON.parse(savedSettings);
-    } else {
+  private async loadSettings(): Promise<void> {
+    try {
+      const db = getDatabase();
+      const settingsRef = ref(db, this.settingsPath);
+      const snapshot = await get(settingsRef);
+      if (snapshot.exists()) {
+        this.configService.settings = snapshot.val();
+      } else {
+        this.configService.settings = JSON.parse(
+          JSON.stringify(this.configService.defaultSettings)
+        );
+        await this.saveSettings();
+      }
+    } catch (error) {
+      console.error('Error loading settings from Firebase:', error);
       this.configService.settings = JSON.parse(
         JSON.stringify(this.configService.defaultSettings)
       );
-      this.saveSettings();
+    } finally {
+      this.settingsLoaded = true;
     }
-    this.settingsLoaded = true;
   }
 
-  private saveSettings(): void {
-    localStorage.setItem(
-      this.parkingSettingsKey,
-      JSON.stringify(this.configService.settings)
-    );
+  private async saveSettings(): Promise<void> {
+    try {
+      const db = getDatabase();
+      const settingsRef = ref(db, this.settingsPath);
+      await set(settingsRef, this.configService.settings);
+    } catch (error) {
+      console.error('Error saving settings to Firebase:', error);
+      throw error;
+    }
   }
 
-  private ensureSettingsLoaded(): void {
+  private async ensureSettingsLoaded(): Promise<void> {
     if (!this.settingsLoaded) {
-      this.loadSettings();
+      await this.loadSettings();
     }
   }
 
   async getParkingSpots(): Promise<ParkingSpot[]> {
-    this.ensureSettingsLoaded();
+    await this.ensureSettingsLoaded();
     const spots = this.configService.settings.parkingLayout.spots.map(
       (spot: any) => ({
         id: spot.id,
@@ -51,7 +66,7 @@ export class LocalStorageParkingSpotService extends ParkingSpotService {
   }
 
   async addParkingSpot(floor: string, spotNumber: number): Promise<void> {
-    this.ensureSettingsLoaded();
+    await this.ensureSettingsLoaded();
     const newSpotId = `${floor}${spotNumber}`;
     const existingSpot = this.configService.settings.parkingLayout.spots.find(
       (spot: any) => spot.id === newSpotId
@@ -62,21 +77,19 @@ export class LocalStorageParkingSpotService extends ParkingSpotService {
         id: newSpotId,
         floor: floor,
       });
-      this.saveSettings();
+      await this.saveSettings();
     }
-    return Promise.resolve();
   }
 
   async removeParkingSpot(spotId: string): Promise<void> {
-    this.ensureSettingsLoaded();
+    await this.ensureSettingsLoaded();
     const index = this.configService.settings.parkingLayout.spots.findIndex(
       (spot: any) => spot.id === spotId
     );
 
     if (index > -1) {
       this.configService.settings.parkingLayout.spots.splice(index, 1);
-      this.saveSettings();
+      await this.saveSettings();
     }
-    return Promise.resolve();
   }
 }

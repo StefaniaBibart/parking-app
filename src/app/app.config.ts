@@ -17,6 +17,7 @@ import {
 import { DataServiceFactory } from './shared/services/data-service-factory';
 import { ParkingSpotService } from './shared/services/parking-spot.service';
 import { LocalStorageParkingSpotService } from './shared/services/localstorage-parking-spot.service';
+import { FirebaseParkingSpotService } from './shared/services/firebase-parking-spot.service';
 
 const firebaseConfig = {
   apiKey: environment.FIREBASE_AUTH_KEY,
@@ -31,6 +32,7 @@ try {
 }
 
 const DEFAULT_DATA_PROVIDER = DataProviderType.FIREBASE;
+const PARKING_SPOT_PROVIDER = DataProviderType.FIREBASE; // or DataProviderType.LOCALSTORAGE
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,10 +44,20 @@ export const appConfig: ApplicationConfig = {
     FirebaseDataService,
     LocalstorageDataService,
     LocalStorageParkingSpotService,
+    FirebaseParkingSpotService,
 
     {
       provide: ParkingSpotService,
-      useClass: LocalStorageParkingSpotService,
+      useFactory: (
+        localStorageService: LocalStorageParkingSpotService,
+        firebaseService: FirebaseParkingSpotService
+      ) => {
+        if (PARKING_SPOT_PROVIDER === DataProviderType.FIREBASE) {
+          return firebaseService;
+        }
+        return localStorageService;
+      },
+      deps: [LocalStorageParkingSpotService, FirebaseParkingSpotService],
     },
 
     {

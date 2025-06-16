@@ -19,7 +19,7 @@ function generateSpotsForFloor(
   providedIn: 'root',
 })
 export class ConfigService {
-  private defaultSettings = {
+  readonly defaultSettings = {
     allowOverlappingReservations: true,
     maxReservationsPerDay: 1,
     parkingLayout: {
@@ -33,25 +33,9 @@ export class ConfigService {
     },
   };
 
-  public settings: any;
+  public settings: any = JSON.parse(JSON.stringify(this.defaultSettings));
 
-  constructor() {
-    this.loadSettings();
-  }
-
-  private loadSettings() {
-    const savedSettings = localStorage.getItem('parkingSettings');
-    if (savedSettings) {
-      this.settings = JSON.parse(savedSettings);
-    } else {
-      this.settings = JSON.parse(JSON.stringify(this.defaultSettings));
-      this.saveSettings();
-    }
-  }
-
-  public saveSettings() {
-    localStorage.setItem('parkingSettings', JSON.stringify(this.settings));
-  }
+  constructor() {}
 
   get parkingLayout() {
     return this.settings.parkingLayout;
@@ -66,7 +50,6 @@ export class ConfigService {
   }
 
   resetToDefaults(): void {
-    this.settings = JSON.parse(JSON.stringify(this.defaultSettings));
-    this.saveSettings();
+    // This will be handled by the active service now
   }
 }
