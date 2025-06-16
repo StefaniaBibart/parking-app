@@ -6,4 +6,6 @@ export abstract class ParkingSpotService {
   abstract getParkingSpots(): Promise<ParkingSpot[]>;
   abstract addParkingSpot(floor: string, spotNumber: number): Promise<void>;
   abstract removeParkingSpot(spotId: string): Promise<void>;
+  abstract clearParkingLayout(): Promise<void>;
+  abstract populateDefaultParkingLayout(): Promise<void>;
 }

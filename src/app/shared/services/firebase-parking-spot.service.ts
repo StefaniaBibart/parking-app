@@ -92,4 +92,21 @@ export class FirebaseParkingSpotService extends ParkingSpotService {
       await this.saveSettings();
     }
   }
+
+  async clearParkingLayout(): Promise<void> {
+    await this.ensureSettingsLoaded();
+    this.configService.settings.parkingLayout = {
+      floors: [],
+      spots: [],
+    };
+    await this.saveSettings();
+  }
+
+  async populateDefaultParkingLayout(): Promise<void> {
+    await this.ensureSettingsLoaded();
+    this.configService.settings.parkingLayout = JSON.parse(
+      JSON.stringify(this.configService.defaultSettings.parkingLayout)
+    );
+    await this.saveSettings();
+  }
 }

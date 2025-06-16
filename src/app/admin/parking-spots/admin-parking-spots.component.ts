@@ -159,4 +159,46 @@ export class AdminParkingSpotsComponent implements OnInit {
       }
     );
   }
+
+  async onClearParkingLayout() {
+    try {
+      await this.parkingSpotService.clearParkingLayout();
+      await this.loadParkingSpots();
+      this.snackBar.open('Parking layout cleared successfully!', 'Close', {
+        duration: 3000,
+        panelClass: ['success-snackbar'],
+      });
+    } catch (error) {
+      console.error('Error clearing parking layout:', error);
+      this.snackBar.open('Failed to clear parking layout.', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+    }
+  }
+
+  async onPopulateDefaultLayout() {
+    try {
+      await this.parkingSpotService.populateDefaultParkingLayout();
+      await this.loadParkingSpots();
+      this.snackBar.open(
+        'Parking layout populated with defaults successfully!',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        }
+      );
+    } catch (error) {
+      console.error('Error populating default parking layout:', error);
+      this.snackBar.open(
+        'Failed to populate default parking layout.',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
+      );
+    }
+  }
 }

@@ -79,4 +79,23 @@ export class LocalStorageParkingSpotService extends ParkingSpotService {
     }
     return Promise.resolve();
   }
+
+  async clearParkingLayout(): Promise<void> {
+    this.ensureSettingsLoaded();
+    this.configService.settings.parkingLayout = {
+      floors: [],
+      spots: [],
+    };
+    this.saveSettings();
+    return Promise.resolve();
+  }
+
+  async populateDefaultParkingLayout(): Promise<void> {
+    this.ensureSettingsLoaded();
+    this.configService.settings.parkingLayout = JSON.parse(
+      JSON.stringify(this.configService.defaultSettings.parkingLayout)
+    );
+    this.saveSettings();
+    return Promise.resolve();
+  }
 }
