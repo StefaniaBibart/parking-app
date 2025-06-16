@@ -14,6 +14,8 @@ import { Vehicle } from '../../shared/models/vehicle.model';
 import { ConfigService } from '../../shared/services/config.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Reservation } from '../../shared/models/reservation.model';
+import { ParkingSpotService } from '../../shared/services/parking-spot.service';
+import { ParkingSpot } from '../../shared/models/parking-spot.model';
 
 @Component({
   selector: 'app-reservation-form',
@@ -46,7 +48,8 @@ export class ReservationFormComponent implements OnInit {
     private router: Router,
     private dataService: DataService,
     private configService: ConfigService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private parkingSpotService: ParkingSpotService
   ) {}
 
   async ngOnInit() {
@@ -143,9 +146,8 @@ export class ReservationFormComponent implements OnInit {
 
   async checkAvailableSpots(startDate: Date, endDate: Date): Promise<string[]> {
     try {
-      const allSpots = this.configService
-        .generateParkingSpots()
-        .map((spot) => spot.id);
+      const allParkingSpots = await this.parkingSpotService.getParkingSpots();
+      const allSpots = allParkingSpots.map((spot: ParkingSpot) => spot.id);
 
       const reservations = await this.dataService.getAllReservations();
 
@@ -163,7 +165,7 @@ export class ReservationFormComponent implements OnInit {
       const bookedSpots = overlappingReservations.map((res) => res.spot);
 
       const availableSpots = allSpots.filter(
-        (spot) => !bookedSpots.includes(spot)
+        (spot: string) => !bookedSpots.includes(spot)
       );
 
       return availableSpots;

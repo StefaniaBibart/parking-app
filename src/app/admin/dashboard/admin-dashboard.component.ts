@@ -5,6 +5,7 @@ import { DataService } from '../../shared/services/data.service';
 import { ConfigService } from '../../shared/services/config.service';
 import { Reservation } from '../../shared/models/reservation.model';
 import { ParkingSpot } from '../../shared/models/parking-spot.model';
+import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -32,7 +33,8 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private parkingSpotService: ParkingSpotService
   ) {}
 
   async ngOnInit() {
@@ -41,7 +43,7 @@ export class AdminDashboardComponent implements OnInit {
 
   async loadDashboardData() {
     try {
-      const allSpots = this.configService.generateParkingSpots();
+      const allSpots = await this.parkingSpotService.getParkingSpots();
       this.totalSpots = allSpots.length;
 
       const allReservations = await this.dataService.getAllReservations();

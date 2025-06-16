@@ -9,6 +9,7 @@ import { Vehicle } from '../../shared/models/vehicle.model';
 import { ConfigService } from '../../shared/services/config.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ParkingSpot } from '../../shared/models/parking-spot.model';
+import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
   selector: 'app-spot-selection',
@@ -40,14 +41,15 @@ export class SpotSelectionComponent implements OnInit {
     private router: Router,
     private dataService: DataService,
     private configService: ConfigService,
-    private snackBar: MatSnackBar
-  ) {
-    this.parkingSpots = this.configService.generateParkingSpots();
-    this.updateVisibleFloors();
-  }
+    private snackBar: MatSnackBar,
+    private parkingSpotService: ParkingSpotService
+  ) {}
 
   async ngOnInit() {
     try {
+      this.parkingSpots = await this.parkingSpotService.getParkingSpots();
+      this.updateVisibleFloors();
+
       this.userVehicles = await this.dataService.getUserVehicles();
       this.userReservations = await this.dataService.getReservations();
 
