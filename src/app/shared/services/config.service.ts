@@ -1,6 +1,21 @@
 import { Injectable } from '@angular/core';
 import { ParkingSpot } from '../models/parking-spot.model';
 
+function generateSpotsForFloor(
+  floor: string,
+  count: number,
+  start = 1
+): { id: string; floor: string }[] {
+  const spots = [];
+  for (let i = 0; i < count; i++) {
+    spots.push({
+      id: `${floor}${start + i}`,
+      floor: floor,
+    });
+  }
+  return spots;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -11,26 +26,10 @@ export class ConfigService {
     parkingLayout: {
       floors: ['A', 'B', 'C', 'D'],
       spots: [
-        { id: 'A1', floor: 'A' },
-        { id: 'A2', floor: 'A' },
-        { id: 'A3', floor: 'A' },
-        { id: 'A4', floor: 'A' },
-        { id: 'A5', floor: 'A' },
-        { id: 'B7', floor: 'B' },
-        { id: 'B8', floor: 'B' },
-        { id: 'B9', floor: 'B' },
-        { id: 'B10', floor: 'B' },
-        { id: 'B11', floor: 'B' },
-        { id: 'C1', floor: 'C' },
-        { id: 'C2', floor: 'C' },
-        { id: 'C3', floor: 'C' },
-        { id: 'C4', floor: 'C' },
-        { id: 'C5', floor: 'C' },
-        { id: 'D6', floor: 'D' },
-        { id: 'D7', floor: 'D' },
-        { id: 'D8', floor: 'D' },
-        { id: 'D9', floor: 'D' },
-        { id: 'D10', floor: 'D' },
+        ...generateSpotsForFloor('A', 5, 1),
+        ...generateSpotsForFloor('B', 5, 7),
+        ...generateSpotsForFloor('C', 5, 1),
+        ...generateSpotsForFloor('D', 5, 6),
       ],
     },
   };
