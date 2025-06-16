@@ -76,7 +76,7 @@ export class LoginComponent {
             if (isAdmin) {
               this.router.navigate(['/admin/dashboard']);
             } else {
-              this.router.navigate(['/new-reservation']);
+              this.router.navigate(['/home']);
             }
           }
         });

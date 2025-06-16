@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, mergeMap } from 'rxjs/operators';
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -89,7 +89,7 @@ export class AuthService {
   login(email: string, password: string): Observable<UserCredential> {
     const auth = getAuth();
     return from(signInWithEmailAndPassword(auth, email, password)).pipe(
-      tap(async (userCredential) => {
+      mergeMap(async (userCredential) => {
         if (userCredential.user) {
           const token = await userCredential.user.getIdToken();
 
@@ -121,6 +121,7 @@ export class AuthService {
             this.userSubject.next(authData);
           }
         }
+        return userCredential;
       }),
       catchError((error) => {
         console.error('Login error:', error);
