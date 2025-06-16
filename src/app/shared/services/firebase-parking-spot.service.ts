@@ -20,7 +20,25 @@ export class FirebaseParkingSpotService extends ParkingSpotService {
       const snapshot = await get(settingsRef);
       if (snapshot.exists()) {
         this.configService.settings = snapshot.val();
+
+        // Guard against missing parkingLayout or its properties from Firebase
+        if (!this.configService.settings.parkingLayout) {
+          this.configService.settings.parkingLayout = JSON.parse(
+            JSON.stringify(this.configService.defaultSettings.parkingLayout)
+          );
+        }
+        if (!this.configService.settings.parkingLayout.spots) {
+          this.configService.settings.parkingLayout.spots = [];
+        }
+        if (!this.configService.settings.parkingLayout.floors) {
+          this.configService.settings.parkingLayout.floors = JSON.parse(
+            JSON.stringify(
+              this.configService.defaultSettings.parkingLayout.floors
+            )
+          );
+        }
       } else {
+        // If no settings in Firebase, use defaults from ConfigService and save them
         this.configService.settings = JSON.parse(
           JSON.stringify(this.configService.defaultSettings)
         );
@@ -96,7 +114,7 @@ export class FirebaseParkingSpotService extends ParkingSpotService {
   async clearParkingLayout(): Promise<void> {
     await this.ensureSettingsLoaded();
     this.configService.settings.parkingLayout = {
-      floors: [],
+      floors: this.configService.defaultSettings.parkingLayout.floors,
       spots: [],
     };
     await this.saveSettings();
