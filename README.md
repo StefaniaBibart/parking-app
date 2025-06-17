@@ -162,4 +162,4 @@ We recommend using `npm start` because:
 - It will automatically use any custom configurations defined in package.json
 - It doesn't require global Angular CLI installation
 
-The application will be available at `http://localhost:4200/` and will automatically reload if you change any of the source files.
+The application will be available at `http://localhost:4200/`.
