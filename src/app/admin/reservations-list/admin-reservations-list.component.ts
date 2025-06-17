@@ -200,4 +200,8 @@ export class AdminReservationsListComponent implements OnInit {
       d1.getDate() === d2.getDate()
     );
   }
+
+  editReservation(reservation: Reservation) {
+    console.log('Edit reservation:', reservation);
+  }
 }
