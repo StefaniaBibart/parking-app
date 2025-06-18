@@ -190,6 +190,17 @@
   transition: all 0.3s ease;
 }
 
+.parking-spot.blocked {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(244, 67, 54, 0.1),
+    rgba(244, 67, 54, 0.1) 10px,
+    rgba(244, 67, 54, 0.2) 10px,
+    rgba(244, 67, 54, 0.2) 20px
+  );
+  border-color: #f44336;
+}
+
 .parking-spot:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);

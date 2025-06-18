@@ -9,6 +9,12 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 import { FormsModule } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent } from '@angular/material/paginator';
+import { ParkingSpotService } from '../../shared/services/parking-spot.service';
+import { ParkingSpot } from '../../shared/models/parking-spot.model';
+
+interface EnrichedReservation extends Reservation {
+  isSpotBlocked?: boolean;
+}
 
 @Component({
   selector: 'app-admin-reservations-list',
@@ -18,9 +24,9 @@ import { PageEvent } from '@angular/material/paginator';
   styleUrls: ['./admin-reservations-list.component.css'],
 })
 export class AdminReservationsListComponent implements OnInit {
-  allReservations: Reservation[] = [];
-  filteredReservations: Reservation[] = [];
-  dataSource = new MatTableDataSource<Reservation>([]);
+  allReservations: EnrichedReservation[] = [];
+  filteredReservations: EnrichedReservation[] = [];
+  dataSource = new MatTableDataSource<EnrichedReservation>([]);
   isLoading = true;
   currentDate = new Date();
 
@@ -35,8 +41,9 @@ export class AdminReservationsListComponent implements OnInit {
   displayedColumns: string[] = [
     'user',
     'dates',
-    'spot',
     'vehicle',
+    'spot',
+    'spotStatus',
     'status',
     'actions',
   ];
@@ -44,7 +51,8 @@ export class AdminReservationsListComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private parkingSpotService: ParkingSpotService
   ) {}
 
   async ngOnInit() {
@@ -54,7 +62,16 @@ export class AdminReservationsListComponent implements OnInit {
   async loadReservations() {
     this.isLoading = true;
     try {
-      this.allReservations = await this.dataService.getAllReservations();
+      const reservations = await this.dataService.getAllReservations();
+      const spots = await this.parkingSpotService.getParkingSpots();
+      const spotMap = new Map<string, ParkingSpot>(
+        spots.map((spot) => [spot.id, spot])
+      );
+
+      this.allReservations = reservations.map((res) => ({
+        ...res,
+        isSpotBlocked: spotMap.get(res.spot)?.isBlocked ?? false,
+      }));
       this.applyFilters();
     } catch (error) {
       console.error('Error loading reservations:', error);

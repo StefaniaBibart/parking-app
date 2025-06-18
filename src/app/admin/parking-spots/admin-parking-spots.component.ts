@@ -88,6 +88,36 @@ export class AdminParkingSpotsComponent implements OnInit {
     return this.availableFloors.length - 2;
   }
 
+  async toggleBlockSpot(spot: ParkingSpot) {
+    const newBlockedStatus = !spot.isBlocked;
+    try {
+      await this.parkingSpotService.updateParkingSpot(spot.id, {
+        isBlocked: newBlockedStatus,
+      });
+      this.loadParkingSpots();
+      this.snackBar.open(
+        `Parking spot ${spot.id} has been ${
+          newBlockedStatus ? 'blocked' : 'unblocked'
+        }.`,
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        }
+      );
+    } catch (error) {
+      console.error('Error updating spot status:', error);
+      this.snackBar.open(
+        'Error updating parking spot status. Please try again.',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
+      );
+    }
+  }
+
   async removeSpot(spot: ParkingSpot) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {

@@ -78,6 +78,7 @@ export class FirebaseParkingSpotService extends ParkingSpotService {
         id: spot.id,
         available: true,
         floor: spot.floor,
+        isBlocked: spot.isBlocked || false,
       })
     );
     return Promise.resolve(spots);
@@ -94,7 +95,23 @@ export class FirebaseParkingSpotService extends ParkingSpotService {
       this.configService.settings.parkingLayout.spots.push({
         id: newSpotId,
         floor: floor,
+        isBlocked: false,
       });
+      await this.saveSettings();
+    }
+  }
+
+  async updateParkingSpot(
+    spotId: string,
+    spotData: Partial<ParkingSpot>
+  ): Promise<void> {
+    await this.ensureSettingsLoaded();
+    const spot = this.configService.settings.parkingLayout.spots.find(
+      (s: any) => s.id === spotId
+    );
+
+    if (spot) {
+      Object.assign(spot, spotData);
       await this.saveSettings();
     }
   }
