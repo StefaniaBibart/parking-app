@@ -45,6 +45,7 @@ export class LocalStorageParkingSpotService extends ParkingSpotService {
         id: spot.id,
         available: true,
         floor: spot.floor,
+        isBlocked: spot.isBlocked || false,
       })
     );
     return Promise.resolve(spots);
@@ -61,9 +62,27 @@ export class LocalStorageParkingSpotService extends ParkingSpotService {
       this.configService.settings.parkingLayout.spots.push({
         id: newSpotId,
         floor: floor,
+        isBlocked: false,
       });
       this.saveSettings();
     }
+    return Promise.resolve();
+  }
+
+  async updateParkingSpot(
+    spotId: string,
+    spotData: Partial<ParkingSpot>
+  ): Promise<void> {
+    this.ensureSettingsLoaded();
+    const spot = this.configService.settings.parkingLayout.spots.find(
+      (s: any) => s.id === spotId
+    );
+
+    if (spot) {
+      Object.assign(spot, spotData);
+      this.saveSettings();
+    }
+
     return Promise.resolve();
   }
 

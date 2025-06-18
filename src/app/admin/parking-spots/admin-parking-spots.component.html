@@ -51,8 +51,18 @@
         <div
           *ngFor="let spot of getFloorSpots(visibleFloors[0])"
           class="parking-spot"
+          [class.blocked]="spot.isBlocked"
         >
           <span>{{ spot.id }}</span>
+          <button
+            mat-icon-button
+            (click)="toggleBlockSpot(spot)"
+            class="block-spot-btn"
+            aria-label="Toggle block on spot"
+            [color]="spot.isBlocked ? 'accent' : 'primary'"
+          >
+            <mat-icon>{{ spot.isBlocked ? "lock_open" : "lock" }}</mat-icon>
+          </button>
           <button
             mat-icon-button
             color="warn"
@@ -94,8 +104,18 @@
         <div
           *ngFor="let spot of getFloorSpots(visibleFloors[1])"
           class="parking-spot"
+          [class.blocked]="spot.isBlocked"
         >
           <span>{{ spot.id }}</span>
+          <button
+            mat-icon-button
+            (click)="toggleBlockSpot(spot)"
+            class="block-spot-btn"
+            aria-label="Toggle block on spot"
+            [color]="spot.isBlocked ? 'accent' : 'primary'"
+          >
+            <mat-icon>{{ spot.isBlocked ? "lock_open" : "lock" }}</mat-icon>
+          </button>
           <button
             mat-icon-button
             color="warn"
