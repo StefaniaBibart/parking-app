@@ -43,11 +43,13 @@
           *ngFor="let spot of getFloorSpots(visibleFloors[0])"
           [class.selected]="selectedSpot === spot.id"
           [class.occupied]="!spot.available"
+          [class.blocked]="spot.isBlocked"
           class="parking-spot"
-          (click)="selectSpot(spot.id)"
+          (click)="selectSpot(spot)"
         >
-          <span *ngIf="spot.available">{{ spot.id }}</span>
+          <span *ngIf="spot.available && !spot.isBlocked">{{ spot.id }}</span>
           <mat-icon *ngIf="!spot.available">directions_car</mat-icon>
+          <mat-icon *ngIf="spot.isBlocked">block</mat-icon>
         </div>
       </div>
 
@@ -75,11 +77,13 @@
           *ngFor="let spot of getFloorSpots(visibleFloors[1])"
           [class.selected]="selectedSpot === spot.id"
           [class.occupied]="!spot.available"
+          [class.blocked]="spot.isBlocked"
           class="parking-spot"
-          (click)="selectSpot(spot.id)"
+          (click)="selectSpot(spot)"
         >
-          <span *ngIf="spot.available">{{ spot.id }}</span>
+          <span *ngIf="spot.available && !spot.isBlocked">{{ spot.id }}</span>
           <mat-icon *ngIf="!spot.available">directions_car</mat-icon>
+          <mat-icon *ngIf="spot.isBlocked">block</mat-icon>
         </div>
       </div>
     </div>

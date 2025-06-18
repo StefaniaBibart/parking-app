@@ -178,10 +178,9 @@ export class SpotSelectionComponent implements OnInit {
     }
   }
 
-  selectSpot(spotId: string) {
-    const spot = this.parkingSpots.find((s) => s.id === spotId);
-    if (spot && spot.available) {
-      this.selectedSpot = spotId;
+  selectSpot(spot: ParkingSpot) {
+    if (spot && spot.available && !spot.isBlocked) {
+      this.selectedSpot = spot.id;
     }
   }
 
