@@ -251,3 +251,18 @@
     height: calc(100vh - 20px);
   }
 }
+
+.status-cell {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.status-blocked {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.status-active {
+  color: #4caf50;
+  font-weight: 500;
+}

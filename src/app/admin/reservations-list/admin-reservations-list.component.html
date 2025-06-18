@@ -65,11 +65,6 @@
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="spot">
-          <th mat-header-cell *matHeaderCellDef>Spot</th>
-          <td mat-cell *matCellDef="let reservation">{{ reservation.spot }}</td>
-        </ng-container>
-
         <ng-container matColumnDef="vehicle">
           <th mat-header-cell *matHeaderCellDef>Vehicle</th>
           <td mat-cell *matCellDef="let reservation">
@@ -77,8 +72,27 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="spot">
+          <th mat-header-cell *matHeaderCellDef>Spot</th>
+          <td mat-cell *matCellDef="let reservation">{{ reservation.spot }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="spotStatus">
+          <th mat-header-cell *matHeaderCellDef>Spot Status</th>
+          <td mat-cell *matCellDef="let reservation">
+            <span
+              [ngClass]="{
+                'status-blocked': reservation.isSpotBlocked,
+                'status-active': !reservation.isSpotBlocked
+              }"
+            >
+              {{ reservation.isSpotBlocked ? "Blocked" : "Active" }}
+            </span>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef>Reservation Status</th>
           <td mat-cell *matCellDef="let reservation">
             <div
               class="status-badge"
