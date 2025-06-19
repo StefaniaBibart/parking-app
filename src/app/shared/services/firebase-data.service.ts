@@ -110,6 +110,7 @@ export class FirebaseDataService extends DataService {
           reservation.endDate instanceof Date
             ? reservation.endDate.toLocaleString()
             : reservation.endDate,
+        userId: userId,
       };
 
       await this.storeData(path, reservationToStore);
@@ -121,7 +122,9 @@ export class FirebaseDataService extends DataService {
 
   async updateReservation(reservation: Reservation): Promise<void> {
     try {
-      const userId = this.getCurrentUserId();
+      const userId = reservation.userId
+        ? reservation.userId
+        : this.getCurrentUserId();
       const path = `${this.reservationsPath}/${userId}/${reservation.id}`;
 
       const reservationToStore = {
@@ -137,7 +140,7 @@ export class FirebaseDataService extends DataService {
       };
 
       await this.storeData(path, reservationToStore);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating reservation in Firebase:', error);
       throw error;
     }
@@ -207,28 +210,17 @@ export class FirebaseDataService extends DataService {
     }
   }
 
+  async getReservationById(id: number): Promise<Reservation | undefined> {
+    const reservations = await this.getAllReservations();
+    return reservations.find((reservation) => reservation.id === id);
+  }
+
   async storeTemporaryReservationData(data: {
     editingReservationId?: number;
     reservationStartDate?: string;
     reservationEndDate?: string;
     reservationVehicleId?: number;
-  }): Promise<void> {
-    try {
-      const userId = this.getCurrentUserId();
-      const path = `${this.tempDataPath}/${userId}`;
-
-      const existingData = await this.getTemporaryReservationData();
-      const updatedData = { ...existingData, ...data };
-
-      await this.storeData(path, updatedData);
-    } catch (error) {
-      console.error(
-        'Error storing temporary reservation data in Firebase:',
-        error
-      );
-      throw error;
-    }
-  }
+  }): Promise<void> {}
 
   async getTemporaryReservationData(): Promise<{
     editingReservationId?: number;
@@ -236,37 +228,30 @@ export class FirebaseDataService extends DataService {
     reservationEndDate?: string;
     reservationVehicleId?: number;
   }> {
-    try {
-      const userId = this.getCurrentUserId();
-      const path = `${this.tempDataPath}/${userId}`;
-      const data = await this.getData(path);
-      return data || {};
-    } catch (error) {
-      console.error(
-        'Error getting temporary reservation data from Firebase:',
-        error
-      );
-      return {};
-    }
+    return {};
   }
 
-  async clearTemporaryReservationData(): Promise<void> {
-    try {
-      const userId = this.getCurrentUserId();
-      const path = `${this.tempDataPath}/${userId}`;
-      await this.deleteData(path);
-    } catch (error) {
-      console.error(
-        'Error clearing temporary reservation data from Firebase:',
-        error
-      );
-      throw error;
-    }
-  }
+  async clearTemporaryReservationData(): Promise<void> {}
 
   async getUserVehicles(): Promise<Vehicle[]> {
     try {
       const userId = this.getCurrentUserId();
+      const path = `${this.usersPath}/${userId}/cars`;
+      const data = await this.getData(path);
+
+      if (!data) {
+        return [];
+      }
+
+      return Array.isArray(data) ? data : Object.values(data);
+    } catch (error) {
+      console.error('Error getting user vehicles from Firebase:', error);
+      return [];
+    }
+  }
+
+  async getUserVehiclesByUserId(userId: string): Promise<Vehicle[]> {
+    try {
       const path = `${this.usersPath}/${userId}/cars`;
       const data = await this.getData(path);
 
@@ -417,41 +402,66 @@ export class FirebaseDataService extends DataService {
 
   async getAllReservations(): Promise<Reservation[]> {
     try {
-      const path = this.reservationsPath;
-      const data = await this.getData(path);
-
-      if (!data) return [];
-
       const allReservations: Reservation[] = [];
+      const usersSnapshot = await this.getData(this.usersPath);
 
-      const usersData = await this.getData(this.usersPath);
+      if (usersSnapshot) {
+        for (const userId in usersSnapshot) {
+          const userReservationsPath = `${this.reservationsPath}/${userId}`;
+          const userReservationsSnapshot = await this.getData(
+            userReservationsPath
+          );
 
-      Object.keys(data).forEach((userId) => {
-        const userReservations = data[userId];
-        if (userReservations) {
-          const reservationsArray = Array.isArray(userReservations)
-            ? userReservations
-            : Object.values(userReservations);
+          if (userReservationsSnapshot) {
+            const reservations = Array.isArray(userReservationsSnapshot)
+              ? userReservationsSnapshot
+              : Object.values(userReservationsSnapshot);
 
-          const username =
-            usersData?.[userId]?.username ||
-            usersData?.[userId]?.email ||
-            'Unknown User';
+            const user = usersSnapshot[userId];
 
-          reservationsArray.forEach((res: any) => {
-            allReservations.push({
-              ...res,
-              user: username,
-              startDate: res.startDate ? new Date(res.startDate) : null,
-              endDate: res.endDate ? new Date(res.endDate) : null,
+            reservations.forEach((res: any) => {
+              if (res) {
+                allReservations.push({
+                  ...res,
+                  startDate: res.startDate ? new Date(res.startDate) : null,
+                  endDate: res.endDate ? new Date(res.endDate) : null,
+                  userId: userId,
+                  user: user ? user.username : 'Unknown',
+                });
+              }
             });
-          });
+          }
         }
-      });
+      }
 
       return allReservations;
     } catch (error) {
       console.error('Error getting all reservations from Firebase:', error);
+      return [];
+    }
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const path = this.usersPath;
+      const data = await this.getData(path);
+
+      if (!data) return [];
+
+      const allUsers: User[] = [];
+
+      const usersData = await this.getData(this.usersPath);
+
+      Object.keys(data).forEach((userId) => {
+        const user = usersData?.[userId];
+        if (user) {
+          allUsers.push(user);
+        }
+      });
+
+      return allUsers;
+    } catch (error) {
+      console.error('Error getting all users from Firebase:', error);
       return [];
     }
   }

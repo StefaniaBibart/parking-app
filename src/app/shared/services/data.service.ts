@@ -18,6 +18,7 @@ export abstract class DataService {
   abstract deleteReservation(id: number): Promise<void>;
   abstract getUpcomingReservations(): Promise<Reservation[]>;
   abstract getPastReservations(): Promise<Reservation[]>;
+  abstract getReservationById(id: number): Promise<Reservation | undefined>;
 
   abstract storeTemporaryReservationData(data: {
     editingReservationId?: number;
@@ -40,6 +41,7 @@ export abstract class DataService {
   abstract updateVehicle(vehicle: Vehicle): Promise<void>;
   abstract deleteVehicle(id: number): Promise<void>;
   abstract findVehicleByPlate(plate: string): Promise<Vehicle | undefined>;
+  abstract getUserVehiclesByUserId(userId: string): Promise<Vehicle[]>;
 
   abstract getCurrentUser(): Promise<User | null>;
   abstract storeUser(user: User): Promise<void>;

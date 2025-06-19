@@ -11,7 +11,7 @@
     <ng-container *ngIf="(isAdmin$ | async) === false">
       <div
         class="menu-item"
-        (click)="navigateTo('/new-reservation')"
+        (click)="navigateTo('/reservations/new')"
         matTooltip="New Reservation"
         matTooltipPosition="right"
       >

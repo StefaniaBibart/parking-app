@@ -25,10 +25,14 @@ export class HomeComponent {
       if (isAdmin) {
         this.router.navigate(['/admin/dashboard']);
       } else {
-        this.router.navigate(['/new-reservation']);
+        this.router.navigate(['/reservations/new']);
       }
     } else {
       this.router.navigate(['/login']);
     }
+  }
+
+  goToNewReservation() {
+    this.router.navigate(['/reservations/new']);
   }
 }
