@@ -4,4 +4,6 @@ export interface Reservation {
   endDate: Date | string;
   spot: string;
   vehicle: string;
+  userId?: string;
+  user?: string;
 }

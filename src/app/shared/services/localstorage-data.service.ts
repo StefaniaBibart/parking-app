@@ -474,4 +474,13 @@ export class LocalstorageDataService extends DataService {
       return [];
     }
   }
+
+  async getReservationById(id: number): Promise<Reservation | undefined> {
+    const reservations = await this.getAllReservations();
+    return reservations.find((reservation) => reservation.id === id);
+  }
+
+  async getUserVehiclesByUserId(userId: string): Promise<Vehicle[]> {
+    return this.getUserVehicles();
+  }
 }

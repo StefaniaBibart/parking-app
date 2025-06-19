@@ -11,6 +11,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent } from '@angular/material/paginator';
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 import { ParkingSpot } from '../../shared/models/parking-spot.model';
+import { Router } from '@angular/router';
 
 interface EnrichedReservation extends Reservation {
   isSpotBlocked?: boolean;
@@ -52,7 +53,8 @@ export class AdminReservationsListComponent implements OnInit {
     private dataService: DataService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private parkingSpotService: ParkingSpotService
+    private parkingSpotService: ParkingSpotService,
+    private router: Router
   ) {}
 
   async ngOnInit() {
@@ -105,7 +107,7 @@ export class AdminReservationsListComponent implements OnInit {
         const searchLower = this.searchTerm.toLowerCase();
         return (
           reservation.id?.toString().toLowerCase().includes(searchLower) ||
-          (reservation as any).user?.toLowerCase().includes(searchLower) ||
+          reservation.user?.toLowerCase().includes(searchLower) ||
           reservation.vehicle?.toLowerCase().includes(searchLower) ||
           reservation.spot?.toLowerCase().includes(searchLower)
         );
@@ -199,5 +201,9 @@ export class AdminReservationsListComponent implements OnInit {
       d1.getMonth() === d2.getMonth() &&
       d1.getDate() === d2.getDate()
     );
+  }
+
+  editReservation(reservation: Reservation) {
+    this.router.navigate(['/admin/reservations', reservation.id, 'edit']);
   }
 }

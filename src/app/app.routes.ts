@@ -6,7 +6,6 @@ import { PlaceholderComponent } from './shared/components/placeholder/placeholde
 import { UserProfileComponent } from './profile/user-profile/user-profile.component';
 import { ReservationListComponent } from './profile/reservation-list/reservation-list.component';
 import { ReservationFormComponent } from './reservations/reservation-form/reservation-form.component';
-import { SpotSelectionComponent } from './reservations/spot-selection/spot-selection.component';
 import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
 import { AdminParkingSpotsComponent } from './admin/parking-spots/admin-parking-spots.component';
 import { AdminReservationsListComponent } from './admin/reservations-list/admin-reservations-list.component';
@@ -39,13 +38,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard, UserGuard],
   },
   {
-    path: 'new-reservation',
+    path: 'reservations/new',
     component: ReservationFormComponent,
     canActivate: [AuthGuard, UserGuard],
   },
   {
-    path: 'select-spot',
-    component: SpotSelectionComponent,
+    path: 'reservations/:id/edit',
+    component: ReservationFormComponent,
     canActivate: [AuthGuard, UserGuard],
   },
   {
@@ -56,6 +55,11 @@ export const routes: Routes = [
   {
     path: 'admin/reservations',
     component: AdminReservationsListComponent,
+    canActivate: [AuthGuard, AdminGuard],
+  },
+  {
+    path: 'admin/reservations/:id/edit',
+    component: ReservationFormComponent,
     canActivate: [AuthGuard, AdminGuard],
   },
   {

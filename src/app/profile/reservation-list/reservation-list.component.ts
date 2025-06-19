@@ -73,40 +73,11 @@ export class ReservationListComponent implements OnInit {
   }
 
   async editReservation(reservation: Reservation) {
-    try {
-      const vehicles = await this.dataService.getUserVehicles();
-      const vehicle = vehicles.find((v) => v.plate === reservation.vehicle);
-
-      if (vehicle) {
-        await this.dataService.storeTemporaryReservationData({
-          editingReservationId: reservation.id,
-          reservationStartDate:
-            reservation.startDate instanceof Date
-              ? reservation.startDate.toISOString()
-              : reservation.startDate.toString(),
-          reservationEndDate:
-            reservation.endDate instanceof Date
-              ? reservation.endDate.toISOString()
-              : reservation.endDate.toString(),
-          reservationVehicleId: vehicle.id,
-        });
-      } else {
-        console.warn('Vehicle not found in user profile:', reservation.vehicle);
-      }
-
-      this.router.navigate(['/new-reservation']);
-    } catch (error) {
-      console.error('Error preparing reservation for editing:', error);
-    }
+    this.router.navigate(['/reservations', reservation.id, 'edit']);
   }
 
-  async createNewReservation() {
-    try {
-      await this.dataService.clearTemporaryReservationData();
-      this.router.navigate(['/new-reservation']);
-    } catch (error) {
-      console.error('Error clearing temporary reservation data:', error);
-    }
+  createNewReservation() {
+    this.router.navigate(['/reservations/new']);
   }
 
   isSameDay(date1: Date | string, date2: Date | string): boolean {

@@ -108,6 +108,15 @@
           <td mat-cell *matCellDef="let reservation">
             <button
               mat-icon-button
+              color="primary"
+              (click)="editReservation(reservation)"
+              [disabled]="getReservationStatus(reservation) === 'past'"
+              aria-label="Edit reservation"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
               color="warn"
               (click)="cancelReservation(reservation)"
               [disabled]="getReservationStatus(reservation) === 'past'"
