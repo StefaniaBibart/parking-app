@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Signal } from '@angular/core';
 
 import { MaterialModule } from '../../../material.module';
 import { LoaderService } from '../../services/loader.service';
@@ -10,7 +10,9 @@ import { LoaderService } from '../../services/loader.service';
   styleUrls: ['./loader.component.css'],
 })
 export class LoaderComponent {
-  isLoading = this.loaderService.isLoading;
+  isLoading: Signal<boolean>;
 
-  constructor(private loaderService: LoaderService) {}
+  constructor(private loaderService: LoaderService) {
+    this.isLoading = this.loaderService.isLoading;
+  }
 }
