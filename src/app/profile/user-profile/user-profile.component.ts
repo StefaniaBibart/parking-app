@@ -5,6 +5,7 @@ import {
   signal,
   ViewChild,
   OnInit,
+  viewChild,
 } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 
@@ -27,14 +28,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
-    selector: 'app-user-profile',
-    imports: [MaterialModule, FormsModule, ReactiveFormsModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    templateUrl: './user-profile.component.html',
-    styleUrls: ['./user-profile.component.css']
+  selector: 'app-user-profile',
+  imports: [MaterialModule, FormsModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './user-profile.component.html',
+  styleUrls: ['./user-profile.component.css'],
 })
 export class UserProfileComponent implements OnInit {
-  @ViewChild('fileInput') fileInput!: ElementRef;
+  fileInput = viewChild.required<ElementRef>('fileInput');
 
   username = new FormControl('', [Validators.required]);
   email = new FormControl({ value: '', disabled: true });
@@ -176,7 +177,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   triggerFileInput() {
-    this.fileInput.nativeElement.click();
+    this.fileInput().nativeElement.click();
   }
 
   onFileSelected(event: Event) {
