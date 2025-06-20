@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, effect } from '@angular/core';
 import { DataService } from './data.service';
 import { FirebaseDataService } from './firebase-data.service';
 import { LocalstorageDataService } from './localstorage-data.service';
@@ -13,14 +13,16 @@ export class DataServiceFactory {
   constructor(
     private firebaseService: FirebaseDataService,
     private localStorageService: LocalstorageDataService,
-    private providerService: DataProviderService,
+    private providerService: DataProviderService
   ) {
     this.currentService = this.getServiceForProvider(
-      providerService.getProviderType(),
+      providerService.getProviderType()
     );
 
-    this.providerService.providerChanged$.subscribe((providerType) => {
-      this.currentService = this.getServiceForProvider(providerType);
+    effect(() => {
+      this.currentService = this.getServiceForProvider(
+        this.providerService.providerChanged()
+      );
     });
   }
 

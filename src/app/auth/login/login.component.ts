@@ -9,15 +9,13 @@ import { Router } from '@angular/router';
 import { MaterialModule } from '../../material.module';
 
 import { AuthService } from '../../shared/services/auth.service';
-import { catchError, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { AdminService } from '../../shared/services/admin.service';
 
 @Component({
-    selector: 'app-login',
-    imports: [MaterialModule, ReactiveFormsModule],
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css']
+  selector: 'app-login',
+  imports: [MaterialModule, ReactiveFormsModule],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
   loginForm: FormGroup;
@@ -49,7 +47,7 @@ export class LoginComponent {
     this.hidePassword = !this.hidePassword;
   }
 
-  onLogin() {
+  async onLogin() {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
@@ -57,28 +55,22 @@ export class LoginComponent {
       const email = this.email?.value;
       const password = this.password?.value;
 
-      this.authService
-        .login(email, password)
-        .pipe(
-          catchError((error) => {
-            this.errorMessage = this.getErrorMessage(error);
-            return of(null);
-          }),
-          finalize(() => {
-            this.isLoading = false;
-          })
-        )
-        .subscribe(async (result) => {
-          if (result) {
-            // Check if user is admin and redirect accordingly
-            const isAdmin = await this.adminService.isAdminAsync();
-            if (isAdmin) {
-              this.router.navigate(['/admin/dashboard']);
-            } else {
-              this.router.navigate(['/home']);
-            }
+      try {
+        const result = await this.authService.login(email, password);
+
+        if (result) {
+          const isAdmin = await this.adminService.isAdminAsync();
+          if (isAdmin) {
+            this.router.navigate(['/admin/dashboard']);
+          } else {
+            this.router.navigate(['/home']);
           }
-        });
+        }
+      } catch (error) {
+        this.errorMessage = this.getErrorMessage(error);
+      } finally {
+        this.isLoading = false;
+      }
     } else {
       Object.keys(this.loginForm.controls).forEach((key) => {
         this.loginForm.get(key)?.markAsTouched();

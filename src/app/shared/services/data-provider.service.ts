@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 export enum DataProviderType {
   FIREBASE = 'firebase',
@@ -10,23 +9,15 @@ export enum DataProviderType {
   providedIn: 'root',
 })
 export class DataProviderService {
-  private providerType: DataProviderType = DataProviderType.FIREBASE;
-  private providerChanged = new BehaviorSubject<DataProviderType>(
-    this.providerType,
-  );
+  private providerType = signal<DataProviderType>(DataProviderType.FIREBASE);
 
-  providerChanged$ = this.providerChanged.asObservable();
+  providerChanged = this.providerType.asReadonly();
 
   setProvider(type: DataProviderType) {
-    const oldType = this.providerType;
-    this.providerType = type;
-
-    if (oldType !== type) {
-      this.providerChanged.next(type);
-    }
+    this.providerType.set(type);
   }
 
   getProviderType(): DataProviderType {
-    return this.providerType;
+    return this.providerType();
   }
 }

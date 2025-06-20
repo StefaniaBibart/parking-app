@@ -1,36 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AdminService } from '../../shared/services/admin.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { Observable } from 'rxjs';
 
 @Component({
-    selector: 'app-sidebar',
-    imports: [MaterialModule, CommonModule],
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.css']
+  selector: 'app-sidebar',
+  imports: [MaterialModule, CommonModule],
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css'],
 })
-export class SidebarComponent implements OnInit {
-  isDarkTheme = false;
-  isAdmin$: Observable<boolean>;
+export class SidebarComponent {
+  isDarkTheme = this.themeService.isDarkTheme;
+  isAdmin = this.adminService.isAdmin;
 
   constructor(
     private router: Router,
-    private themeService: ThemeService,
+    public themeService: ThemeService,
     private adminService: AdminService,
     private authService: AuthService
-  ) {
-    this.isAdmin$ = this.adminService.isAdmin();
-  }
-
-  ngOnInit(): void {
-    this.themeService.isDarkTheme$.subscribe((isDark) => {
-      this.isDarkTheme = isDark;
-    });
-  }
+  ) {}
 
   navigateTo(route: string) {
     this.router.navigate([route]);

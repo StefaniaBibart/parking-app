@@ -10,14 +10,12 @@ import { Router } from '@angular/router';
 
 import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { catchError, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 @Component({
-    selector: 'app-signup',
-    imports: [MaterialModule, ReactiveFormsModule],
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css']
+  selector: 'app-signup',
+  imports: [MaterialModule, ReactiveFormsModule],
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent {
   signupForm: FormGroup;
@@ -30,7 +28,7 @@ export class SignupComponent {
     private router: Router,
     private validationService: ValidationService,
     private fb: FormBuilder,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
     this.signupForm = this.fb.group({
       username: ['', [Validators.required]],
@@ -132,7 +130,7 @@ export class SignupComponent {
     return this.validationService.onPhoneNumberKeyPress(event);
   }
 
-  onSignup() {
+  async onSignup() {
     this.validatePhoneNumber();
     this.validatePasswordMatch();
 
@@ -145,22 +143,22 @@ export class SignupComponent {
       const username = this.username?.value;
       const phoneNumber = this.phoneNumber?.value;
 
-      this.authService
-        .signup(email, password, username, phoneNumber)
-        .pipe(
-          catchError((error) => {
-            this.errorMessage = this.getSignupErrorMessage(error);
-            return of(null);
-          }),
-          finalize(() => {
-            this.isLoading = false;
-          }),
-        )
-        .subscribe((result) => {
-          if (result) {
-            this.router.navigate(['/home']);
-          }
-        });
+      try {
+        const result = await this.authService.signup(
+          email,
+          password,
+          username,
+          phoneNumber
+        );
+
+        if (result) {
+          this.router.navigate(['/home']);
+        }
+      } catch (error) {
+        this.errorMessage = this.getSignupErrorMessage(error);
+      } finally {
+        this.isLoading = false;
+      }
     } else {
       Object.keys(this.signupForm.controls).forEach((key) => {
         this.signupForm.get(key)?.markAsTouched();

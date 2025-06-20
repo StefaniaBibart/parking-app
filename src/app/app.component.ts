@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import {
   RouterOutlet,
   Router,
@@ -17,21 +17,22 @@ import { AuthService } from './shared/services/auth.service';
 import { AdminService } from './shared/services/admin.service';
 
 @Component({
-    selector: 'app-root',
-    imports: [
+  selector: 'app-root',
+  imports: [
     RouterOutlet,
     MaterialModule,
     SidebarComponent,
     HomeComponent,
-    LoaderComponent
-],
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.css'
+    LoaderComponent,
+  ],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css',
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'parking-app';
-  isLoggedIn = false;
   hasNavigatedFromRoot = false;
+
+  isLoggedIn = computed(() => !!this.authService.user());
 
   constructor(
     private router: Router,
@@ -40,12 +41,6 @@ export class AppComponent implements OnInit {
     private adminService: AdminService
   ) {
     this.setupRouterEvents();
-  }
-
-  ngOnInit() {
-    this.authService.user.subscribe((user) => {
-      this.isLoggedIn = !!user;
-    });
   }
 
   setupRouterEvents() {

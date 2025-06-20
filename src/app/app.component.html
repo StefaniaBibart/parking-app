@@ -1,15 +1,14 @@
 <div class="app-container">
   <app-loader></app-loader>
 
-  @if (isLoggedIn) {
-    <div class="main-layout">
-      <app-sidebar class="sidebar"></app-sidebar>
-      <div class="content-area">
-        <router-outlet></router-outlet>
-      </div>
+  @if (isLoggedIn()) {
+  <div class="main-layout">
+    <app-sidebar class="sidebar"></app-sidebar>
+    <div class="content-area">
+      <router-outlet></router-outlet>
     </div>
+  </div>
   } @else {
-    <router-outlet></router-outlet>
+  <router-outlet></router-outlet>
   }
-
 </div>
