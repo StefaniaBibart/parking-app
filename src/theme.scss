@@ -1,6 +1,7 @@
 @use "@angular/material" as mat;
 
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 // Define custom palettes based on your theme variables
 $light-primary: mat.define-palette(mat.$indigo-palette, 500);
