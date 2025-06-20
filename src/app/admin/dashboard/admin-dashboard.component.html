@@ -54,42 +54,44 @@
     <section class="floor-stats">
       <h2>Parking Spots by Floor</h2>
       <div class="floor-stats-container">
-        <div class="floor-card" *ngFor="let floorData of spotsByFloor">
-          <div class="floor-header">
-            <h3>Floor {{ floorData.floor }}</h3>
-          </div>
-          <div class="floor-metrics">
-            <div class="floor-metric">
-              <div class="floor-metric-value">{{ floorData.total }}</div>
-              <div class="floor-metric-label">Total</div>
+        @for (floorData of spotsByFloor; track floorData) {
+          <div class="floor-card">
+            <div class="floor-header">
+              <h3>Floor {{ floorData.floor }}</h3>
             </div>
-            <div class="floor-metric">
-              <div class="floor-metric-value available">
-                {{ floorData.available }}
+            <div class="floor-metrics">
+              <div class="floor-metric">
+                <div class="floor-metric-value">{{ floorData.total }}</div>
+                <div class="floor-metric-label">Total</div>
               </div>
-              <div class="floor-metric-label">Available</div>
-            </div>
-            <div class="floor-metric">
-              <div class="floor-metric-value occupied">
-                {{ floorData.occupied }}
+              <div class="floor-metric">
+                <div class="floor-metric-value available">
+                  {{ floorData.available }}
+                </div>
+                <div class="floor-metric-label">Available</div>
               </div>
-              <div class="floor-metric-label">Occupied</div>
+              <div class="floor-metric">
+                <div class="floor-metric-value occupied">
+                  {{ floorData.occupied }}
+                </div>
+                <div class="floor-metric-label">Occupied</div>
+              </div>
             </div>
-          </div>
-          <div class="floor-progress">
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                [style.width.%]="(floorData.occupied / floorData.total) * 100"
-              ></div>
-            </div>
-            <div class="progress-label">
-              {{
+            <div class="floor-progress">
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="(floorData.occupied / floorData.total) * 100"
+                ></div>
+              </div>
+              <div class="progress-label">
+                {{
                 (floorData.occupied / floorData.total) * 100 | number : "1.0-0"
-              }}% Occupied
+                }}% Occupied
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
     </section>
 

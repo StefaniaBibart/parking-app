@@ -8,7 +8,7 @@ import {
   NavigationError,
 } from '@angular/router';
 import { MaterialModule } from './material.module';
-import { CommonModule } from '@angular/common';
+
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { HomeComponent } from './home/home.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
@@ -19,13 +19,12 @@ import { AdminService } from './shared/services/admin.service';
 @Component({
     selector: 'app-root',
     imports: [
-        RouterOutlet,
-        MaterialModule,
-        CommonModule,
-        SidebarComponent,
-        HomeComponent,
-        LoaderComponent,
-    ],
+    RouterOutlet,
+    MaterialModule,
+    SidebarComponent,
+    HomeComponent,
+    LoaderComponent
+],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })

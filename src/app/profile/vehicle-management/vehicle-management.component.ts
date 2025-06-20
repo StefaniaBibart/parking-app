@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MaterialModule } from '../../material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../shared/services/data.service';
@@ -11,7 +11,7 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 @Component({
   selector: 'app-vehicle-management',
   standalone: true,
-  imports: [CommonModule, MaterialModule, FormsModule, ReactiveFormsModule],
+  imports: [MaterialModule, FormsModule, ReactiveFormsModule],
   templateUrl: './vehicle-management.component.html',
   styleUrls: ['./vehicle-management.component.css'],
 })

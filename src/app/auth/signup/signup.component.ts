@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
@@ -15,7 +15,7 @@ import { of } from 'rxjs';
 
 @Component({
     selector: 'app-signup',
-    imports: [MaterialModule, ReactiveFormsModule, CommonModule],
+    imports: [MaterialModule, ReactiveFormsModule],
     templateUrl: './signup.component.html',
     styleUrls: ['./signup.component.css']
 })

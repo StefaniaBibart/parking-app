@@ -1,20 +1,24 @@
 <div class="sidebar-container">
-  <div class="logo-container" *ngIf="(isAdmin$ | async) === false">
-    <div class="p-logo" (click)="navigateToHome()">P</div>
-  </div>
+  @if ((isAdmin$ | async) === false) {
+    <div class="logo-container">
+      <div class="p-logo" (click)="navigateToHome()">P</div>
+    </div>
+  }
 
-  <div class="logo-container" *ngIf="(isAdmin$ | async) === true">
-    <div class="admin-logo" (click)="navigateToHome()">A</div>
-  </div>
+  @if ((isAdmin$ | async) === true) {
+    <div class="logo-container">
+      <div class="admin-logo" (click)="navigateToHome()">A</div>
+    </div>
+  }
 
   <div class="menu-items">
-    <ng-container *ngIf="(isAdmin$ | async) === false">
+    @if ((isAdmin$ | async) === false) {
       <div
         class="menu-item"
         (click)="navigateTo('/reservations/new')"
         matTooltip="New Reservation"
         matTooltipPosition="right"
-      >
+        >
         <mat-icon>edit_calendar</mat-icon>
       </div>
       <div
@@ -22,18 +26,18 @@
         (click)="navigateTo('/reservations')"
         matTooltip="My Reservations"
         matTooltipPosition="right"
-      >
+        >
         <mat-icon>list</mat-icon>
       </div>
-    </ng-container>
+    }
 
-    <ng-container *ngIf="(isAdmin$ | async) === true">
+    @if ((isAdmin$ | async) === true) {
       <div
         class="menu-item"
         (click)="navigateTo('/admin/reservations')"
         matTooltip="Admin Reservations"
         matTooltipPosition="right"
-      >
+        >
         <mat-icon>event_note</mat-icon>
       </div>
       <div
@@ -41,10 +45,10 @@
         (click)="navigateTo('/admin/parking-spots')"
         matTooltip="Manage Parking Spots"
         matTooltipPosition="right"
-      >
+        >
         <mat-icon>garage</mat-icon>
       </div>
-    </ng-container>
+    }
   </div>
 
   <div class="bottom-controls">
@@ -53,34 +57,36 @@
       (click)="toggleTheme()"
       matTooltip="Toggle Theme"
       matTooltipPosition="right"
-    >
+      >
       <mat-icon>{{ isDarkTheme ? "light_mode" : "dark_mode" }}</mat-icon>
     </div>
 
-    <div
-      *ngIf="(isAdmin$ | async) === true"
-      class="menu-item logout-button"
-      (click)="logout()"
-      matTooltip="Logout"
-      matTooltipPosition="right"
-    >
-      <mat-icon>exit_to_app</mat-icon>
-    </div>
-
-    <div
-      *ngIf="(isAdmin$ | async) === false"
-      class="user-profile"
-      (click)="navigateTo('/profile')"
-      matTooltip="My Profile"
-      matTooltipPosition="right"
-    >
-      <div class="avatar">
-        <img
-          src="assets/avatar.png"
-          alt="User avatar"
-          onError="this.src='https://placehold.co/200x200/455a64/ffffff?text=User'"
-        />
+    @if ((isAdmin$ | async) === true) {
+      <div
+        class="menu-item logout-button"
+        (click)="logout()"
+        matTooltip="Logout"
+        matTooltipPosition="right"
+        >
+        <mat-icon>exit_to_app</mat-icon>
       </div>
+    }
+
+    @if ((isAdmin$ | async) === false) {
+      <div
+        class="user-profile"
+        (click)="navigateTo('/profile')"
+        matTooltip="My Profile"
+        matTooltipPosition="right"
+        >
+        <div class="avatar">
+          <img
+            src="assets/avatar.png"
+            alt="User avatar"
+            onError="this.src='https://placehold.co/200x200/455a64/ffffff?text=User'"
+            />
+          </div>
+        </div>
+      }
     </div>
   </div>
-</div>

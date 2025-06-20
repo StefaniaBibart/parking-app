@@ -8,142 +8,142 @@
       class="tab"
       [class.active]="activeTab === 'upcoming'"
       (click)="setActiveTab('upcoming')"
-    >
+      >
       Upcoming
     </div>
     <div
       class="tab"
       [class.active]="activeTab === 'past'"
       (click)="setActiveTab('past')"
-    >
+      >
       Past
     </div>
   </div>
 
-  <div
-    class="reservations-list"
-    *ngIf="activeTab === 'upcoming' && upcomingReservations.length > 0"
-  >
+  @if (activeTab === 'upcoming' && upcomingReservations.length > 0) {
     <div
-      *ngFor="let reservation of upcomingReservations"
-      class="reservation-card"
-    >
-      <div class="reservation-date">
-        <div class="date-content">
-          <div class="date-day">{{ reservation.startDate | date : "dd" }}</div>
-          <div class="date-month">
-            {{ reservation.startDate | date : "MMM" }}
-          </div>
-          <ng-container
-            *ngIf="
-              reservation.endDate &&
-              !isSameDay(reservation.startDate, reservation.endDate)
-            "
+      class="reservations-list"
+      >
+      @for (reservation of upcomingReservations; track reservation) {
+        <div
+          class="reservation-card"
           >
-            <mat-icon>arrow_forward</mat-icon>
-            <div class="date-day">
-              {{ reservation.endDate | date : "dd" }}
+          <div class="reservation-date">
+            <div class="date-content">
+              <div class="date-day">{{ reservation.startDate | date : "dd" }}</div>
+              <div class="date-month">
+                {{ reservation.startDate | date : "MMM" }}
+              </div>
+              @if (
+                reservation.endDate &&
+                !isSameDay(reservation.startDate, reservation.endDate)
+                ) {
+                <mat-icon>arrow_forward</mat-icon>
+                <div class="date-day">
+                  {{ reservation.endDate | date : "dd" }}
+                </div>
+                <div class="date-month">
+                  {{ reservation.endDate | date : "MMM" }}
+                </div>
+              }
             </div>
-            <div class="date-month">
-              {{ reservation.endDate | date : "MMM" }}
-            </div>
-          </ng-container>
-        </div>
-      </div>
-
-      <div class="reservation-details">
-        <div class="reservation-spot">
-          <mat-icon>location_on</mat-icon>
-          <span>Spot {{ reservation.spot }}</span>
-        </div>
-        <div class="reservation-vehicle">
-          <mat-icon>directions_car</mat-icon>
-          <span>{{ reservation.vehicle }}</span>
-        </div>
-      </div>
-
-      <div class="reservation-actions">
-        <button
-          mat-icon-button
-          color="primary"
-          (click)="editReservation(reservation)"
-          class="edit-button"
-          aria-label="Edit reservation"
-        >
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          color="warn"
-          (click)="deleteReservation(reservation.id)"
-          class="cancel-button"
-          aria-label="Cancel reservation"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div
-    class="reservations-list"
-    *ngIf="activeTab === 'past' && pastReservations.length > 0"
-  >
-    <div *ngFor="let reservation of pastReservations" class="reservation-card">
-      <div class="reservation-date">
-        <div class="date-content">
-          <div class="date-day">{{ reservation.startDate | date : "dd" }}</div>
-          <div class="date-month">
-            {{ reservation.startDate | date : "MMM" }}
           </div>
-          <ng-container
-            *ngIf="
-              reservation.endDate &&
-              !isSameDay(reservation.startDate, reservation.endDate)
-            "
-          >
-            <mat-icon>arrow_forward</mat-icon>
-            <div class="date-day">
-              {{ reservation.endDate | date : "dd" }}
+          <div class="reservation-details">
+            <div class="reservation-spot">
+              <mat-icon>location_on</mat-icon>
+              <span>Spot {{ reservation.spot }}</span>
             </div>
-            <div class="date-month">
-              {{ reservation.endDate | date : "MMM" }}
+            <div class="reservation-vehicle">
+              <mat-icon>directions_car</mat-icon>
+              <span>{{ reservation.vehicle }}</span>
             </div>
-          </ng-container>
+          </div>
+          <div class="reservation-actions">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="editReservation(reservation)"
+              class="edit-button"
+              aria-label="Edit reservation"
+              >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteReservation(reservation.id)"
+              class="cancel-button"
+              aria-label="Cancel reservation"
+              >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
-      </div>
-
-      <div class="reservation-details">
-        <div class="reservation-spot">
-          <mat-icon>location_on</mat-icon>
-          <span>Spot {{ reservation.spot }}</span>
-        </div>
-        <div class="reservation-vehicle">
-          <mat-icon>directions_car</mat-icon>
-          <span>{{ reservation.vehicle }}</span>
-        </div>
-      </div>
+      }
     </div>
-  </div>
+  }
 
-  <div
-    class="empty-state"
-    *ngIf="activeTab === 'upcoming' && upcomingReservations.length === 0"
-  >
-    <mat-icon>event_busy</mat-icon>
-    <h3>No upcoming reservations</h3>
-    <p>You don't have any upcoming parking reservations.</p>
-    <button mat-raised-button color="primary" (click)="createNewReservation()">
-      Make a Reservation
-    </button>
-  </div>
+  @if (activeTab === 'past' && pastReservations.length > 0) {
+    <div
+      class="reservations-list"
+      >
+      @for (reservation of pastReservations; track reservation) {
+        <div class="reservation-card">
+          <div class="reservation-date">
+            <div class="date-content">
+              <div class="date-day">{{ reservation.startDate | date : "dd" }}</div>
+              <div class="date-month">
+                {{ reservation.startDate | date : "MMM" }}
+              </div>
+              @if (
+                reservation.endDate &&
+                !isSameDay(reservation.startDate, reservation.endDate)
+                ) {
+                <mat-icon>arrow_forward</mat-icon>
+                <div class="date-day">
+                  {{ reservation.endDate | date : "dd" }}
+                </div>
+                <div class="date-month">
+                  {{ reservation.endDate | date : "MMM" }}
+                </div>
+              }
+            </div>
+          </div>
+          <div class="reservation-details">
+            <div class="reservation-spot">
+              <mat-icon>location_on</mat-icon>
+              <span>Spot {{ reservation.spot }}</span>
+            </div>
+            <div class="reservation-vehicle">
+              <mat-icon>directions_car</mat-icon>
+              <span>{{ reservation.vehicle }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
 
-  <div
-    class="empty-state"
-    *ngIf="activeTab === 'past' && pastReservations.length === 0"
-  >
-    <mat-icon>history</mat-icon>
-    <h3>No past reservations</h3>
-    <p>You don't have any past parking reservations.</p>
-  </div>
+  @if (activeTab === 'upcoming' && upcomingReservations.length === 0) {
+    <div
+      class="empty-state"
+      >
+      <mat-icon>event_busy</mat-icon>
+      <h3>No upcoming reservations</h3>
+      <p>You don't have any upcoming parking reservations.</p>
+      <button mat-raised-button color="primary" (click)="createNewReservation()">
+        Make a Reservation
+      </button>
+    </div>
+  }
+
+  @if (activeTab === 'past' && pastReservations.length === 0) {
+    <div
+      class="empty-state"
+      >
+      <mat-icon>history</mat-icon>
+      <h3>No past reservations</h3>
+      <p>You don't have any past parking reservations.</p>
+    </div>
+  }
 </div>

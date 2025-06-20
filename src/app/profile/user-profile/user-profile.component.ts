@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { MaterialModule } from '../../material.module';
-import { CommonModule } from '@angular/common';
+
 import {
   FormControl,
   FormsModule,
@@ -28,7 +28,7 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 
 @Component({
     selector: 'app-user-profile',
-    imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
+    imports: [MaterialModule, FormsModule, ReactiveFormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './user-profile.component.html',
     styleUrls: ['./user-profile.component.css']

@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MaterialModule } from '../../material.module';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from '../../shared/services/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -15,7 +15,7 @@ import { AdminService } from '../../shared/services/admin.service';
 
 @Component({
     selector: 'app-login',
-    imports: [MaterialModule, ReactiveFormsModule, CommonModule],
+    imports: [MaterialModule, ReactiveFormsModule],
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css']
 })

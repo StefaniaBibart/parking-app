@@ -6,148 +6,165 @@
           [src]="profileImage"
           alt="User avatar"
           onError="this.src='https://placehold.co/200x200/455a64/ffffff?text=User'"
-        />
-        <div class="avatar-edit" *ngIf="isEditing" (click)="triggerFileInput()">
-          <mat-icon>photo_camera</mat-icon>
-        </div>
-        <input
-          type="file"
-          #fileInput
-          hidden
-          (change)="onFileSelected($event)"
-          accept="image/*"
-        />
-      </div>
-    </div>
-    <div class="user-info">
-      <div class="name-section">
-        <h2 *ngIf="!isEditing">{{ username.value }}</h2>
-        <button
-          *ngIf="!isEditing"
-          mat-icon-button
-          color="primary"
-          (click)="toggleEdit()"
-          class="edit-button"
-        >
-          <mat-icon>edit</mat-icon>
-        </button>
-      </div>
-      <div class="contact-info">
-        <div class="info-item" *ngIf="!isEditing">
-          <mat-icon>email</mat-icon>
-          <span>{{ email.value }}</span>
-        </div>
-        <div class="info-item" *ngIf="!isEditing">
-          <mat-icon>phone</mat-icon>
-          <span>{{ phoneNumber.value }}</span>
-        </div>
-
-        <div class="edit-fields" *ngIf="isEditing">
-          <mat-form-field appearance="outline">
-            <mat-label>Username</mat-label>
-            <input matInput [formControl]="username" />
-            <mat-icon matPrefix>person</mat-icon>
-            <mat-error
-              *ngIf="username.invalid && (username.dirty || username.touched)"
-              >{{ usernameError() }}</mat-error
-            >
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Phone Number</mat-label>
-            <input
-              matInput
-              [formControl]="phoneNumber"
-              type="tel"
-              (keypress)="onPhoneNumberKeyPress($event)"
-              (input)="validatePhoneNumber()"
+          />
+          @if (isEditing) {
+            <div class="avatar-edit" (click)="triggerFileInput()">
+              <mat-icon>photo_camera</mat-icon>
+            </div>
+          }
+          <input
+            type="file"
+            #fileInput
+            hidden
+            (change)="onFileSelected($event)"
+            accept="image/*"
             />
-            <mat-icon matPrefix>phone</mat-icon>
-            <mat-hint>Format: +40 7xx xxx xxx or 07xx xxx xxx</mat-hint>
-            <mat-error>{{ phoneNumberError() }}</mat-error>
-          </mat-form-field>
+          </div>
+        </div>
+        <div class="user-info">
+          <div class="name-section">
+            @if (!isEditing) {
+              <h2>{{ username.value }}</h2>
+            }
+            @if (!isEditing) {
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="toggleEdit()"
+                class="edit-button"
+                >
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+          <div class="contact-info">
+            @if (!isEditing) {
+              <div class="info-item">
+                <mat-icon>email</mat-icon>
+                <span>{{ email.value }}</span>
+              </div>
+            }
+            @if (!isEditing) {
+              <div class="info-item">
+                <mat-icon>phone</mat-icon>
+                <span>{{ phoneNumber.value }}</span>
+              </div>
+            }
 
-          <div class="action-buttons">
-            <button mat-icon-button color="warn" (click)="cancelEdit()">
-              <mat-icon>close</mat-icon>
-            </button>
+            @if (isEditing) {
+              <div class="edit-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Username</mat-label>
+                  <input matInput [formControl]="username" />
+                  <mat-icon matPrefix>person</mat-icon>
+                  @if (username.invalid && (username.dirty || username.touched)) {
+                    <mat-error
+                      >{{ usernameError() }}</mat-error
+                      >
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Phone Number</mat-label>
+                  <input
+                    matInput
+                    [formControl]="phoneNumber"
+                    type="tel"
+                    (keypress)="onPhoneNumberKeyPress($event)"
+                    (input)="validatePhoneNumber()"
+                    />
+                    <mat-icon matPrefix>phone</mat-icon>
+                    <mat-hint>Format: +40 7xx xxx xxx or 07xx xxx xxx</mat-hint>
+                    <mat-error>{{ phoneNumberError() }}</mat-error>
+                  </mat-form-field>
+                  <div class="action-buttons">
+                    <button mat-icon-button color="warn" (click)="cancelEdit()">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="confirmEdit()"
+                      [disabled]="username.invalid || phoneNumber.invalid"
+                      >
+                      <mat-icon>check</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="cars-section">
+          <h3>My Vehicles</h3>
+
+          @if (cars.length === 0) {
+            <div class="no-vehicles-message">
+              <mat-icon>warning</mat-icon>
+              <h3>No vehicles found</h3>
+              <p>You need to add a vehicle to make parking reservations.</p>
+            </div>
+          }
+
+          @if (cars.length > 0) {
+            <div class="car-list">
+              @for (car of cars; track car) {
+                <div class="car-item">
+                  <div class="car-info">
+                    <mat-icon>directions_car</mat-icon>
+                    <div class="car-details">
+                      <div class="car-plate">{{ car.plate }}</div>
+                    </div>
+                  </div>
+                  <button mat-icon-button color="warn" (click)="removeCar(car.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="add-car-form">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Add new vehicle (license plate)</mat-label>
+              <input
+                matInput
+                [formControl]="newCarPlate"
+                (input)="onLicensePlateInput($event)"
+                />
+                <mat-hint>Format: XX 99 XXX or X 999 XXX</mat-hint>
+                <mat-error>{{ licensePlateError() }}</mat-error>
+                @if (newCarPlate.value) {
+                  <button
+                    matSuffix
+                    mat-icon-button
+                    aria-label="Clear"
+                    (click)="newCarPlate.setValue('')"
+                    >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </mat-form-field>
+              <button
+                mat-raised-button
+                color="primary"
+                [disabled]="!newCarPlate.value || newCarPlate.invalid"
+                (click)="addCar()"
+                >
+                Add Vehicle
+              </button>
+            </div>
+          </section>
+
+          <section class="logout-section">
             <button
-              mat-icon-button
-              color="primary"
-              (click)="confirmEdit()"
-              [disabled]="username.invalid || phoneNumber.invalid"
-            >
-              <mat-icon>check</mat-icon>
+              mat-raised-button
+              color="warn"
+              (click)="logout()"
+              class="logout-button"
+              >
+              <mat-icon>exit_to_app</mat-icon>
+              Logout
             </button>
-          </div>
+          </section>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cars-section">
-    <h3>My Vehicles</h3>
-
-    <div *ngIf="cars.length === 0" class="no-vehicles-message">
-      <mat-icon>warning</mat-icon>
-      <h3>No vehicles found</h3>
-      <p>You need to add a vehicle to make parking reservations.</p>
-    </div>
-
-    <div class="car-list" *ngIf="cars.length > 0">
-      <div *ngFor="let car of cars" class="car-item">
-        <div class="car-info">
-          <mat-icon>directions_car</mat-icon>
-          <div class="car-details">
-            <div class="car-plate">{{ car.plate }}</div>
-          </div>
-        </div>
-        <button mat-icon-button color="warn" (click)="removeCar(car.id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-    </div>
-
-    <div class="add-car-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Add new vehicle (license plate)</mat-label>
-        <input
-          matInput
-          [formControl]="newCarPlate"
-          (input)="onLicensePlateInput($event)"
-        />
-        <mat-hint>Format: XX 99 XXX or X 999 XXX</mat-hint>
-        <mat-error>{{ licensePlateError() }}</mat-error>
-        <button
-          *ngIf="newCarPlate.value"
-          matSuffix
-          mat-icon-button
-          aria-label="Clear"
-          (click)="newCarPlate.setValue('')"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-form-field>
-      <button
-        mat-raised-button
-        color="primary"
-        [disabled]="!newCarPlate.value || newCarPlate.invalid"
-        (click)="addCar()"
-      >
-        Add Vehicle
-      </button>
-    </div>
-  </section>
-
-  <section class="logout-section">
-    <button
-      mat-raised-button
-      color="warn"
-      (click)="logout()"
-      class="logout-button"
-    >
-      <mat-icon>exit_to_app</mat-icon>
-      Logout
-    </button>
-  </section>
-</div>

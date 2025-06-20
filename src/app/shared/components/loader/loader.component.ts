@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MaterialModule } from '../../../material.module';
 import { LoaderService } from '../../services/loader.service';
 
 @Component({
     selector: 'app-loader',
-    imports: [CommonModule, MaterialModule],
+    imports: [MaterialModule],
     templateUrl: './loader.component.html',
     styleUrls: ['./loader.component.css']
 })

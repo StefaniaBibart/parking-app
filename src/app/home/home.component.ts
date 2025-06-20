@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { MaterialModule } from '../material.module';
 import { AuthService } from '../shared/services/auth.service';
 import { AdminService } from '../shared/services/admin.service';
 
 @Component({
     selector: 'app-home',
-    imports: [CommonModule, MaterialModule],
+    imports: [MaterialModule],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })
