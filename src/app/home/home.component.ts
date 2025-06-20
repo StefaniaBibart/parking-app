@@ -6,11 +6,10 @@ import { AuthService } from '../shared/services/auth.service';
 import { AdminService } from '../shared/services/admin.service';
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, MaterialModule],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+    selector: 'app-home',
+    imports: [CommonModule, MaterialModule],
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
   constructor(

@@ -14,11 +14,10 @@ import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 @Component({
-  selector: 'app-signup',
-  standalone: true,
-  imports: [MaterialModule, ReactiveFormsModule, CommonModule],
-  templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css'],
+    selector: 'app-signup',
+    imports: [MaterialModule, ReactiveFormsModule, CommonModule],
+    templateUrl: './signup.component.html',
+    styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
   signupForm: FormGroup;

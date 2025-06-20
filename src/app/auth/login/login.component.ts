@@ -14,11 +14,10 @@ import { of } from 'rxjs';
 import { AdminService } from '../../shared/services/admin.service';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [MaterialModule, ReactiveFormsModule, CommonModule],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+    selector: 'app-login',
+    imports: [MaterialModule, ReactiveFormsModule, CommonModule],
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   loginForm: FormGroup;

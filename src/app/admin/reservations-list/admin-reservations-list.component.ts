@@ -18,11 +18,10 @@ interface EnrichedReservation extends Reservation {
 }
 
 @Component({
-  selector: 'app-admin-reservations-list',
-  standalone: true,
-  imports: [CommonModule, MaterialModule, FormsModule],
-  templateUrl: './admin-reservations-list.component.html',
-  styleUrls: ['./admin-reservations-list.component.css'],
+    selector: 'app-admin-reservations-list',
+    imports: [CommonModule, MaterialModule, FormsModule],
+    templateUrl: './admin-reservations-list.component.html',
+    styleUrls: ['./admin-reservations-list.component.css']
 })
 export class AdminReservationsListComponent implements OnInit {
   allReservations: EnrichedReservation[] = [];

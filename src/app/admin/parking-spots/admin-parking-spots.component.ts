@@ -10,11 +10,10 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
-  selector: 'app-admin-parking-spots',
-  standalone: true,
-  imports: [CommonModule, MaterialModule],
-  templateUrl: './admin-parking-spots.component.html',
-  styleUrls: ['./admin-parking-spots.component.css'],
+    selector: 'app-admin-parking-spots',
+    imports: [CommonModule, MaterialModule],
+    templateUrl: './admin-parking-spots.component.html',
+    styleUrls: ['./admin-parking-spots.component.css']
 })
 export class AdminParkingSpotsComponent implements OnInit {
   parkingSpots: ParkingSpot[] = [];

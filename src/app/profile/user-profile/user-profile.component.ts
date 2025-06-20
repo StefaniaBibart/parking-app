@@ -27,12 +27,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
-  selector: 'app-user-profile',
-  standalone: true,
-  imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.css'],
+    selector: 'app-user-profile',
+    imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './user-profile.component.html',
+    styleUrls: ['./user-profile.component.css']
 })
 export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;

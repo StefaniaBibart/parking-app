@@ -17,18 +17,17 @@ import { AuthService } from './shared/services/auth.service';
 import { AdminService } from './shared/services/admin.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    MaterialModule,
-    CommonModule,
-    SidebarComponent,
-    HomeComponent,
-    LoaderComponent,
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+    selector: 'app-root',
+    imports: [
+        RouterOutlet,
+        MaterialModule,
+        CommonModule,
+        SidebarComponent,
+        HomeComponent,
+        LoaderComponent,
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'parking-app';

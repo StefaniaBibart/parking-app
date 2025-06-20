@@ -18,11 +18,10 @@ import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 import { ParkingSpot } from '../../shared/models/parking-spot.model';
 
 @Component({
-  selector: 'app-reservation-form',
-  standalone: true,
-  imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './reservation-form.component.html',
-  styleUrls: ['./reservation-form.component.css'],
+    selector: 'app-reservation-form',
+    imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
+    templateUrl: './reservation-form.component.html',
+    styleUrls: ['./reservation-form.component.css']
 })
 export class ReservationFormComponent implements OnInit {
   dateRange = new FormGroup({

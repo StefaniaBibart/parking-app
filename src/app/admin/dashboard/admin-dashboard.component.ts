@@ -8,11 +8,10 @@ import { ParkingSpot } from '../../shared/models/parking-spot.model';
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [CommonModule, MaterialModule],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css'],
+    selector: 'app-admin-dashboard',
+    imports: [CommonModule, MaterialModule],
+    templateUrl: './admin-dashboard.component.html',
+    styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
   totalSpots: number = 0;

@@ -8,11 +8,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
-  selector: 'app-reservation-list',
-  standalone: true,
-  imports: [MaterialModule, CommonModule],
-  templateUrl: './reservation-list.component.html',
-  styleUrls: ['./reservation-list.component.css'],
+    selector: 'app-reservation-list',
+    imports: [MaterialModule, CommonModule],
+    templateUrl: './reservation-list.component.html',
+    styleUrls: ['./reservation-list.component.css']
 })
 export class ReservationListComponent implements OnInit {
   activeTab = 'upcoming';
