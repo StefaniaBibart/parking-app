@@ -2,10 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  effect,
   signal,
-  viewChild,
   ViewChild,
+  OnInit,
+  viewChild,
 } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 
@@ -15,6 +15,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { merge } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ValidationService } from '../../shared/services/validation.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { DataService } from '../../shared/services/data.service';
@@ -32,10 +34,9 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css'],
 })
-export class UserProfileComponent {
+export class UserProfileComponent implements OnInit {
   fileInput = viewChild.required<ElementRef>('fileInput');
 
-  user;
   username = new FormControl('', [Validators.required]);
   email = new FormControl({ value: '', disabled: true });
   phoneNumber = new FormControl('', [Validators.required]);
@@ -59,34 +60,38 @@ export class UserProfileComponent {
     private router: Router,
     private dialog: MatDialog
   ) {
-    this.user = this.authService.user;
-    effect(() => {
-      this.updateUsernameError();
-    });
+    merge(this.username.statusChanges, this.username.valueChanges)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.updateUsernameError());
 
-    effect(() => {
-      this.validatePhoneNumber();
-    });
+    merge(this.phoneNumber.statusChanges, this.phoneNumber.valueChanges)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.validatePhoneNumber());
 
-    effect(() => {
-      this.validateLicensePlate();
-    });
-    effect(() => {
-      const user = this.user();
+    merge(this.newCarPlate.statusChanges, this.newCarPlate.valueChanges)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.validateLicensePlate());
+  }
+
+  async ngOnInit() {
+    try {
+      const user = this.authService.getCurrentUser();
       if (user) {
         this.loadUserData(user);
       } else {
         this.router.navigate(['/login']);
       }
-    });
+    } catch (error) {
+      console.error('Error initializing user profile:', error);
+    }
   }
 
   async loadUserData(user: User) {
-    this.username.setValue(user.username, { emitEvent: false });
-    this.email.setValue(user.email, { emitEvent: false });
+    this.username.setValue(user.username);
+    this.email.setValue(user.email);
 
     if (user.phoneNumber) {
-      this.phoneNumber.setValue(user.phoneNumber, { emitEvent: false });
+      this.phoneNumber.setValue(user.phoneNumber);
     }
 
     try {
@@ -212,7 +217,7 @@ export class UserProfileComponent {
     }
   }
 
-  removeCar(id: number) {
+  async removeCar(id: number) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '350px',
       data: {
@@ -243,8 +248,16 @@ export class UserProfileComponent {
 
     if (value.length === 2 && !value.includes(' ')) {
       value += ' ';
+    } else if (
+      value.length === 5 &&
+      value[2] === ' ' &&
+      !value.includes(' ', 3)
+    ) {
+      value += ' ';
     }
-    input.value = value;
+
+    this.newCarPlate.setValue(value);
+    this.validateLicensePlate();
   }
 
   logout() {
@@ -252,10 +265,15 @@ export class UserProfileComponent {
   }
 
   cancelEdit() {
-    this.isEditing = false;
     const user = this.authService.getCurrentUser();
     if (user) {
-      this.loadUserData(user);
+      this.username.setValue(user.username);
+      this.phoneNumber.setValue(user.phoneNumber || '');
     }
+
+    this.phoneNumberError.set('');
+    this.usernameError.set('');
+
+    this.isEditing = false;
   }
 }

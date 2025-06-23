@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
 import { Vehicle } from '../models/vehicle.model';
@@ -7,8 +8,8 @@ import { Vehicle } from '../models/vehicle.model';
   providedIn: 'root',
 })
 export class UserService {
-  private currentUserSubject = signal<User | null>(null);
-  currentUser = this.currentUserSubject.asReadonly();
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private dataService: DataService) {
     this.loadUserFromStorage();
@@ -18,7 +19,7 @@ export class UserService {
     try {
       const user = await this.dataService.getCurrentUser();
       if (user) {
-        this.currentUserSubject.set(user);
+        this.currentUserSubject.next(user);
       }
     } catch (error) {
       console.error('Error loading user from storage:', error);
@@ -26,7 +27,7 @@ export class UserService {
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject();
+    return this.currentUserSubject.value;
   }
 
   getCurrentUserId(): string {
@@ -37,7 +38,7 @@ export class UserService {
   async saveUserData(user: User): Promise<void> {
     try {
       await this.dataService.updateUser(user);
-      this.currentUserSubject.set(user);
+      this.currentUserSubject.next(user);
     } catch (error) {
       console.error('Error saving user data:', error);
       throw error;

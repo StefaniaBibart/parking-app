@@ -1,5 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, from } from 'rxjs';
+import { tap, catchError, mergeMap } from 'rxjs/operators';
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -15,8 +17,8 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class AuthService {
-  private userSubject = signal<User | null>(null);
-  user = this.userSubject.asReadonly();
+  private userSubject = new BehaviorSubject<User | null>(null);
+  user = this.userSubject.asObservable();
 
   constructor(private router: Router, private dataService: DataService) {
     this.loadUserFromStorage();
@@ -36,9 +38,9 @@ export class AuthService {
             token: authData.token,
           };
           localStorage.setItem('userData', JSON.stringify(completeUser));
-          this.userSubject.set(completeUser);
+          this.userSubject.next(completeUser);
         } else {
-          this.userSubject.set(authData);
+          this.userSubject.next(authData);
         }
       }
     } catch (error) {
@@ -46,95 +48,96 @@ export class AuthService {
     }
   }
 
-  async signup(
+  signup(
     email: string,
     password: string,
     username: string,
     phoneNumber: string
-  ): Promise<UserCredential> {
+  ): Observable<UserCredential> {
     const auth = getAuth();
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      if (userCredential.user) {
-        await updateProfile(userCredential.user, {
-          displayName: username,
-        });
+    return from(createUserWithEmailAndPassword(auth, email, password)).pipe(
+      tap(async (userCredential) => {
+        if (userCredential.user) {
+          await updateProfile(userCredential.user, {
+            displayName: username,
+          });
 
-        const token = await userCredential.user.getIdToken();
+          const token = await userCredential.user.getIdToken();
 
-        const user: User = {
-          email: email,
-          id: userCredential.user.uid,
-          token: token,
-          username: username,
-          phoneNumber: phoneNumber,
-        };
-
-        await this.dataService.storeUser(user);
-        localStorage.setItem('userData', JSON.stringify(user));
-        this.userSubject.set(user);
-      }
-      return userCredential;
-    } catch (error) {
-      console.error('Signup error:', error);
-      throw error;
-    }
-  }
-
-  async login(email: string, password: string): Promise<UserCredential> {
-    const auth = getAuth();
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      if (userCredential.user) {
-        const token = await userCredential.user.getIdToken();
-        const existingUser = await this.dataService.getCurrentUser();
-
-        if (existingUser) {
-          const updatedUser = {
-            ...existingUser,
-            token: token,
-            email: userCredential.user.email || existingUser.email,
-            username: userCredential.user.displayName || existingUser.username,
-            phoneNumber: existingUser.phoneNumber,
-          };
-
-          localStorage.setItem('userData', JSON.stringify(updatedUser));
-          await this.dataService.updateUser(updatedUser);
-          this.userSubject.set(updatedUser);
-        } else {
-          const authData = {
-            email: userCredential.user.email || '',
+          const user: User = {
+            email: email,
             id: userCredential.user.uid,
             token: token,
-            username: userCredential.user.displayName || '',
+            username: username,
+            phoneNumber: phoneNumber,
           };
 
-          localStorage.setItem('userData', JSON.stringify(authData));
-          await this.dataService.storeUser(authData);
-          this.userSubject.set(authData);
+          await this.dataService.storeUser(user);
+
+          localStorage.setItem('userData', JSON.stringify(user));
+
+          this.userSubject.next(user);
         }
-      }
-      return userCredential;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+      }),
+      catchError((error) => {
+        console.error('Signup error:', error);
+        throw error;
+      })
+    );
+  }
+
+  login(email: string, password: string): Observable<UserCredential> {
+    const auth = getAuth();
+    return from(signInWithEmailAndPassword(auth, email, password)).pipe(
+      mergeMap(async (userCredential) => {
+        if (userCredential.user) {
+          const token = await userCredential.user.getIdToken();
+
+          const existingUser = await this.dataService.getCurrentUser();
+
+          if (existingUser) {
+            const updatedUser = {
+              ...existingUser,
+              token: token,
+              email: userCredential.user.email || existingUser.email,
+              username:
+                userCredential.user.displayName || existingUser.username,
+              phoneNumber: existingUser.phoneNumber,
+            };
+
+            localStorage.setItem('userData', JSON.stringify(updatedUser));
+            await this.dataService.updateUser(updatedUser);
+            this.userSubject.next(updatedUser);
+          } else {
+            const authData = {
+              email: userCredential.user.email || '',
+              id: userCredential.user.uid,
+              token: token,
+              username: userCredential.user.displayName || '',
+            };
+
+            localStorage.setItem('userData', JSON.stringify(authData));
+            await this.dataService.storeUser(authData);
+            this.userSubject.next(authData);
+          }
+        }
+        return userCredential;
+      }),
+      catchError((error) => {
+        console.error('Login error:', error);
+        throw error;
+      })
+    );
   }
 
   logout() {
     const auth = getAuth();
     signOut(auth)
       .then(async () => {
-        this.userSubject.set(null);
+        this.userSubject.next(null);
+
         localStorage.removeItem('userData');
+
         this.router.navigate(['/login']);
       })
       .catch((error) => {
@@ -143,14 +146,16 @@ export class AuthService {
   }
 
   getCurrentUser(): User | null {
-    return this.userSubject();
+    return this.userSubject.value;
   }
 
   async updateUserProfile(user: User): Promise<void> {
     try {
       await this.dataService.updateUser(user);
+
       localStorage.setItem('userData', JSON.stringify(user));
-      this.userSubject.set(user);
+
+      this.userSubject.next(user);
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;

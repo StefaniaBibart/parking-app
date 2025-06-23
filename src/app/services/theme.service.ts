@@ -1,10 +1,12 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
-  isDarkTheme = signal(false);
+  private isDarkTheme = new BehaviorSubject<boolean>(false);
+  isDarkTheme$ = this.isDarkTheme.asObservable();
 
   constructor() {
     const savedTheme = localStorage.getItem('theme');
@@ -12,22 +14,22 @@ export class ThemeService {
       this.setTheme(savedTheme === 'dark');
     } else {
       const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
+        '(prefers-color-scheme: dark)',
       ).matches;
       this.setTheme(prefersDark);
     }
   }
 
   toggleTheme(): void {
-    this.setTheme(!this.isDarkTheme());
+    this.setTheme(!this.isDarkTheme.value);
   }
 
   private setTheme(isDark: boolean): void {
-    this.isDarkTheme.set(isDark);
+    this.isDarkTheme.next(isDark);
 
     document.documentElement.setAttribute(
       'data-theme',
-      isDark ? 'dark' : 'light'
+      isDark ? 'dark' : 'light',
     );
 
     if (isDark) {
