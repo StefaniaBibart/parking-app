@@ -30,6 +30,7 @@ This project relies on several key dependencies. The major versions are:
 - Angular v18.2.0
 - Angular Material & CDK v18.2.14
 - Firebase v11.6.0
+- RxJS v7.8.0
 
 ### Installing Dependencies
 
