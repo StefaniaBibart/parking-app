@@ -1,4 +1,4 @@
-import { Component, Signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -13,18 +13,15 @@ import { AuthService } from '../../shared/services/auth.service';
   styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent {
-  isDarkTheme: Signal<boolean>;
-  isAdmin: Signal<boolean>;
+  isDarkTheme = this.themeService.isDarkTheme;
+  isAdmin = this.adminService.isAdmin;
 
   constructor(
     private router: Router,
     public themeService: ThemeService,
     private adminService: AdminService,
     private authService: AuthService
-  ) {
-    this.isDarkTheme = this.themeService.isDarkTheme;
-    this.isAdmin = this.adminService.isAdmin;
-  }
+  ) {}
 
   navigateTo(route: string) {
     this.router.navigate([route]);
