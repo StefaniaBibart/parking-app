@@ -1,22 +1,18 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, from } from 'rxjs';
-import { tap, catchError, mergeMap } from 'rxjs/operators';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  UserCredential,
-} from 'firebase/auth';
+import { tap, catchError, mergeMap, switchMap } from 'rxjs/operators';
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import {
   Auth,
-  user as fireUser,
   signInWithEmailAndPassword,
   authState,
   signOut,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  UserCredential,
 } from '@angular/fire/auth';
 
 @Injectable({
@@ -31,93 +27,53 @@ export class AuthService {
   user = computed(async () => {
     const authState = this.authState();
 
-    if (!authState || !authState.email) return null;
-
-    const token = await authState.getIdToken();
-    const mappedUser: User = {
-      email: authState.email,
-      id: authState.uid,
-      token: token,
-      username: authState.displayName ?? '',
-      phoneNumber: authState.phoneNumber ?? null,
-    };
-
-    const existingUser = await this.dataService.getCurrentUser();
-
-    if (existingUser) {
-      // DO STUFF
-      localStorage.setItem('userData', JSON.stringify(mappedUser));
-      this.dataService.storeUser(mappedUser);
+    if (!authState || !authState.email) {
+      localStorage.removeItem('userData');
+      return null;
     }
 
-    return mappedUser;
+    const userFromAuth = await this.mapUser(authState);
+    const userFromDb = await this.dataService.getCurrentUser();
+
+    const fullUser: User = {
+      ...userFromDb,
+      ...userFromAuth,
+    };
+
+    localStorage.setItem('userData', JSON.stringify(fullUser));
+    return fullUser;
   });
 
-  constructor(private router: Router, private dataService: DataService) {
-    this.loadUserFromStorage();
-  }
 
   users$ = this.authState$.pipe(
     mergeMap(async (user) => {
-      if (!user || !user.displayName || !user.email) return null;
+      if (!user) return null;
 
-      const token = await user.getIdToken();
-      const mappedUser: User = {
-        email: user.email,
-        id: user.uid,
-        token: token,
-        username: user.displayName,
-        phoneNumber: user.phoneNumber ?? null,
-      };
-      return mappedUser;
+      return this.mapUser(user);
     })
   );
 
-  private async loadUserFromStorage() {
-    try {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        const authData = JSON.parse(userData);
 
-        const user = await this.dataService.getCurrentUser();
+  constructor(private router: Router, private dataService: DataService) {}
 
-        if (user) {
-          const completeUser = {
-            ...user,
-            token: authData.token,
-          };
-          localStorage.setItem('userData', JSON.stringify(completeUser));
-        } else {
-        }
-      }
-    } catch (error) {
-      console.error('Error loading user from storage:', error);
-    }
-  }
-
+  // WIP
   signup(
     email: string,
     password: string,
     username: string,
     phoneNumber: string
   ): Observable<UserCredential> {
-    const auth = getAuth();
-    return from(createUserWithEmailAndPassword(auth, email, password)).pipe(
+    return from(
+      createUserWithEmailAndPassword(this.auth, email, password)
+    ).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
           await updateProfile(userCredential.user, {
             displayName: username,
           });
 
-          const token = await userCredential.user.getIdToken();
-
-          const user: User = {
-            email: email,
-            id: userCredential.user.uid,
-            token: token,
-            username: username,
-            phoneNumber: phoneNumber || null,
-          };
+          const user: User = await this.mapUser(userCredential.user);
+          user.phoneNumber = phoneNumber;
 
           await this.dataService.storeUser(user);
 
@@ -129,6 +85,16 @@ export class AuthService {
         throw error;
       })
     );
+  }
+
+  private async mapUser(user: any): Promise<Omit<User, 'phoneNumber'>> {
+    const token = await user.getIdToken();
+    return {
+      email: user.email,
+      id: user.uid,
+      token,
+      username: user.displayName,
+    };
   }
 
   // DONE
@@ -156,10 +122,19 @@ export class AuthService {
   }
 
   async updateUserProfile(user: User): Promise<void> {
+    const firebaseUser = this.auth.currentUser;
+    if (!firebaseUser) {
+      throw new Error('User not logged in.');
+    }
+
     try {
+      await updateProfile(firebaseUser, {
+        displayName: user.username,
+      });
+
       await this.dataService.updateUser(user);
 
-      localStorage.setItem('userData', JSON.stringify(user));
+      await firebaseUser.getIdToken(true);
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;
