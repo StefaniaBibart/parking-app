@@ -19,7 +19,7 @@ export class HomeComponent {
   ) {}
 
   async navigateToSmartParking() {
-    if (this.authService.getCurrentUser()) {
+    if (await this.authService.user()) {
       const isAdmin = await this.adminService.isAdminAsync();
       if (isAdmin) {
         this.router.navigate(['/admin/dashboard']);

@@ -75,7 +75,7 @@ export class UserProfileComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      const user = this.authService.getCurrentUser();
+      const user = await this.authService.user();
       if (user) {
         this.loadUserData(user);
       } else {
@@ -89,10 +89,7 @@ export class UserProfileComponent implements OnInit {
   async loadUserData(user: User) {
     this.username.setValue(user.username);
     this.email.setValue(user.email);
-
-    if (user.phoneNumber) {
-      this.phoneNumber.setValue(user.phoneNumber);
-    }
+    this.phoneNumber.setValue(user.phoneNumber || '');
 
     try {
       this.cars = await this.dataService.getUserVehicles();
@@ -153,12 +150,12 @@ export class UserProfileComponent implements OnInit {
   async confirmEdit() {
     if (this.validatePhoneNumber() && this.username.valid) {
       try {
-        const currentUser = this.authService.getCurrentUser();
+        const currentUser = await this.authService.user();
         if (currentUser) {
           const updatedUser: User = {
             ...currentUser,
             username: this.username.value || currentUser.username,
-            phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
+            phoneNumber: this.phoneNumber.value || null,
           };
 
           await this.authService.updateUserProfile(updatedUser);
@@ -261,11 +258,13 @@ export class UserProfileComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout();
+    this.authService.logout().subscribe({
+      error: (err) => console.error('Logout failed', err),
+    });
   }
 
-  cancelEdit() {
-    const user = this.authService.getCurrentUser();
+  async cancelEdit() {
+    const user = await this.authService.user();
     if (user) {
       this.username.setValue(user.username);
       this.phoneNumber.setValue(user.phoneNumber || '');

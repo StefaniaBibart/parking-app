@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.user.subscribe((user) => {
+    this.authService.users$.subscribe((user) => {
       this.isLoggedIn = !!user;
     });
   }

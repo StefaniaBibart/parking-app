@@ -14,7 +14,7 @@ export class RootRedirectGuard implements CanActivate {
   ) {}
 
   async canActivate(): Promise<boolean> {
-    const user = this.authService.getCurrentUser();
+    const user = await this.authService.user();
 
     if (!user) {
       this.router.navigate(['/login']);
