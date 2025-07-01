@@ -10,7 +10,7 @@ import {
 } from 'firebase/auth';
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Auth,
   user as fireUser,
@@ -23,33 +23,29 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-
   private readonly auth = inject(Auth);
   readonly authState$ = authState(this.auth);
 
-  fireBaseUser = toSignal(this.authState$);
+  authState = toSignal(this.authState$);
 
   user = computed(async () => {
-    const fireBaseUser = this.fireBaseUser();
-    console.log('fireBaseUser', fireBaseUser);
+    const authState = this.authState();
 
-    if (!fireBaseUser || !fireBaseUser.email)
-      return null;
+    if (!authState || !authState.email) return null;
 
-    const token = await fireBaseUser.getIdToken();
+    const token = await authState.getIdToken();
     const mappedUser: User = {
-      email: fireBaseUser.email,
-      id: fireBaseUser.uid,
+      email: authState.email,
+      id: authState.uid,
       token: token,
-      username: fireBaseUser.displayName ?? '',
-      phoneNumber: fireBaseUser.phoneNumber ?? null,
+      username: authState.displayName ?? '',
+      phoneNumber: authState.phoneNumber ?? null,
     };
 
     const existingUser = await this.dataService.getCurrentUser();
 
     if (existingUser) {
       // DO STUFF
-      console.log('existingUser', existingUser);
       localStorage.setItem('userData', JSON.stringify(mappedUser));
       this.dataService.storeUser(mappedUser);
     }

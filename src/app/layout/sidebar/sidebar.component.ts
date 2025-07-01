@@ -8,10 +8,10 @@ import { AuthService } from '../../shared/services/auth.service';
 import { Observable, take } from 'rxjs';
 
 @Component({
-    selector: 'app-sidebar',
-    imports: [MaterialModule, CommonModule],
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.css']
+  selector: 'app-sidebar',
+  imports: [MaterialModule, CommonModule],
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
   isDarkTheme = false;
@@ -39,10 +39,8 @@ export class SidebarComponent implements OnInit {
   async navigateToHome() {
     const isAdmin = await this.adminService.isAdminAsync();
     if (isAdmin) {
-      console.log('is admin');
       this.router.navigate(['/admin/dashboard']);
     } else {
-      console.log('is not admin');
       this.router.navigate(['/home']);
     }
   }

@@ -39,7 +39,6 @@ export class VehicleManagementComponent implements OnInit {
   async loadVehicles() {
     try {
       this.vehicles = await this.dataService.getUserVehicles();
-      console.log('Loaded vehicles:', this.vehicles);
     } catch (error) {
       console.error('Error loading vehicles:', error);
     }
