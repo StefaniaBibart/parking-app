@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { AdminService } from '../services/admin.service';
+import { map, take } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -8,14 +9,17 @@ import { AdminService } from '../services/admin.service';
 export class AdminGuard implements CanActivate {
   constructor(private adminService: AdminService, private router: Router) {}
 
-  async canActivate(): Promise<boolean> {
-    const isAdmin = await this.adminService.isAdminAsync();
-
-    if (!isAdmin) {
-      this.router.navigate(['/home']);
-      return false;
-    }
-
-    return true;
+  canActivate() {
+    return this.adminService.isAdmin().pipe(
+      take(1),
+      map((isAdmin) => {
+        if (!isAdmin) {
+          console.log('is not admin');
+          this.router.navigate(['/home']);
+          return false;
+        }
+        return true;
+      })
+    );
   }
 }

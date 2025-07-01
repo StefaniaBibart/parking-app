@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { ADMIN_CONFIG } from '../config/admin.config';
-import { Observable, map, mergeMap } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,6 @@ export class AdminService {
 
   isAdmin(): Observable<boolean> {
     return this.authService.users$.pipe(
-      mergeMap(user => user),
       map(user => {
         if (!user) return false;
         return user.email === ADMIN_CONFIG.adminEmail;

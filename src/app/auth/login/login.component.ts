@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { MaterialModule } from '../../material.module';
 
 import { AuthService } from '../../shared/services/auth.service';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, finalize, switchMap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AdminService } from '../../shared/services/admin.service';
 
@@ -68,15 +68,18 @@ export class LoginComponent {
             this.isLoading = false;
           })
         )
-        .subscribe(async (result) => {
+        .subscribe((result) => {
           if (result) {
-            // Check if user is admin and redirect accordingly
-            const isAdmin = await this.adminService.isAdminAsync();
-            if (isAdmin) {
-              this.router.navigate(['/admin/dashboard']);
-            } else {
-              this.router.navigate(['/home']);
-            }
+            this.adminService
+              .isAdmin()
+              .pipe(take(1))
+              .subscribe((isAdmin) => {
+                if (isAdmin) {
+                  this.router.navigate(['/admin/dashboard']);
+                } else {
+                  this.router.navigate(['/home']);
+                }
+              });
           }
         });
     } else {

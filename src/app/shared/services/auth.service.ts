@@ -11,49 +11,71 @@ import {
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Auth, user as fireUser, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import {
+  Auth,
+  user as fireUser,
+  signInWithEmailAndPassword,
+  authState,
+  signOut,
+} from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  
-  private readonly auth = inject(Auth);
 
-  fireBaseUser = toSignal(fireUser(this.auth));
+  private readonly auth = inject(Auth);
+  readonly authState$ = authState(this.auth);
+
+  fireBaseUser = toSignal(this.authState$);
 
   user = computed(async () => {
     const fireBaseUser = this.fireBaseUser();
-    console.log(fireBaseUser);
+    console.log('fireBaseUser', fireBaseUser);
 
-    if (!fireBaseUser || !fireBaseUser.displayName || !fireBaseUser.email) return null;
+    if (!fireBaseUser || !fireBaseUser.email)
+      return null;
 
     const token = await fireBaseUser.getIdToken();
     const mappedUser: User = {
       email: fireBaseUser.email,
       id: fireBaseUser.uid,
       token: token,
-      username: fireBaseUser.displayName,
+      username: fireBaseUser.displayName ?? '',
       phoneNumber: fireBaseUser.phoneNumber ?? null,
-    }
+    };
 
     const existingUser = await this.dataService.getCurrentUser();
- 
+
     if (existingUser) {
-      // DO STUFF 
+      // DO STUFF
+      console.log('existingUser', existingUser);
       localStorage.setItem('userData', JSON.stringify(mappedUser));
-    this.dataService.storeUser(mappedUser);
+      this.dataService.storeUser(mappedUser);
     }
-  
 
     return mappedUser;
-  })
- 
+  });
+
   constructor(private router: Router, private dataService: DataService) {
     this.loadUserFromStorage();
   }
 
-  users$ = toObservable(this.user);
+  users$ = this.authState$.pipe(
+    mergeMap(async (user) => {
+      if (!user || !user.displayName || !user.email) return null;
+
+      const token = await user.getIdToken();
+      const mappedUser: User = {
+        email: user.email,
+        id: user.uid,
+        token: token,
+        username: user.displayName,
+        phoneNumber: user.phoneNumber ?? null,
+      };
+      return mappedUser;
+    })
+  );
 
   private async loadUserFromStorage() {
     try {
@@ -104,7 +126,6 @@ export class AuthService {
           await this.dataService.storeUser(user);
 
           localStorage.setItem('userData', JSON.stringify(user));
-
         }
       }),
       catchError((error) => {
@@ -117,11 +138,11 @@ export class AuthService {
   // DONE
   login(email: string, password: string) {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
-    catchError((error) => {
-      console.error('Login error:', error);
-      throw error;
-    })
-    )
+      catchError((error) => {
+        console.error('Login error:', error);
+        throw error;
+      })
+    );
   }
 
   // DONE
@@ -143,7 +164,6 @@ export class AuthService {
       await this.dataService.updateUser(user);
 
       localStorage.setItem('userData', JSON.stringify(user));
-
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;

@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AdminService } from '../../shared/services/admin.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 
 @Component({
     selector: 'app-sidebar',
@@ -39,8 +39,10 @@ export class SidebarComponent implements OnInit {
   async navigateToHome() {
     const isAdmin = await this.adminService.isAdminAsync();
     if (isAdmin) {
+      console.log('is admin');
       this.router.navigate(['/admin/dashboard']);
     } else {
+      console.log('is not admin');
       this.router.navigate(['/home']);
     }
   }
@@ -50,6 +52,6 @@ export class SidebarComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout();
+    this.authService.logout().pipe(take(1)).subscribe();
   }
 }

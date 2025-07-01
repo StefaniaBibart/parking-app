@@ -258,9 +258,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout().subscribe({
-      error: (err) => console.error('Logout failed', err),
-    });
+    this.authService.logout();
   }
 
   async cancelEdit() {
