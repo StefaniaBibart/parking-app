@@ -10,7 +10,7 @@ export class AdminService {
   constructor(private authService: AuthService) {}
 
   isAdmin(): Observable<boolean> {
-    return this.authService.users$.pipe(
+    return this.authService.user$.pipe(
       map(user => {
         if (!user) return false;
         return user.email === ADMIN_CONFIG.adminEmail;

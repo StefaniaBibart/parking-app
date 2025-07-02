@@ -45,7 +45,7 @@ export class AuthService {
   });
 
 
-  users$ = this.authState$.pipe(
+  user$ = this.authState$.pipe(
     mergeMap(async (user) => {
       if (!user) return null;
 
