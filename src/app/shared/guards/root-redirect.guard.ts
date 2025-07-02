@@ -16,7 +16,7 @@ export class RootRedirectGuard implements CanActivate {
   ) {}
 
   canActivate(): Observable<UrlTree> {
-    return this.authService.users$.pipe(
+    return this.authService.user$.pipe(
       take(1),
       switchMap((user) => {
         if (!user) {
