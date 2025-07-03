@@ -49,6 +49,7 @@ export class LoginComponent {
     this.hidePassword = !this.hidePassword;
   }
 
+  // TODO: refactor to have this logic only in auth.service
   onLogin() {
     if (this.loginForm.valid) {
       this.isLoading = true;

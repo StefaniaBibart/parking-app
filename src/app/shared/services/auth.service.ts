@@ -29,8 +29,11 @@ export class AuthService {
 
     if (!authState || !authState.email) {
       localStorage.removeItem('userData');
+      this.router.navigate(['/login']);
       return null;
     }
+
+    // TODO: check if user is in db or is a new user
 
     const userFromAuth = await this.mapUser(authState);
     const userFromDb = await this.dataService.getCurrentUser();
@@ -40,11 +43,16 @@ export class AuthService {
       ...userFromAuth,
     };
 
+    // signup if new user
+
     localStorage.setItem('userData', JSON.stringify(fullUser));
     return fullUser;
   });
 
+  // TODO:
+  // isAdmin = computed(() =>  this.user().email === ADMIN_CONFIG.adminEmail);
 
+  // TODO: toObservable(this.user)
   user$ = this.authState$.pipe(
     mergeMap(async (user) => {
       if (!user) return null;
@@ -53,10 +61,8 @@ export class AuthService {
     })
   );
 
-
   constructor(private router: Router, private dataService: DataService) {}
 
-  // WIP
   signup(
     email: string,
     password: string,
@@ -68,6 +74,7 @@ export class AuthService {
     ).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
+          // TODO: move in computed user
           await updateProfile(userCredential.user, {
             displayName: username,
           });
@@ -77,7 +84,7 @@ export class AuthService {
 
           await this.dataService.storeUser(user);
 
-          localStorage.setItem('userData', JSON.stringify(user));
+          // TODO: move in computed user
         }
       }),
       catchError((error) => {
@@ -87,17 +94,6 @@ export class AuthService {
     );
   }
 
-  private async mapUser(user: any): Promise<Omit<User, 'phoneNumber'>> {
-    const token = await user.getIdToken();
-    return {
-      email: user.email,
-      id: user.uid,
-      token,
-      username: user.displayName,
-    };
-  }
-
-  // DONE
   login(email: string, password: string) {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
       catchError((error) => {
@@ -107,13 +103,8 @@ export class AuthService {
     );
   }
 
-  // DONE
   logout() {
     return from(signOut(this.auth)).pipe(
-      tap(() => {
-        localStorage.removeItem('userData');
-        this.router.navigate(['/login']);
-      }),
       catchError((error) => {
         console.error('Logout error:', error);
         throw error;
@@ -139,5 +130,15 @@ export class AuthService {
       console.error('Error updating user profile:', error);
       throw error;
     }
+  }
+
+  private async mapUser(user: any): Promise<Omit<User, 'phoneNumber'>> {
+    const token = await user.getIdToken();
+    return {
+      email: user.email,
+      id: user.uid,
+      token,
+      username: user.displayName,
+    };
   }
 }

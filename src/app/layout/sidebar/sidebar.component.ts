@@ -50,6 +50,7 @@ export class SidebarComponent implements OnInit {
   }
 
   logout() {
+    // TODO: refactor to this.authService.logout();
     this.authService.logout().pipe(take(1)).subscribe();
   }
 }

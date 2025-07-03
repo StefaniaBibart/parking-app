@@ -132,6 +132,7 @@ export class SignupComponent {
     return this.validationService.onPhoneNumberKeyPress(event);
   }
 
+  // TODO: refactor to have this logic only in auth.service
   onSignup() {
     this.validatePhoneNumber();
     this.validatePasswordMatch();
@@ -145,6 +146,7 @@ export class SignupComponent {
       const username = this.username?.value;
       const phoneNumber = this.phoneNumber?.value;
 
+      // TODO: only in auth.service
       this.authService
         .signup(email, password, username, phoneNumber)
         .pipe(

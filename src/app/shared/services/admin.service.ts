@@ -9,6 +9,8 @@ import { Observable, map } from 'rxjs';
 export class AdminService {
   constructor(private authService: AuthService) {}
 
+  // TODO: move everything to auth.service and remove this service 
+  // isAdmin = computed(() =>  this.user().email === ADMIN_CONFIG.adminEmail);
   isAdmin(): Observable<boolean> {
     return this.authService.user$.pipe(
       map(user => {

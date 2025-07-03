@@ -1,33 +1,27 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
 import { Vehicle } from '../models/vehicle.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  currentUser$ = this.currentUserSubject.asObservable();
+  private readonly authService = inject(AuthService);
+  private readonly dataService = inject(DataService);
 
-  constructor(private dataService: DataService) {
-    this.loadUserFromStorage();
-  }
+  private readonly userSignal = signal<User | null>(null);
 
-  private async loadUserFromStorage() {
-    try {
-      const user = await this.dataService.getCurrentUser();
-      if (user) {
-        this.currentUserSubject.next(user);
-      }
-    } catch (error) {
-      console.error('Error loading user from storage:', error);
-    }
+  constructor() {
+    effect(async () => {
+      const user = await this.authService.user();
+      this.userSignal.set(user);
+    });
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.userSignal();
   }
 
   getCurrentUserId(): string {
@@ -38,7 +32,7 @@ export class UserService {
   async saveUserData(user: User): Promise<void> {
     try {
       await this.dataService.updateUser(user);
-      this.currentUserSubject.next(user);
+      this.userSignal.set(user);
     } catch (error) {
       console.error('Error saving user data:', error);
       throw error;
