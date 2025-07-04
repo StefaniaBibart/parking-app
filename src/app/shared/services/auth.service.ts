@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, from } from 'rxjs';
 import { tap, catchError, mergeMap, switchMap } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   UserCredential,
+  User as FirebaseUser,
 } from '@angular/fire/auth';
 
 @Injectable({
@@ -21,29 +22,53 @@ import {
 export class AuthService {
   private readonly auth = inject(Auth);
   readonly authState$ = authState(this.auth);
+  readonly authState = toSignal(this.authState$);
 
-  authState = toSignal(this.authState$);
-
-  user = computed(async () => {
+  // Base auth user data from authState
+  readonly userFromAuth = computed(() => {
     const authState = this.authState();
+    if (!authState) {
+      return null;
+    }
+    return this.mapUserFromFirebase(authState);
+  });
 
-    if (!authState || !authState.email) {
+  // User data from our database
+  readonly userFromDb = computed(() => {
+    const auth = this.userFromAuth();
+    if (!auth) {
+      return null;
+    }
+    return this.dataService.getCurrentUser();
+  });
+
+  // Combined user data with proper type checking
+  readonly user = computed<User | null>(() => {
+    const auth = this.userFromAuth();
+    if (!auth) {
       localStorage.removeItem('userData');
       this.router.navigate(['/login']);
       return null;
     }
 
-    // TODO: check if user is in db or is a new user
+    const dbUser = this.userFromDb();
+    if (!dbUser) {
+      // If no DB user exists yet, return just the auth user data
+      const baseUser: User = {
+        email: auth.email,
+        id: auth.id,
+        token: auth.token,
+        username: auth.username,
+      };
+      localStorage.setItem('userData', JSON.stringify(baseUser));
+      return baseUser;
+    }
 
-    const userFromAuth = await this.mapUser(authState);
-    const userFromDb = await this.dataService.getCurrentUser();
-
+    // Combine auth and DB data, with auth taking precedence for overlapping fields
     const fullUser: User = {
-      ...userFromDb,
-      ...userFromAuth,
+      ...dbUser,
+      ...auth, // Auth data overrides DB data for core fields
     };
-
-    // signup if new user
 
     localStorage.setItem('userData', JSON.stringify(fullUser));
     return fullUser;
@@ -57,7 +82,7 @@ export class AuthService {
     mergeMap(async (user) => {
       if (!user) return null;
 
-      return this.mapUser(user);
+      return this.mapUserFromFirebase(user);
     })
   );
 
@@ -79,7 +104,7 @@ export class AuthService {
             displayName: username,
           });
 
-          const user: User = await this.mapUser(userCredential.user);
+          const user: User = this.mapUserFromFirebase(userCredential.user);
           user.phoneNumber = phoneNumber;
 
           await this.dataService.storeUser(user);
@@ -132,13 +157,12 @@ export class AuthService {
     }
   }
 
-  private async mapUser(user: any): Promise<Omit<User, 'phoneNumber'>> {
-    const token = await user.getIdToken();
+  private mapUserFromFirebase(firebaseUser: FirebaseUser): Omit<User, 'phoneNumber' | 'cars'> {
     return {
-      email: user.email,
-      id: user.uid,
-      token,
-      username: user.displayName,
+      email: firebaseUser.email!,
+      id: firebaseUser.uid,
+      token: firebaseUser.refreshToken,
+      username: firebaseUser.displayName || '',
     };
   }
 }
