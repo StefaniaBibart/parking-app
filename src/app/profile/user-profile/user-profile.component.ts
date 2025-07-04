@@ -79,6 +79,8 @@ export class UserProfileComponent implements OnInit {
       if (user) {
         this.loadUserData(user);
       } else {
+        // HERE: redirect to login on refresh
+        console.log('login redirect user-profile');
         this.router.navigate(['/login']);
       }
     } catch (error) {

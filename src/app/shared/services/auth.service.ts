@@ -1,4 +1,10 @@
-import { computed, inject, Injectable } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  resource,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, from } from 'rxjs';
 import { tap, catchError, mergeMap, switchMap } from 'rxjs/operators';
@@ -24,44 +30,54 @@ export class AuthService {
 
   authState = toSignal(this.authState$);
 
-  user = computed(async () => {
-    const authState = this.authState();
+  userResource = resource({
+    params: () => this.authState(),
+    loader: async ({ params: authState }) => {
+      if (!authState) {
+        return null;
+      }
 
-    if (!authState || !authState.email) {
-      localStorage.removeItem('userData');
-      this.router.navigate(['/login']);
-      return null;
-    }
+      // TODO: check if user is in db or is a new user
+      const userFromAuth = await this.mapUser(authState);
+      const userFromDb = await this.dataService.getCurrentUser();
 
-    // TODO: check if user is in db or is a new user
+      const fullUser: User = {
+        ...userFromDb,
+        ...userFromAuth,
+      };
 
-    const userFromAuth = await this.mapUser(authState);
-    const userFromDb = await this.dataService.getCurrentUser();
-
-    const fullUser: User = {
-      ...userFromDb,
-      ...userFromAuth,
-    };
-
-    // signup if new user
-
-    localStorage.setItem('userData', JSON.stringify(fullUser));
-    return fullUser;
+      return fullUser;
+    },
   });
+
+  user = computed(() => this.userResource.value());
 
   // TODO:
   // isAdmin = computed(() =>  this.user().email === ADMIN_CONFIG.adminEmail);
 
-  // TODO: toObservable(this.user)
-  user$ = this.authState$.pipe(
-    mergeMap(async (user) => {
-      if (!user) return null;
+  user$ = toObservable(this.user);
+ 
+  constructor(private router: Router, private dataService: DataService) {
+    effect(() => {
+      const status = this.userResource.status();
+      console.log('status', status);
 
-      return this.mapUser(user);
-    })
-  );
+      if (status === 'loading' || status === 'reloading') {
+        return;
+      }
 
-  constructor(private router: Router, private dataService: DataService) {}
+      const currentUser = this.userResource.value();
+
+      if (currentUser) {
+        console.log('currentUser if', currentUser);
+        localStorage.setItem('userData', JSON.stringify(currentUser));
+      } else {
+        console.log('currentUser else', currentUser);
+        localStorage.removeItem('userData');
+        // this.router.navigate(['/login']);
+      }
+    });
+  }
 
   signup(
     email: string,

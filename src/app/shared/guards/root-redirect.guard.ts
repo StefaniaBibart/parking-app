@@ -20,6 +20,7 @@ export class RootRedirectGuard implements CanActivate {
       take(1),
       switchMap((user) => {
         if (!user) {
+          console.log('login redirect root-redirect');
           return of(this.router.createUrlTree(['/login']));
         }
         return this.adminService.isAdmin().pipe(

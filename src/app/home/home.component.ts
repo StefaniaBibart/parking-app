@@ -27,6 +27,7 @@ export class HomeComponent {
         this.router.navigate(['/reservations/new']);
       }
     } else {
+      console.log('login redirect home');
       this.router.navigate(['/login']);
     }
   }
