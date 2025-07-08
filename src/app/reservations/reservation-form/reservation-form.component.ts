@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import {
@@ -16,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Reservation } from '../../shared/models/reservation.model';
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 import { ParkingSpot } from '../../shared/models/parking-spot.model';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
     selector: 'app-reservation-form',
@@ -52,6 +53,10 @@ export class ReservationFormComponent implements OnInit {
   currentFloorIndex = 0;
   visibleFloors: string[] = ['A', 'B'];
 
+  private authService = inject(AuthService);
+  private user = this.authService.user;
+  private isInitialized = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -59,9 +64,18 @@ export class ReservationFormComponent implements OnInit {
     private configService: ConfigService,
     private snackBar: MatSnackBar,
     private parkingSpotService: ParkingSpotService
-  ) {}
+  ) {
+    effect(() => {
+      if (this.user() && !this.isInitialized) {
+        this.isInitialized = true;
+        this.initializeForm();
+      }
+    });
+  }
 
-  async ngOnInit() {
+  ngOnInit() {}
+
+  async initializeForm() {
     try {
       await this.dataService.clearTemporaryReservationData();
 
