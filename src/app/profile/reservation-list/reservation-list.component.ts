@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject} from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { DataService } from '../../shared/services/data.service';
 import { Reservation } from '../../shared/models/reservation.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
     selector: 'app-reservation-list',
@@ -13,7 +14,8 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
     templateUrl: './reservation-list.component.html',
     styleUrls: ['./reservation-list.component.css']
 })
-export class ReservationListComponent implements OnInit {
+export class ReservationListComponent{
+  authService = inject(AuthService);
   activeTab = 'upcoming';
 
   upcomingReservations: Reservation[] = [];
@@ -23,10 +25,19 @@ export class ReservationListComponent implements OnInit {
     private router: Router,
     private dataService: DataService,
     private dialog: MatDialog
-  ) {}
+  ) {
+    effect(() => {
+      const user = this.authService.user();
+      const status = this.authService.userResource.status();
 
-  async ngOnInit() {
-    await this.loadReservations();
+      if (status === 'resolved' && !user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+      if (user) {
+        this.loadReservations();
+      }
+    });
   }
 
   async loadReservations() {

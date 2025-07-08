@@ -57,6 +57,7 @@ export class AuthService {
 
   user$ = toObservable(this.user);
  
+  // TODO: create new user in db in a separate effect
   constructor(private router: Router, private dataService: DataService) {
     effect(() => {
       const status = this.userResource.status();

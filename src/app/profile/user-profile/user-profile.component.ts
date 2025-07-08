@@ -6,6 +6,8 @@ import {
   ViewChild,
   OnInit,
   viewChild,
+  effect,
+  inject,
 } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 
@@ -34,8 +36,9 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css'],
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent{
   fileInput = viewChild.required<ElementRef>('fileInput');
+  authService = inject(AuthService);
 
   username = new FormControl('', [Validators.required]);
   email = new FormControl({ value: '', disabled: true });
@@ -54,12 +57,25 @@ export class UserProfileComponent implements OnInit {
 
   constructor(
     private validationService: ValidationService,
-    private authService: AuthService,
     private dataService: DataService,
     private cdr: ChangeDetectorRef,
     private router: Router,
     private dialog: MatDialog
   ) {
+    effect(() => {
+      const user = this.authService.user();
+      const status = this.authService.userResource.status();
+
+      if (status === 'resolved' && !user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      if (user) {
+        this.loadUserData(user);
+      }
+    });
+
     merge(this.username.statusChanges, this.username.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateUsernameError());
@@ -71,21 +87,6 @@ export class UserProfileComponent implements OnInit {
     merge(this.newCarPlate.statusChanges, this.newCarPlate.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.validateLicensePlate());
-  }
-
-  async ngOnInit() {
-    try {
-      const user = await this.authService.user();
-      if (user) {
-        this.loadUserData(user);
-      } else {
-        // HERE: redirect to login on refresh
-        console.log('login redirect user-profile');
-        this.router.navigate(['/login']);
-      }
-    } catch (error) {
-      console.error('Error initializing user profile:', error);
-    }
   }
 
   async loadUserData(user: User) {
