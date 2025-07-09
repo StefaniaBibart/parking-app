@@ -9,9 +9,8 @@ import { Router } from '@angular/router';
 import { MaterialModule } from '../../material.module';
 
 import { AuthService } from '../../shared/services/auth.service';
-import { catchError, finalize, switchMap, take } from 'rxjs/operators';
+import { catchError, finalize, switchMap, take, skip } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { AdminService } from '../../shared/services/admin.service';
 
 @Component({
     selector: 'app-login',
@@ -29,7 +28,6 @@ export class LoginComponent {
     private router: Router,
     private fb: FormBuilder,
     private authService: AuthService,
-    private adminService: AdminService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -49,45 +47,40 @@ export class LoginComponent {
     this.hidePassword = !this.hidePassword;
   }
 
-  // TODO: refactor to have this logic only in auth.service
   onLogin() {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = '';
-
-      const email = this.email?.value;
-      const password = this.password?.value;
-
-      this.authService
-        .login(email, password)
-        .pipe(
-          catchError((error) => {
-            this.errorMessage = this.getErrorMessage(error);
-            return of(null);
-          }),
-          finalize(() => {
-            this.isLoading = false;
-          })
-        )
-        .subscribe((result) => {
-          if (result) {
-            this.adminService
-              .isAdmin()
-              .pipe(take(1))
-              .subscribe((isAdmin) => {
-                if (isAdmin) {
-                  this.router.navigate(['/admin/dashboard']);
-                } else {
-                  this.router.navigate(['/home']);
-                }
-              });
-          }
-        });
-    } else {
-      Object.keys(this.loginForm.controls).forEach((key) => {
+    if (!this.loginForm.valid) {
+      Object.keys(this.loginForm.controls).forEach(key => {
         this.loginForm.get(key)?.markAsTouched();
       });
+      return;
     }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const { email, password } = this.loginForm.value;
+
+    this.authService
+      .login(email, password)
+      .pipe(
+        switchMap(() => this.authService.isAdmin$.pipe(skip(1), take(1))),
+        catchError((error) => {
+          this.errorMessage = this.getErrorMessage(error);
+          return of(null);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe(isAdmin => {
+        if (isAdmin === null) return;
+        
+        if (isAdmin) {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/home']);
+        }
+      });
   }
 
   onSignup() {

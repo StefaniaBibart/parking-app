@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, from } from 'rxjs';
-import { tap, catchError, mergeMap, switchMap } from 'rxjs/operators';
+import { tap, catchError, mergeMap, switchMap, filter } from 'rxjs/operators';
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -20,6 +20,7 @@ import {
   updateProfile,
   UserCredential,
 } from '@angular/fire/auth';
+import { ADMIN_CONFIG } from '../config/admin.config';
 
 @Injectable({
   providedIn: 'root',
@@ -52,8 +53,28 @@ export class AuthService {
 
   user = computed(() => this.userResource.value());
 
-  // TODO:
-  // isAdmin = computed(() =>  this.user().email === ADMIN_CONFIG.adminEmail);
+  isLoading = computed(() => {
+    const status = this.userResource.status();
+    return status === 'loading' || status === 'reloading' || status === 'idle';
+  });
+
+  isAdmin = computed(() => {
+    if (this.isLoading()) {
+      return null;
+    }
+
+    const currentUser = this.user();
+    if (!currentUser) {
+      return false;
+    }
+    
+    const isAdmin = currentUser.email === ADMIN_CONFIG.adminEmail;
+    return isAdmin;
+  });
+
+  isAdmin$ = toObservable(this.isAdmin).pipe(
+    filter(isAdmin => isAdmin !== null)
+  );
 
   user$ = toObservable(this.user);
  
@@ -61,7 +82,6 @@ export class AuthService {
   constructor(private router: Router, private dataService: DataService) {
     effect(() => {
       const status = this.userResource.status();
-      console.log('status', status);
 
       if (status === 'loading' || status === 'reloading') {
         return;
@@ -70,12 +90,9 @@ export class AuthService {
       const currentUser = this.userResource.value();
 
       if (currentUser) {
-        console.log('currentUser if', currentUser);
         localStorage.setItem('userData', JSON.stringify(currentUser));
       } else {
-        console.log('currentUser else', currentUser);
         localStorage.removeItem('userData');
-        // this.router.navigate(['/login']);
       }
     });
   }

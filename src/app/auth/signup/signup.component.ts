@@ -171,7 +171,6 @@ export class SignupComponent {
   }
 
   onLogin() {
-    console.log('login redirect signup');
     this.router.navigate(['/login']);
   }
 

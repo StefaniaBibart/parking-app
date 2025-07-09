@@ -32,7 +32,6 @@ export class AuthGuard implements CanActivate {
         if (user) {
           return true;
         }
-        console.log('login redirect auth-guard');
         return this.router.createUrlTree(['/login']);
       }),
     );
