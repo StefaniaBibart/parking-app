@@ -99,12 +99,12 @@ export class AuthService {
 
     effect(() => {
       const currentUser = this.userResource.value();
-      if (!currentUser) {
-        this.router.navigate(['/login']);
-      } else if (this.isAdmin()) {
-        this.router.navigate(['/admin/dashboard']);
-      } else {
-        this.router.navigate(['/home']);
+      if (currentUser) {
+        if (this.isAdmin()) {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/home']);
+        }
       }
     });
   }
