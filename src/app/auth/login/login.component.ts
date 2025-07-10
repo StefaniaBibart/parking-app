@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -24,11 +24,11 @@ export class LoginComponent {
   hidePassword = true;
   errorMessage = '';
 
-  constructor(
-    private router: Router,
-    private fb: FormBuilder,
-    private authService: AuthService,
-  ) {
+  private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
+  constructor() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
@@ -47,6 +47,7 @@ export class LoginComponent {
     this.hidePassword = !this.hidePassword;
   }
 
+  // TODO: refactor
   onLogin() {
     if (!this.loginForm.valid) {
       Object.keys(this.loginForm.controls).forEach(key => {
@@ -87,6 +88,7 @@ export class LoginComponent {
     this.router.navigate(['/signup']);
   }
 
+  // TODO: change with new cases
   private getErrorMessage(error: any): string {
     switch (error.code) {
       case 'auth/invalid-email':
@@ -95,7 +97,7 @@ export class LoginComponent {
         return 'This user account has been disabled.';
       case 'auth/user-not-found':
         return 'No user found with this email.';
-      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
         return 'Incorrect password.';
       case 'auth/too-many-requests':
         return 'Too many unsuccessful login attempts. Please try again later.';

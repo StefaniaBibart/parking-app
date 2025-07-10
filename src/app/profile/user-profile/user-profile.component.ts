@@ -55,13 +55,13 @@ export class UserProfileComponent{
 
   cars: Vehicle[] = [];
 
-  constructor(
-    private validationService: ValidationService,
-    private dataService: DataService,
-    private cdr: ChangeDetectorRef,
-    private router: Router,
-    private dialog: MatDialog
-  ) {
+  private readonly validationService = inject(ValidationService);
+  private readonly dataService = inject(DataService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+
+  constructor() {
     effect(() => {
       const user = this.authService.user();
       const status = this.authService.userResource.status();

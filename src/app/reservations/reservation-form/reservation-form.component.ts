@@ -57,14 +57,14 @@ export class ReservationFormComponent implements OnInit {
   private user = this.authService.user;
   private isInitialized = false;
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private dataService: DataService,
-    private configService: ConfigService,
-    private snackBar: MatSnackBar,
-    private parkingSpotService: ParkingSpotService
-  ) {
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly dataService = inject(DataService);
+  private readonly configService = inject(ConfigService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly parkingSpotService = inject(ParkingSpotService);
+
+  constructor() {
     effect(() => {
       if (this.user() && !this.isInitialized) {
         this.isInitialized = true;

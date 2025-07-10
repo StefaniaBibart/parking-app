@@ -32,10 +32,10 @@ export class AppComponent {
   isLoggedIn = computed(() => !!this.authService.authState());
   authStatusResolved = computed(() => this.authService.authState() !== undefined);
 
-  constructor(
-    private router: Router,
-    private loaderService: LoaderService
-  ) {
+  private readonly router = inject(Router);
+  private readonly loaderService = inject(LoaderService);
+
+  constructor() {
     this.setupRouterEvents();
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../material.module';
 import { DataService } from '../../shared/services/data.service';
@@ -48,13 +48,11 @@ export class AdminReservationsListComponent implements OnInit {
     'actions',
   ];
 
-  constructor(
-    private dataService: DataService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private parkingSpotService: ParkingSpotService,
-    private router: Router
-  ) {}
+  private readonly dataService = inject(DataService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly parkingSpotService = inject(ParkingSpotService);
+  private readonly router = inject(Router);
 
   async ngOnInit() {
     await this.loadReservations();

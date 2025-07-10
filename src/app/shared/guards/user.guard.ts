@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { map, filter, take } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserGuard implements CanActivate {
-  constructor(private router: Router, private authService: AuthService) {}
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   canActivate() {
     return this.authService.isAdmin$.pipe(

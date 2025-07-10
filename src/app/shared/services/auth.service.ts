@@ -28,6 +28,8 @@ import { ADMIN_CONFIG } from '../config/admin.config';
 export class AuthService {
   private readonly auth = inject(Auth);
   readonly authState$ = authState(this.auth);
+  private readonly router = inject(Router);
+  private readonly dataService = inject(DataService);
 
   authState = toSignal(this.authState$);
 
@@ -55,6 +57,7 @@ export class AuthService {
 
   isLoading = computed(() => {
     const status = this.userResource.status();
+    // TODO: check if idle is needed
     return status === 'loading' || status === 'reloading' || status === 'idle';
   });
 
@@ -75,11 +78,9 @@ export class AuthService {
   isAdmin$ = toObservable(this.isAdmin).pipe(
     filter(isAdmin => isAdmin !== null)
   );
-
-  user$ = toObservable(this.user);
  
   // TODO: create new user in db in a separate effect
-  constructor(private router: Router, private dataService: DataService) {
+  constructor() {
     effect(() => {
       const status = this.userResource.status();
 
@@ -93,6 +94,17 @@ export class AuthService {
         localStorage.setItem('userData', JSON.stringify(currentUser));
       } else {
         localStorage.removeItem('userData');
+      }
+    });
+
+    effect(() => {
+      const currentUser = this.userResource.value();
+      if (!currentUser) {
+        this.router.navigate(['/login']);
+      } else if (this.isAdmin()) {
+        this.router.navigate(['/admin/dashboard']);
+      } else {
+        this.router.navigate(['/home']);
       }
     });
   }

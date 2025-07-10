@@ -1,18 +1,18 @@
 <div class="sidebar-container">
-  @if ((isAdmin$ | async) === false) {
+  @if (isAdmin() === false) {
     <div class="logo-container">
       <div class="p-logo" (click)="navigateToHome()">P</div>
     </div>
   }
 
-  @if ((isAdmin$ | async) === true) {
+  @if (isAdmin() === true) {
     <div class="logo-container">
       <div class="admin-logo" (click)="navigateToHome()">A</div>
     </div>
   }
 
   <div class="menu-items">
-    @if ((isAdmin$ | async) === false) {
+      @if (isAdmin() === false) {
       <div
         class="menu-item"
         (click)="navigateTo('/reservations/new')"
@@ -31,7 +31,7 @@
       </div>
     }
 
-    @if ((isAdmin$ | async) === true) {
+    @if (isAdmin() === true) {
       <div
         class="menu-item"
         (click)="navigateTo('/admin/reservations')"
@@ -61,7 +61,7 @@
       <mat-icon>{{ isDarkTheme ? "light_mode" : "dark_mode" }}</mat-icon>
     </div>
 
-    @if ((isAdmin$ | async) === true) {
+    @if (isAdmin() === true) {
       <div
         class="menu-item logout-button"
         (click)="logout()"
@@ -72,7 +72,7 @@
       </div>
     }
 
-    @if ((isAdmin$ | async) === false) {
+    @if (isAdmin() === false) {
       <div
         class="user-profile"
         (click)="navigateTo('/profile')"

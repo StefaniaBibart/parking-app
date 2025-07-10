@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import {
   FormBuilder,
@@ -26,12 +26,12 @@ export class SignupComponent {
   hideConfirmPassword = true;
   errorMessage = '';
 
-  constructor(
-    private router: Router,
-    private validationService: ValidationService,
-    private fb: FormBuilder,
-    private authService: AuthService,
-  ) {
+  private readonly router = inject(Router);
+  private readonly validationService = inject(ValidationService);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
+  constructor() {
     this.signupForm = this.fb.group({
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],

@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { Observable, take } from 'rxjs';
+import { take } from 'rxjs';
 import { tap, catchError, of } from 'rxjs';
 
 @Component({
@@ -14,16 +14,12 @@ import { tap, catchError, of } from 'rxjs';
   styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
-  isDarkTheme = false;
-  isAdmin$: Observable<boolean | null>;
+  private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
+  private readonly authService = inject(AuthService);
 
-  constructor(
-    private router: Router,
-    private themeService: ThemeService,
-    private authService: AuthService
-  ) {
-    this.isAdmin$ = this.authService.isAdmin$;
-  }
+  isDarkTheme = false;
+  isAdmin = this.authService.isAdmin;
 
   ngOnInit(): void {
     this.themeService.isDarkTheme$.subscribe((isDark) => {
@@ -48,18 +44,7 @@ export class SidebarComponent implements OnInit {
     this.themeService.toggleTheme();
   }
 
-  // TODO: refactor to this.authService.logout();
   logout() {
-    this.authService
-      .logout()
-      .pipe(
-        tap(() => this.router.navigate(['/login'])),
-        catchError((error) => {
-          console.error('Logout failed:', error);
-          return of(null);
-        }),
-        take(1)
-      )
-      .subscribe();
+    this.authService.logout();
   }
 }

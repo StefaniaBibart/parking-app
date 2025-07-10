@@ -5,7 +5,7 @@ import {
   Router,
   UrlTree,
 } from '@angular/router';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, tap, take, mergeMap} from 'rxjs/operators';
 
@@ -13,10 +13,8 @@ import { AuthService } from '../shared/services/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-  ) {}
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   canActivate(
     route: ActivatedRouteSnapshot,

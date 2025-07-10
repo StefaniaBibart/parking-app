@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 
 import { MaterialModule } from '../../material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -22,11 +22,11 @@ export class VehicleManagementComponent implements OnInit {
   editingVehicleId: number | null = null;
   vehicleForm: FormGroup;
 
-  constructor(
-    private dataService: DataService,
-    private fb: FormBuilder,
-    private dialog: MatDialog
-  ) {
+  private readonly dataService = inject(DataService);
+  private readonly fb = inject(FormBuilder);
+  private readonly dialog = inject(MatDialog);
+
+  constructor() {
     this.vehicleForm = this.fb.group({
       plate: ['', [Validators.required]],
     });

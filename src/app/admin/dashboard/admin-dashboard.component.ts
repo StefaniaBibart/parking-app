@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../material.module';
 import { DataService } from '../../shared/services/data.service';
@@ -30,11 +30,9 @@ export class AdminDashboardComponent implements OnInit {
     occupied: number;
   }[] = [];
 
-  constructor(
-    private dataService: DataService,
-    private configService: ConfigService,
-    private parkingSpotService: ParkingSpotService
-  ) {}
+  private readonly dataService = inject(DataService);
+  private readonly configService = inject(ConfigService);
+  private readonly parkingSpotService = inject(ParkingSpotService);
 
   async ngOnInit() {
     await this.loadDashboardData();

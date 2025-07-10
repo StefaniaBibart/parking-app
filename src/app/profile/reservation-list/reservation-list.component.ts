@@ -21,11 +21,11 @@ export class ReservationListComponent{
   upcomingReservations: Reservation[] = [];
   pastReservations: Reservation[] = [];
 
-  constructor(
-    private router: Router,
-    private dataService: DataService,
-    private dialog: MatDialog
-  ) {
+  private readonly router = inject(Router);
+  private readonly dataService = inject(DataService);
+  private readonly dialog = inject(MatDialog);
+
+  constructor() {
     effect(() => {
       const user = this.authService.user();
       const status = this.authService.userResource.status();

@@ -1,20 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RootRedirectGuard implements CanActivate {
-  constructor(
-    private router: Router,
-    private authService: AuthService
-  ) {}
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   canActivate(): Observable<UrlTree> {
-    return this.authService.user$.pipe(
+    return toObservable(this.authService.user).pipe(
       take(1),
       switchMap((user) => {
         if (!user) {
