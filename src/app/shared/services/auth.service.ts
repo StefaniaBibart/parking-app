@@ -40,7 +40,6 @@ export class AuthService {
         return null;
       }
 
-      // TODO: check if user is in db or is a new user
       const userFromAuth = await this.mapUser(authState);
       const userFromDb = await this.dataService.getCurrentUser();
 
@@ -55,11 +54,9 @@ export class AuthService {
 
   user = computed(() => this.userResource.value());
 
-  isLoading = computed(() => {
-    const status = this.userResource.status();
-    // TODO: check if idle is needed
-    return status === 'loading' || status === 'reloading' || status === 'idle';
-  });
+  isLoading = computed(() => this.userResource.isLoading());
+
+  error = computed(() => this.userResource.error() as unknown as { code: string; message: string } | null);
 
   isAdmin = computed(() => {
     if (this.isLoading()) {
@@ -78,22 +75,24 @@ export class AuthService {
   isAdmin$ = toObservable(this.isAdmin).pipe(
     filter(isAdmin => isAdmin !== null)
   );
- 
-  // TODO: create new user in db in a separate effect
+
   constructor() {
     effect(() => {
-      const status = this.userResource.status();
-
-      if (status === 'loading' || status === 'reloading') {
-        return;
-      }
-
       const currentUser = this.userResource.value();
 
       if (currentUser) {
         localStorage.setItem('userData', JSON.stringify(currentUser));
       } else {
         localStorage.removeItem('userData');
+      }
+    });
+
+    effect(() => {
+      const user = this.userResource.value();
+      const status = this.userResource.status();
+
+      if (status === 'resolved' && !user) {
+        this.router.navigate(['/login']);
       }
     });
 

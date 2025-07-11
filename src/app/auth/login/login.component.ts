@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { MaterialModule } from '../../material.module';
 
 import { AuthService } from '../../shared/services/auth.service';
-import { catchError, finalize, switchMap, take, skip } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 @Component({
@@ -20,18 +20,36 @@ import { of } from 'rxjs';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  isLoading = false;
   hidePassword = true;
   errorMessage = '';
+  isLoading = false;
 
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
 
   constructor() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
+    });
+
+    effect(() => {
+      const error = this.authService.error();
+      if (error !== null && error !== undefined) {
+        this.errorMessage = this.getErrorMessage(error);
+      } else {
+        this.errorMessage = '';
+      }
+    });
+
+    effect(() => {
+      const isLoading = this.authService.isLoading();
+      if (isLoading) {
+        this.isLoading = true;
+      } else {
+        this.isLoading = false;
+      }
     });
   }
 
@@ -47,7 +65,6 @@ export class LoginComponent {
     this.hidePassword = !this.hidePassword;
   }
 
-  // TODO: refactor
   onLogin() {
     if (!this.loginForm.valid) {
       Object.keys(this.loginForm.controls).forEach(key => {
@@ -56,40 +73,27 @@ export class LoginComponent {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-
     const { email, password } = this.loginForm.value;
-
-    this.authService
-      .login(email, password)
-      .pipe(
-        switchMap(() => this.authService.isAdmin$.pipe(skip(1), take(1))),
-        catchError((error) => {
-          this.errorMessage = this.getErrorMessage(error);
-          return of(null);
-        }),
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
-      .subscribe(isAdmin => {
-        if (isAdmin === null) return;
-        
-        if (isAdmin) {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/home']);
-        }
-      });
+    this.authService.login(email, password).pipe(
+      catchError((error) => {
+        this.errorMessage = this.getErrorMessage(error);
+        return of(null);
+      }),
+      finalize(() => {
+        this.isLoading = this.authService.isLoading();
+      })
+    ).subscribe();
   }
 
   onSignup() {
     this.router.navigate(['/signup']);
   }
 
-  // TODO: change with new cases
-  private getErrorMessage(error: any): string {
+  private getErrorMessage(error: { code: string; message: string } | null): string {
+    if (error === null) {
+      return '';
+    }
+
     switch (error.code) {
       case 'auth/invalid-email':
         return 'Invalid email address format.';
