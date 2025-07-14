@@ -10,6 +10,7 @@ import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.compo
 import { AdminParkingSpotsComponent } from './admin/parking-spots/admin-parking-spots.component';
 import { AdminReservationsListComponent } from './admin/reservations-list/admin-reservations-list.component';
 import { AuthGuard } from './auth/auth.guard';
+import { LoginGuard } from './auth/login.guard';
 
 export const routes: Routes = [
   {
@@ -22,8 +23,8 @@ export const routes: Routes = [
     component: HomeComponent,
     canActivate: [AuthGuard],
   },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+  { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
+  { path: 'signup', component: SignupComponent, canActivate: [LoginGuard] },
   {
     path: 'profile',
     component: UserProfileComponent,

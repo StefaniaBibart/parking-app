@@ -88,23 +88,28 @@ export class AuthService {
     });
 
     effect(() => {
-      const user = this.userResource.value();
-      const status = this.userResource.status();
-
-      if (status === 'resolved' && !user) {
-        this.router.navigate(['/login']);
-      }
-    });
-
-    effect(() => {
-      const currentUser = this.userResource.value();
-      if (currentUser) {
+      const user = this.user();
+      if (
+        user &&
+        (this.router.url === '/login' || this.router.url === '/signup')
+      ) {
         if (this.isAdmin()) {
           this.router.navigate(['/admin/dashboard']);
         } else {
           this.router.navigate(['/home']);
         }
       }
+    });
+
+    effect((onCleanup) => {
+      const user = this.user();
+
+      onCleanup(() => {
+        const previousUser = user;
+        if (previousUser && !this.user()) {
+          this.router.navigate(['/login']);
+        }
+      });
     });
   }
 
