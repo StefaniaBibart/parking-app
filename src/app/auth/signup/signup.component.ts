@@ -14,10 +14,10 @@ import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 @Component({
-    selector: 'app-signup',
-    imports: [MaterialModule, ReactiveFormsModule],
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css']
+  selector: 'app-signup',
+  imports: [MaterialModule, ReactiveFormsModule],
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent {
   signupForm: FormGroup;
@@ -132,7 +132,6 @@ export class SignupComponent {
     return this.validationService.onPhoneNumberKeyPress(event);
   }
 
-  // TODO: refactor to have this logic only in auth.service
   onSignup() {
     this.validatePhoneNumber();
     this.validatePasswordMatch();
@@ -146,7 +145,6 @@ export class SignupComponent {
       const username = this.username?.value;
       const phoneNumber = this.phoneNumber?.value;
 
-      // TODO: only in auth.service
       this.authService
         .signup(email, password, username, phoneNumber)
         .pipe(
@@ -156,7 +154,7 @@ export class SignupComponent {
           }),
           finalize(() => {
             this.isLoading = false;
-          }),
+          })
         )
         .subscribe((result) => {
           if (result) {

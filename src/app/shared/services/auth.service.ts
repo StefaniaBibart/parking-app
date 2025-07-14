@@ -1,10 +1,4 @@
-import {
-  computed,
-  effect,
-  inject,
-  Injectable,
-  resource,
-} from '@angular/core';
+import { computed, effect, inject, Injectable, resource } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, from } from 'rxjs';
 import { tap, catchError, mergeMap, switchMap, filter } from 'rxjs/operators';
@@ -56,7 +50,13 @@ export class AuthService {
 
   isLoading = computed(() => this.userResource.isLoading());
 
-  error = computed(() => this.userResource.error() as unknown as { code: string; message: string } | null);
+  error = computed(
+    () =>
+      this.userResource.error() as unknown as {
+        code: string;
+        message: string;
+      } | null
+  );
 
   isAdmin = computed(() => {
     if (this.isLoading()) {
@@ -67,14 +67,10 @@ export class AuthService {
     if (!currentUser) {
       return false;
     }
-    
+
     const isAdmin = currentUser.email === ADMIN_CONFIG.adminEmail;
     return isAdmin;
   });
-
-  isAdmin$ = toObservable(this.isAdmin).pipe(
-    filter(isAdmin => isAdmin !== null)
-  );
 
   constructor() {
     effect(() => {
@@ -124,7 +120,6 @@ export class AuthService {
     ).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
-          // TODO: move in computed user
           await updateProfile(userCredential.user, {
             displayName: username,
           });
@@ -133,8 +128,6 @@ export class AuthService {
           user.phoneNumber = phoneNumber;
 
           await this.dataService.storeUser(user);
-
-          // TODO: move in computed user
         }
       }),
       catchError((error) => {
