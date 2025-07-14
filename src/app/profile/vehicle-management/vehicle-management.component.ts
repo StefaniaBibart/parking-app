@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+
 import { MaterialModule } from '../../material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../shared/services/data.service';
@@ -11,7 +11,7 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 @Component({
   selector: 'app-vehicle-management',
   standalone: true,
-  imports: [CommonModule, MaterialModule, FormsModule, ReactiveFormsModule],
+  imports: [MaterialModule, FormsModule, ReactiveFormsModule],
   templateUrl: './vehicle-management.component.html',
   styleUrls: ['./vehicle-management.component.css'],
 })
@@ -22,11 +22,11 @@ export class VehicleManagementComponent implements OnInit {
   editingVehicleId: number | null = null;
   vehicleForm: FormGroup;
 
-  constructor(
-    private dataService: DataService,
-    private fb: FormBuilder,
-    private dialog: MatDialog
-  ) {
+  private readonly dataService = inject(DataService);
+  private readonly fb = inject(FormBuilder);
+  private readonly dialog = inject(MatDialog);
+
+  constructor() {
     this.vehicleForm = this.fb.group({
       plate: ['', [Validators.required]],
     });
@@ -39,7 +39,6 @@ export class VehicleManagementComponent implements OnInit {
   async loadVehicles() {
     try {
       this.vehicles = await this.dataService.getUserVehicles();
-      console.log('Loaded vehicles:', this.vehicles);
     } catch (error) {
       console.error('Error loading vehicles:', error);
     }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ParkingSpotService } from './parking-spot.service';
 import { ConfigService } from './config.service';
 import { ParkingSpot } from '../models/parking-spot.model';
@@ -8,7 +8,9 @@ export class LocalStorageParkingSpotService extends ParkingSpotService {
   private settingsLoaded = false;
   private parkingSettingsKey = 'parkingSettings';
 
-  constructor(private configService: ConfigService) {
+  private readonly configService = inject(ConfigService);
+
+  constructor() {
     super();
   }
 

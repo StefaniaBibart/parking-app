@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { getDatabase, ref, get, set } from 'firebase/database';
 import { ParkingSpotService } from './parking-spot.service';
 import { ParkingSpot } from '../models/parking-spot.model';
@@ -9,7 +9,9 @@ export class FirebaseParkingSpotService extends ParkingSpotService {
   private settingsPath = 'parkingSettings';
   private settingsLoaded = false;
 
-  constructor(private configService: ConfigService) {
+  private readonly configService = inject(ConfigService);
+
+  constructor() {
     super();
   }
 

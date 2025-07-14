@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../material.module';
 import { DataService } from '../../shared/services/data.service';
@@ -8,11 +8,10 @@ import { ParkingSpot } from '../../shared/models/parking-spot.model';
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [CommonModule, MaterialModule],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css'],
+    selector: 'app-admin-dashboard',
+    imports: [CommonModule, MaterialModule],
+    templateUrl: './admin-dashboard.component.html',
+    styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
   totalSpots: number = 0;
@@ -31,11 +30,9 @@ export class AdminDashboardComponent implements OnInit {
     occupied: number;
   }[] = [];
 
-  constructor(
-    private dataService: DataService,
-    private configService: ConfigService,
-    private parkingSpotService: ParkingSpotService
-  ) {}
+  private readonly dataService = inject(DataService);
+  private readonly configService = inject(ConfigService);
+  private readonly parkingSpotService = inject(ParkingSpotService);
 
   async ngOnInit() {
     await this.loadDashboardData();

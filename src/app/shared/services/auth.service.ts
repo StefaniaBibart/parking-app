@@ -1,51 +1,112 @@
-import { Injectable } from '@angular/core';
+import { computed, effect, inject, Injectable, resource } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, from } from 'rxjs';
-import { tap, catchError, mergeMap } from 'rxjs/operators';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  UserCredential,
-} from 'firebase/auth';
+import { Observable, from } from 'rxjs';
+import { tap, catchError, mergeMap, switchMap, filter } from 'rxjs/operators';
 import { DataService } from './data.service';
 import { User } from '../models/user.model';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import {
+  Auth,
+  signInWithEmailAndPassword,
+  authState,
+  signOut,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  UserCredential,
+} from '@angular/fire/auth';
+import { ADMIN_CONFIG } from '../config/admin.config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private userSubject = new BehaviorSubject<User | null>(null);
-  user = this.userSubject.asObservable();
+  private readonly auth = inject(Auth);
+  readonly authState$ = authState(this.auth);
+  private readonly router = inject(Router);
+  private readonly dataService = inject(DataService);
 
-  constructor(private router: Router, private dataService: DataService) {
-    this.loadUserFromStorage();
-  }
+  authState = toSignal(this.authState$);
 
-  private async loadUserFromStorage() {
-    try {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        const authData = JSON.parse(userData);
+  userResource = resource({
+    params: () => this.authState(),
+    loader: async ({ params: authState }) => {
+      if (!authState) {
+        return null;
+      }
 
-        const user = await this.dataService.getCurrentUser();
+      const userFromAuth = await this.mapUser(authState);
+      const userFromDb = await this.dataService.getCurrentUser();
 
-        if (user) {
-          const completeUser = {
-            ...user,
-            token: authData.token,
-          };
-          localStorage.setItem('userData', JSON.stringify(completeUser));
-          this.userSubject.next(completeUser);
+      const fullUser: User = {
+        ...userFromDb,
+        ...userFromAuth,
+      };
+
+      return fullUser;
+    },
+  });
+
+  user = computed(() => this.userResource.value());
+
+  isLoading = computed(() => this.userResource.isLoading());
+
+  error = computed(
+    () =>
+      this.userResource.error() as unknown as {
+        code: string;
+        message: string;
+      } | null
+  );
+
+  isAdmin = computed(() => {
+    if (this.isLoading()) {
+      return null;
+    }
+
+    const currentUser = this.user();
+    if (!currentUser) {
+      return false;
+    }
+
+    const isAdmin = currentUser.email === ADMIN_CONFIG.adminEmail;
+    return isAdmin;
+  });
+
+  constructor() {
+    effect(() => {
+      const currentUser = this.userResource.value();
+
+      if (currentUser) {
+        localStorage.setItem('userData', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('userData');
+      }
+    });
+
+    effect(() => {
+      const user = this.user();
+      if (
+        user &&
+        (this.router.url === '/login' || this.router.url === '/signup')
+      ) {
+        if (this.isAdmin()) {
+          this.router.navigate(['/admin/dashboard']);
         } else {
-          this.userSubject.next(authData);
+          this.router.navigate(['/home']);
         }
       }
-    } catch (error) {
-      console.error('Error loading user from storage:', error);
-    }
+    });
+
+    effect((onCleanup) => {
+      const user = this.user();
+
+      onCleanup(() => {
+        const previousUser = user;
+        if (previousUser && !this.user()) {
+          this.router.navigate(['/login']);
+        }
+      });
+    });
   }
 
   signup(
@@ -54,29 +115,19 @@ export class AuthService {
     username: string,
     phoneNumber: string
   ): Observable<UserCredential> {
-    const auth = getAuth();
-    return from(createUserWithEmailAndPassword(auth, email, password)).pipe(
+    return from(
+      createUserWithEmailAndPassword(this.auth, email, password)
+    ).pipe(
       tap(async (userCredential) => {
         if (userCredential.user) {
           await updateProfile(userCredential.user, {
             displayName: username,
           });
 
-          const token = await userCredential.user.getIdToken();
-
-          const user: User = {
-            email: email,
-            id: userCredential.user.uid,
-            token: token,
-            username: username,
-            phoneNumber: phoneNumber,
-          };
+          const user: User = await this.mapUser(userCredential.user);
+          user.phoneNumber = phoneNumber;
 
           await this.dataService.storeUser(user);
-
-          localStorage.setItem('userData', JSON.stringify(user));
-
-          this.userSubject.next(user);
         }
       }),
       catchError((error) => {
@@ -86,43 +137,8 @@ export class AuthService {
     );
   }
 
-  login(email: string, password: string): Observable<UserCredential> {
-    const auth = getAuth();
-    return from(signInWithEmailAndPassword(auth, email, password)).pipe(
-      mergeMap(async (userCredential) => {
-        if (userCredential.user) {
-          const token = await userCredential.user.getIdToken();
-
-          const existingUser = await this.dataService.getCurrentUser();
-
-          if (existingUser) {
-            const updatedUser = {
-              ...existingUser,
-              token: token,
-              email: userCredential.user.email || existingUser.email,
-              username:
-                userCredential.user.displayName || existingUser.username,
-              phoneNumber: existingUser.phoneNumber,
-            };
-
-            localStorage.setItem('userData', JSON.stringify(updatedUser));
-            await this.dataService.updateUser(updatedUser);
-            this.userSubject.next(updatedUser);
-          } else {
-            const authData = {
-              email: userCredential.user.email || '',
-              id: userCredential.user.uid,
-              token: token,
-              username: userCredential.user.displayName || '',
-            };
-
-            localStorage.setItem('userData', JSON.stringify(authData));
-            await this.dataService.storeUser(authData);
-            this.userSubject.next(authData);
-          }
-        }
-        return userCredential;
-      }),
+  login(email: string, password: string) {
+    return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
       catchError((error) => {
         console.error('Login error:', error);
         throw error;
@@ -131,34 +147,41 @@ export class AuthService {
   }
 
   logout() {
-    const auth = getAuth();
-    signOut(auth)
-      .then(async () => {
-        this.userSubject.next(null);
-
-        localStorage.removeItem('userData');
-
-        this.router.navigate(['/login']);
-      })
-      .catch((error) => {
+    return from(signOut(this.auth)).pipe(
+      catchError((error) => {
         console.error('Logout error:', error);
-      });
-  }
-
-  getCurrentUser(): User | null {
-    return this.userSubject.value;
+        throw error;
+      })
+    );
   }
 
   async updateUserProfile(user: User): Promise<void> {
+    const firebaseUser = this.auth.currentUser;
+    if (!firebaseUser) {
+      throw new Error('User not logged in.');
+    }
+
     try {
+      await updateProfile(firebaseUser, {
+        displayName: user.username,
+      });
+
       await this.dataService.updateUser(user);
 
-      localStorage.setItem('userData', JSON.stringify(user));
-
-      this.userSubject.next(user);
+      await firebaseUser.getIdToken(true);
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;
     }
+  }
+
+  private async mapUser(user: any): Promise<Omit<User, 'phoneNumber'>> {
+    const token = await user.getIdToken();
+    return {
+      email: user.email,
+      id: user.uid,
+      token,
+      username: user.displayName,
+    };
   }
 }

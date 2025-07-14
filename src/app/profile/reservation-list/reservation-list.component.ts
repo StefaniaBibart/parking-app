@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject} from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -6,28 +6,38 @@ import { DataService } from '../../shared/services/data.service';
 import { Reservation } from '../../shared/models/reservation.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
-  selector: 'app-reservation-list',
-  standalone: true,
-  imports: [MaterialModule, CommonModule],
-  templateUrl: './reservation-list.component.html',
-  styleUrls: ['./reservation-list.component.css'],
+    selector: 'app-reservation-list',
+    imports: [MaterialModule, CommonModule],
+    templateUrl: './reservation-list.component.html',
+    styleUrls: ['./reservation-list.component.css']
 })
-export class ReservationListComponent implements OnInit {
+export class ReservationListComponent{
+  authService = inject(AuthService);
   activeTab = 'upcoming';
 
   upcomingReservations: Reservation[] = [];
   pastReservations: Reservation[] = [];
 
-  constructor(
-    private router: Router,
-    private dataService: DataService,
-    private dialog: MatDialog
-  ) {}
+  private readonly router = inject(Router);
+  private readonly dataService = inject(DataService);
+  private readonly dialog = inject(MatDialog);
 
-  async ngOnInit() {
-    await this.loadReservations();
+  constructor() {
+    effect(() => {
+      const user = this.authService.user();
+      const status = this.authService.userResource.status();
+
+      if (status === 'resolved' && !user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+      if (user) {
+        this.loadReservations();
+      }
+    });
   }
 
   async loadReservations() {

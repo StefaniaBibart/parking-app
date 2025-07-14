@@ -5,9 +5,12 @@ import {
   signal,
   ViewChild,
   OnInit,
+  viewChild,
+  effect,
+  inject,
 } from '@angular/core';
 import { MaterialModule } from '../../material.module';
-import { CommonModule } from '@angular/common';
+
 import {
   FormControl,
   FormsModule,
@@ -28,14 +31,14 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 
 @Component({
   selector: 'app-user-profile',
-  standalone: true,
-  imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [MaterialModule, FormsModule, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css'],
 })
-export class UserProfileComponent implements OnInit {
-  @ViewChild('fileInput') fileInput!: ElementRef;
+export class UserProfileComponent{
+  fileInput = viewChild.required<ElementRef>('fileInput');
+  authService = inject(AuthService);
 
   username = new FormControl('', [Validators.required]);
   email = new FormControl({ value: '', disabled: true });
@@ -52,14 +55,27 @@ export class UserProfileComponent implements OnInit {
 
   cars: Vehicle[] = [];
 
-  constructor(
-    private validationService: ValidationService,
-    private authService: AuthService,
-    private dataService: DataService,
-    private cdr: ChangeDetectorRef,
-    private router: Router,
-    private dialog: MatDialog
-  ) {
+  private readonly validationService = inject(ValidationService);
+  private readonly dataService = inject(DataService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+
+  constructor() {
+    effect(() => {
+      const user = this.authService.user();
+      const status = this.authService.userResource.status();
+
+      if (status === 'resolved' && !user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      if (user) {
+        this.loadUserData(user);
+      }
+    });
+
     merge(this.username.statusChanges, this.username.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateUsernameError());
@@ -73,26 +89,10 @@ export class UserProfileComponent implements OnInit {
       .subscribe(() => this.validateLicensePlate());
   }
 
-  async ngOnInit() {
-    try {
-      const user = this.authService.getCurrentUser();
-      if (user) {
-        this.loadUserData(user);
-      } else {
-        this.router.navigate(['/login']);
-      }
-    } catch (error) {
-      console.error('Error initializing user profile:', error);
-    }
-  }
-
   async loadUserData(user: User) {
     this.username.setValue(user.username);
     this.email.setValue(user.email);
-
-    if (user.phoneNumber) {
-      this.phoneNumber.setValue(user.phoneNumber);
-    }
+    this.phoneNumber.setValue(user.phoneNumber || '');
 
     try {
       this.cars = await this.dataService.getUserVehicles();
@@ -153,12 +153,12 @@ export class UserProfileComponent implements OnInit {
   async confirmEdit() {
     if (this.validatePhoneNumber() && this.username.valid) {
       try {
-        const currentUser = this.authService.getCurrentUser();
+        const currentUser = await this.authService.user();
         if (currentUser) {
           const updatedUser: User = {
             ...currentUser,
             username: this.username.value || currentUser.username,
-            phoneNumber: this.phoneNumber.value || currentUser.phoneNumber,
+            phoneNumber: this.phoneNumber.value || null,
           };
 
           await this.authService.updateUserProfile(updatedUser);
@@ -177,7 +177,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   triggerFileInput() {
-    this.fileInput.nativeElement.click();
+    this.fileInput().nativeElement.click();
   }
 
   onFileSelected(event: Event) {
@@ -264,8 +264,8 @@ export class UserProfileComponent implements OnInit {
     this.authService.logout();
   }
 
-  cancelEdit() {
-    const user = this.authService.getCurrentUser();
+  async cancelEdit() {
+    const user = await this.authService.user();
     if (user) {
       this.username.setValue(user.username);
       this.phoneNumber.setValue(user.phoneNumber || '');

@@ -5,6 +5,6 @@ export interface User {
   id: string;
   token: string;
   username: string;
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   cars?: Vehicle[];
 }

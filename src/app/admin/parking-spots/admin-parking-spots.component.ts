@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../../material.module';
 import { ConfigService } from '../../shared/services/config.service';
@@ -10,11 +10,10 @@ import { ConfirmationDialogComponent } from '../../shared/components/confirmatio
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 
 @Component({
-  selector: 'app-admin-parking-spots',
-  standalone: true,
-  imports: [CommonModule, MaterialModule],
-  templateUrl: './admin-parking-spots.component.html',
-  styleUrls: ['./admin-parking-spots.component.css'],
+    selector: 'app-admin-parking-spots',
+    imports: [CommonModule, MaterialModule],
+    templateUrl: './admin-parking-spots.component.html',
+    styleUrls: ['./admin-parking-spots.component.css']
 })
 export class AdminParkingSpotsComponent implements OnInit {
   parkingSpots: ParkingSpot[] = [];
@@ -28,13 +27,11 @@ export class AdminParkingSpotsComponent implements OnInit {
   currentFloorIndex = 0;
   visibleFloors: string[] = [];
 
-  constructor(
-    private configService: ConfigService,
-    private dataService: DataService,
-    private parkingSpotService: ParkingSpotService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
+  private readonly configService = inject(ConfigService);
+  private readonly dataService = inject(DataService);
+  private readonly parkingSpotService = inject(ParkingSpotService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     this.availableFloors = this.configService.parkingLayout.floors;

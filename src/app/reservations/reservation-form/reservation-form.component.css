@@ -425,13 +425,11 @@ h2 mat-icon {
 
 .booking-summary {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  background-color: var(--background);
-  border-radius: 12px;
   padding: 15px;
   margin-top: 30px;
-  border: 1px solid var(--secondary);
+  border: none !important;
 }
 
 .action-buttons {

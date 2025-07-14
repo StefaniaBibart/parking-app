@@ -10,62 +10,64 @@ import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.compo
 import { AdminParkingSpotsComponent } from './admin/parking-spots/admin-parking-spots.component';
 import { AdminReservationsListComponent } from './admin/reservations-list/admin-reservations-list.component';
 import { AuthGuard } from './auth/auth.guard';
-import { AdminGuard } from './shared/guards/admin.guard';
-import { UserGuard } from './shared/guards/user.guard';
-import { RootRedirectGuard } from './shared/guards/root-redirect.guard';
+import { LoginGuard } from './auth/login.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: PlaceholderComponent,
-    canActivate: [RootRedirectGuard],
+    canActivate: [AuthGuard],
   },
   {
     path: 'home',
     component: HomeComponent,
-    canActivate: [UserGuard],
+    canActivate: [AuthGuard],
   },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+  { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
+  { path: 'signup', component: SignupComponent, canActivate: [LoginGuard] },
   {
     path: 'profile',
     component: UserProfileComponent,
-    canActivate: [AuthGuard, UserGuard],
+    canActivate: [AuthGuard],
   },
   {
     path: 'reservations',
     component: ReservationListComponent,
-    canActivate: [AuthGuard, UserGuard],
+    canActivate: [AuthGuard],
   },
   {
     path: 'reservations/new',
     component: ReservationFormComponent,
-    canActivate: [AuthGuard, UserGuard],
+    canActivate: [AuthGuard],
   },
   {
     path: 'reservations/:id/edit',
     component: ReservationFormComponent,
-    canActivate: [AuthGuard, UserGuard],
+    canActivate: [AuthGuard],
   },
   {
     path: 'admin/dashboard',
     component: AdminDashboardComponent,
-    canActivate: [AuthGuard, AdminGuard],
+    canActivate: [AuthGuard],
+    data: { isAdminRoute: true },
   },
   {
     path: 'admin/reservations',
     component: AdminReservationsListComponent,
-    canActivate: [AuthGuard, AdminGuard],
+    canActivate: [AuthGuard],
+    data: { isAdminRoute: true },
   },
   {
     path: 'admin/reservations/:id/edit',
     component: ReservationFormComponent,
-    canActivate: [AuthGuard, AdminGuard],
+    canActivate: [AuthGuard],
+    data: { isAdminRoute: true },
   },
   {
     path: 'admin/parking-spots',
     component: AdminParkingSpotsComponent,
-    canActivate: [AuthGuard, AdminGuard],
+    canActivate: [AuthGuard],
+    data: { isAdminRoute: true },
   },
   { path: '**', redirectTo: '/home' },
 ];

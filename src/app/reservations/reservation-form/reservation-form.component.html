@@ -5,174 +5,219 @@
   <section class="date-selection">
     <div class="step-header">
       <h2>1. Select Dates</h2>
-      <button
-        mat-button
-        color="primary"
-        *ngIf="formStep !== 'date'"
-        (click)="editDate()"
-      >
-        Change
-      </button>
-    </div>
-    <div *ngIf="formStep === 'date'">
-      <div class="date-range-container">
-        <mat-form-field appearance="fill" class="date-range-field">
-          <mat-label>Enter a date range</mat-label>
-          <mat-date-range-input
-            [formGroup]="dateRange"
-            [rangePicker]="picker"
-            [min]="minDate"
-            [max]="maxDate"
+      @if (formStep !== 'date') {
+        <button
+          mat-button
+          color="primary"
+          (click)="editDate()"
           >
-            <input
-              matStartDate
-              formControlName="start"
-              placeholder="Start date"
-            />
-            <input matEndDate formControlName="end" placeholder="End date" />
-          </mat-date-range-input>
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="picker"
-          ></mat-datepicker-toggle>
-          <mat-date-range-picker #picker></mat-date-range-picker>
-        </mat-form-field>
-      </div>
-      <div class="checking-availability" *ngIf="checkingAvailability">
-        <mat-spinner diameter="20"></mat-spinner>
-        <span>Checking availability...</span>
-      </div>
-      <div class="date-error-message" *ngIf="dateError">
-        <mat-icon>error</mat-icon>
-        <span>{{ dateError }}</span>
-      </div>
-    </div>
-    <div *ngIf="formStep !== 'date' && dateRange.valid" class="summary-view">
-      <mat-icon>calendar_today</mat-icon>
-      <span
-        >{{ dateRange.get("start")?.value | date : "mediumDate" }} -
-        {{ dateRange.get("end")?.value | date : "mediumDate" }}</span
-      >
-    </div>
-  </section>
-
-  <!-- Vehicle Selection Step -->
-  <section class="vehicle-selection" *ngIf="formStep !== 'date' && !dateError">
-    <div class="step-header">
-      <h2>2. Select Vehicle</h2>
-      <button
-        mat-button
-        color="primary"
-        *ngIf="formStep === 'spot' && selectedVehicleId"
-        (click)="editVehicle()"
-      >
-        Change
-      </button>
-    </div>
-    <div *ngIf="formStep === 'vehicle'">
-      <div *ngIf="userVehicles.length === 0" class="no-vehicles-message">
-        <mat-icon>warning</mat-icon>
-        <h3>No vehicles found</h3>
-        <p>You need to add a vehicle before making a reservation.</p>
-        <button mat-raised-button color="primary" (click)="addNewVehicle()">
-          Add Vehicle
+          Change
         </button>
-      </div>
-      <div class="vehicles-list" *ngIf="userVehicles.length > 0">
-        <div
-          *ngFor="let vehicle of userVehicles"
-          class="vehicle-card"
-          [class.selected]="selectedVehicleId === vehicle.id"
-          (click)="selectVehicle(vehicle.id)"
-        >
-          <mat-icon>directions_car</mat-icon>
-          <div class="vehicle-info">
-            <div class="vehicle-plate">{{ vehicle.plate }}</div>
+      }
+    </div>
+    @if (formStep === 'date') {
+      <div>
+        <div class="date-range-container">
+          <mat-form-field appearance="fill" class="date-range-field">
+            <mat-label>Enter a date range</mat-label>
+            <mat-date-range-input
+              [formGroup]="dateRange"
+              [rangePicker]="picker"
+              [min]="minDate"
+              [max]="maxDate"
+              >
+              <input
+                matStartDate
+                formControlName="start"
+                placeholder="Start date"
+                />
+                <input matEndDate formControlName="end" placeholder="End date" />
+              </mat-date-range-input>
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="picker"
+              ></mat-datepicker-toggle>
+              <mat-date-range-picker #picker></mat-date-range-picker>
+            </mat-form-field>
           </div>
-          <mat-icon *ngIf="selectedVehicleId === vehicle.id" class="check-icon"
-            >check_circle</mat-icon
-          >
+          @if (checkingAvailability) {
+            <div class="checking-availability">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Checking availability...</span>
+            </div>
+          }
+          @if (dateError) {
+            <div class="date-error-message">
+              <mat-icon>error</mat-icon>
+              <span>{{ dateError }}</span>
+            </div>
+          }
         </div>
-        <div class="add-vehicle-card" (click)="addNewVehicle()">
-          <mat-icon>add_circle_outline</mat-icon>
-          <div class="add-vehicle-text">Add New Vehicle</div>
-        </div>
-      </div>
-    </div>
-    <div *ngIf="formStep === 'spot' && selectedVehicleId" class="summary-view">
-      <mat-icon>directions_car</mat-icon>
-      <span>{{ getSelectedVehiclePlate() }}</span>
-    </div>
-  </section>
+      }
+      @if (formStep !== 'date' && dateRange.valid) {
+        <div class="summary-view">
+          <mat-icon>calendar_today</mat-icon>
+          <span
+            >{{ dateRange.get("start")?.value | date : "mediumDate" }} -
+            {{ dateRange.get("end")?.value | date : "mediumDate" }}</span
+            >
+          </div>
+        }
+      </section>
 
-  <!-- Spot Selection Step -->
-  <section class="spot-selection" *ngIf="formStep === 'spot'">
-    <div class="step-header">
-      <h2>3. Choose a Parking Spot</h2>
-    </div>
-    <div class="parking-layout">
-      <div class="parking-row">
-        <div
-          *ngFor="let spot of getFloorSpots(visibleFloors[0])"
-          [class.selected]="selectedSpot === spot.id"
-          [class.occupied]="!spot.available"
-          [class.blocked]="spot.isBlocked"
-          class="parking-spot"
-          (click)="selectSpot(spot)"
-        >
-          <span *ngIf="spot.available && !spot.isBlocked">{{ spot.id }}</span>
-          <mat-icon *ngIf="!spot.available">directions_car</mat-icon>
-          <mat-icon *ngIf="spot.isBlocked">block</mat-icon>
-        </div>
-      </div>
-      <div class="floor-selector" *ngIf="getMaxFloorIndex() > 0">
-        <button
-          mat-icon-button
-          (click)="previousFloor()"
-          [disabled]="currentFloorIndex === 0"
-        >
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <span
-          >{{ visibleFloors[0]
-          }}{{ visibleFloors[1] ? "-" + visibleFloors[1] : "" }} Floor</span
-        >
-        <button
-          mat-icon-button
-          (click)="nextFloor()"
-          [disabled]="currentFloorIndex >= getMaxFloorIndex()"
-        >
-          <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
-      <div class="parking-row" *ngIf="visibleFloors[1]">
-        <div
-          *ngFor="let spot of getFloorSpots(visibleFloors[1])"
-          [class.selected]="selectedSpot === spot.id"
-          [class.occupied]="!spot.available"
-          [class.blocked]="spot.isBlocked"
-          class="parking-spot"
-          (click)="selectSpot(spot)"
-        >
-          <span *ngIf="spot.available && !spot.isBlocked">{{ spot.id }}</span>
-          <mat-icon *ngIf="!spot.available">directions_car</mat-icon>
-          <mat-icon *ngIf="spot.isBlocked">block</mat-icon>
-        </div>
-      </div>
-    </div>
-  </section>
+      <!-- Vehicle Selection Step -->
+      @if (formStep !== 'date' && !dateError) {
+        <section class="vehicle-selection">
+          <div class="step-header">
+            <h2>2. Select Vehicle</h2>
+            @if (formStep === 'spot' && selectedVehicleId) {
+              <button
+                mat-button
+                color="primary"
+                (click)="editVehicle()"
+                >
+                Change
+              </button>
+            }
+          </div>
+          @if (formStep === 'vehicle') {
+            <div>
+              @if (userVehicles.length === 0) {
+                <div class="no-vehicles-message">
+                  <mat-icon>warning</mat-icon>
+                  <h3>No vehicles found</h3>
+                  <p>You need to add a vehicle before making a reservation.</p>
+                  <button mat-raised-button color="primary" (click)="addNewVehicle()">
+                    Add Vehicle
+                  </button>
+                </div>
+              }
+              @if (userVehicles.length > 0) {
+                <div class="vehicles-list">
+                  @for (vehicle of userVehicles; track vehicle) {
+                    <div
+                      class="vehicle-card"
+                      [class.selected]="selectedVehicleId === vehicle.id"
+                      (click)="selectVehicle(vehicle.id)"
+                      >
+                      <mat-icon>directions_car</mat-icon>
+                      <div class="vehicle-info">
+                        <div class="vehicle-plate">{{ vehicle.plate }}</div>
+                      </div>
+                      @if (selectedVehicleId === vehicle.id) {
+                        <mat-icon class="check-icon"
+                          >check_circle</mat-icon
+                          >
+                      }
+                    </div>
+                  }
+                  <div class="add-vehicle-card" (click)="addNewVehicle()">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    <div class="add-vehicle-text">Add New Vehicle</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          @if (formStep === 'spot' && selectedVehicleId) {
+            <div class="summary-view">
+              <mat-icon>directions_car</mat-icon>
+              <span>{{ getSelectedVehiclePlate() }}</span>
+            </div>
+          }
+        </section>
+      }
 
-  <!-- Booking Action -->
-  <section class="booking-summary" *ngIf="formStep === 'spot' && selectedSpot">
-    <div class="action-buttons">
-      <button
-        mat-raised-button
-        class="book-button"
-        [disabled]="!selectedSpot || !selectedVehicleId || !dateRange.valid"
-        (click)="bookPlace()"
-      >
-        {{ isEditing ? "Update Reservation" : "Book Place" }}
-      </button>
-    </div>
-  </section>
-</div>
+      <!-- Spot Selection Step -->
+      @if (formStep === 'spot') {
+        <section class="spot-selection">
+          <div class="step-header">
+            <h2>3. Choose a Parking Spot</h2>
+          </div>
+          <div class="parking-layout">
+            <div class="parking-row">
+              @for (spot of getFloorSpots(visibleFloors[0]); track spot) {
+                <div
+                  [class.selected]="selectedSpot === spot.id"
+                  [class.occupied]="!spot.available"
+                  [class.blocked]="spot.isBlocked"
+                  class="parking-spot"
+                  (click)="selectSpot(spot)"
+                  >
+                  @if (spot.available && !spot.isBlocked) {
+                    <span>{{ spot.id }}</span>
+                  }
+                  @if (!spot.available) {
+                    <mat-icon>directions_car</mat-icon>
+                  }
+                  @if (spot.isBlocked) {
+                    <mat-icon>block</mat-icon>
+                  }
+                </div>
+              }
+            </div>
+            @if (getMaxFloorIndex() > 0) {
+              <div class="floor-selector">
+                <button
+                  mat-icon-button
+                  (click)="previousFloor()"
+                  [disabled]="currentFloorIndex === 0"
+                  >
+                  <mat-icon>arrow_back</mat-icon>
+                </button>
+                <span
+                  >{{ visibleFloors[0]
+                  }}{{ visibleFloors[1] ? "-" + visibleFloors[1] : "" }} Floor</span
+                  >
+                  <button
+                    mat-icon-button
+                    (click)="nextFloor()"
+                    [disabled]="currentFloorIndex >= getMaxFloorIndex()"
+                    >
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </div>
+              }
+              @if (visibleFloors[1]) {
+                <div class="parking-row">
+                  @for (spot of getFloorSpots(visibleFloors[1]); track spot) {
+                    <div
+                      [class.selected]="selectedSpot === spot.id"
+                      [class.occupied]="!spot.available"
+                      [class.blocked]="spot.isBlocked"
+                      class="parking-spot"
+                      (click)="selectSpot(spot)"
+                      >
+                      @if (spot.available && !spot.isBlocked) {
+                        <span>{{ spot.id }}</span>
+                      }
+                      @if (!spot.available) {
+                        <mat-icon>directions_car</mat-icon>
+                      }
+                      @if (spot.isBlocked) {
+                        <mat-icon>block</mat-icon>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Booking Action -->
+        @if (formStep === 'spot' && selectedSpot) {
+          <section class="booking-summary">
+            <div class="action-buttons">
+              <button
+                mat-raised-button
+                class="book-button"
+                [disabled]="!selectedSpot || !selectedVehicleId || !dateRange.valid"
+                (click)="bookPlace()"
+                >
+                {{ isEditing ? "Update Reservation" : "Book Place" }}
+              </button>
+            </div>
+          </section>
+        }
+      </div>

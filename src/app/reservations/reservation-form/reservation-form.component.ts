@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { CommonModule } from '@angular/common';
 import {
@@ -16,13 +16,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Reservation } from '../../shared/models/reservation.model';
 import { ParkingSpotService } from '../../shared/services/parking-spot.service';
 import { ParkingSpot } from '../../shared/models/parking-spot.model';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
-  selector: 'app-reservation-form',
-  standalone: true,
-  imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './reservation-form.component.html',
-  styleUrls: ['./reservation-form.component.css'],
+    selector: 'app-reservation-form',
+    imports: [MaterialModule, CommonModule, FormsModule, ReactiveFormsModule],
+    templateUrl: './reservation-form.component.html',
+    styleUrls: ['./reservation-form.component.css']
 })
 export class ReservationFormComponent implements OnInit {
   dateRange = new FormGroup({
@@ -53,16 +53,29 @@ export class ReservationFormComponent implements OnInit {
   currentFloorIndex = 0;
   visibleFloors: string[] = ['A', 'B'];
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private dataService: DataService,
-    private configService: ConfigService,
-    private snackBar: MatSnackBar,
-    private parkingSpotService: ParkingSpotService
-  ) {}
+  private authService = inject(AuthService);
+  private user = this.authService.user;
+  private isInitialized = false;
 
-  async ngOnInit() {
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly dataService = inject(DataService);
+  private readonly configService = inject(ConfigService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly parkingSpotService = inject(ParkingSpotService);
+
+  constructor() {
+    effect(() => {
+      if (this.user() && !this.isInitialized) {
+        this.isInitialized = true;
+        this.initializeForm();
+      }
+    });
+  }
+
+  ngOnInit() {}
+
+  async initializeForm() {
     try {
       await this.dataService.clearTemporaryReservationData();
 

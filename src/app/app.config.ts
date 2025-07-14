@@ -4,7 +4,6 @@ import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { ThemeService } from './services/theme.service';
-import { initializeApp } from 'firebase/app';
 import { environment } from '../environments/environment.development';
 
 import { DataService } from './shared/services/data.service';
@@ -18,18 +17,8 @@ import { DataServiceFactory } from './shared/services/data-service-factory';
 import { ParkingSpotService } from './shared/services/parking-spot.service';
 import { LocalStorageParkingSpotService } from './shared/services/localstorage-parking-spot.service';
 import { FirebaseParkingSpotService } from './shared/services/firebase-parking-spot.service';
-
-const firebaseConfig = {
-  apiKey: environment.FIREBASE_AUTH_KEY,
-  databaseURL:
-    'https://parking-app-16597-default-rtdb.europe-west1.firebasedatabase.app/',
-};
-
-try {
-  initializeApp(firebaseConfig);
-} catch (e) {
-  console.error('Firebase initialization error:', e);
-}
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 
 const DEFAULT_DATA_PROVIDER = DataProviderType.FIREBASE;
 const PARKING_SPOT_PROVIDER = DataProviderType.FIREBASE; // or DataProviderType.LOCALSTORAGE
@@ -78,5 +67,8 @@ export const appConfig: ApplicationConfig = {
       },
       deps: [DataServiceFactory],
     },
+    
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth())
   ],
 };
